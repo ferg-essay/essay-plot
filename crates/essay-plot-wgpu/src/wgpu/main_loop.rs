@@ -7,7 +7,7 @@ use winit::{
     window::Window,
 };
 
-use super::{render::{FigureRenderer}};
+use super::{render::{FigureRenderer, DrawRenderer}};
 
 async fn init_wgpu_args(window: &Window) -> EventLoopArgs {
     let size = window.inner_size();
@@ -153,6 +153,8 @@ fn run_event_loop(
             &queue,
         );
 
+        let mut draw_renderer = DrawRenderer::new(&device, &mut figure_renderer);
+
         let mut is_draw = false;
     
         *control_flow = ControlFlow::Wait;
@@ -181,14 +183,14 @@ fn run_event_loop(
 
                         if state == ElementState::Pressed {
                             figure.event(
-                                &mut figure_renderer,
+                                &mut draw_renderer,
                                 &CanvasEvent::MouseLeftPress(cursor.position),
                             );
                             let now = Instant::now();
 
                             if now.duration_since(mouse.left_press_time).as_millis() < dbl_click {
                                 figure.event(
-                                    &mut figure_renderer,
+                                    &mut draw_renderer,
                                     &CanvasEvent::ResetView(cursor.position),
                                 )
                             }
@@ -204,7 +206,7 @@ fn run_event_loop(
                         match state {
                             ElementState::Pressed => {
                                 figure.event(
-                                    &mut figure_renderer,
+                                    &mut draw_renderer,
                                     &CanvasEvent::MouseRightPress(cursor.position),
                                 );
 
@@ -213,13 +215,13 @@ fn run_event_loop(
                             }
                             ElementState::Released => {
                                 figure.event(
-                                    &mut figure_renderer,
+                                    &mut draw_renderer,
                                     &CanvasEvent::MouseRightRelease(cursor.position),
                                 );
 
                                 if zoom_min <= mouse.right_press_start.dist(&cursor.position) {
                                     figure.event(
-                                        &mut figure_renderer,
+                                        &mut draw_renderer,
                                         &CanvasEvent::ZoomBounds(
                                             mouse.right_press_start, 
                                             cursor.position
@@ -244,7 +246,7 @@ fn run_event_loop(
                 if mouse.left == ElementState::Pressed 
                     && pan_min <= mouse.left_press_start.dist(&cursor.position) {
                     figure.event(
-                        &mut figure_renderer,
+                        &mut draw_renderer,
                         &CanvasEvent::Pan(
                             mouse.left_press_start, 
                             mouse.left_press_last, 
@@ -257,7 +259,7 @@ fn run_event_loop(
                 if mouse.right == ElementState::Pressed
                     && pan_min <= mouse.left_press_start.dist(&cursor.position) {
                         figure.event(
-                            &mut figure_renderer,
+                            &mut draw_renderer,
                             &CanvasEvent::MouseRightDrag(mouse.left_press_start, cursor.position),
                     );
                 }

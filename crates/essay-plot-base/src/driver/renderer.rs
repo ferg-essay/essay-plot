@@ -47,6 +47,14 @@ pub trait Renderer {
         clip: &Clip,
     ) -> Result<(), RenderErr>;
 
+    fn draw_image(
+        &mut self,
+        bounds: &Bounds<Canvas>,
+        colors: &Tensor<u8>,
+        clip: &Clip
+    ) -> Result<(), RenderErr>;
+
+
     fn request_redraw(
         &mut self,
         bounds: &Bounds<Canvas>

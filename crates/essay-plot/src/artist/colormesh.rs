@@ -1,12 +1,12 @@
 use essay_plot_base::{Canvas, Bounds, Point, Clip, PathOpt, Path};
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
-use crate::frame::Data;
+use crate::{frame::Data, artist::{Norm, Norms}};
 
 use super::{Artist, ColorMap, ColorMaps, PathStyle};
 
 pub enum Shading {
-    Solid,
+    Flat,
     Gouraud,
 }
 
@@ -15,6 +15,7 @@ pub struct ColorMesh {
     xy: Tensor,
     color_map: ColorMap,
     shading: Shading,
+    norm: Norm,
 }
 
 impl ColorMesh {
@@ -27,7 +28,8 @@ impl ColorMesh {
             data,
             xy: Tensor::empty(),
             color_map: ColorMaps::Default.into(),
-            shading: Shading::Gouraud,
+            shading: Shading::Flat,
+            norm: Norm::from(Norms::Linear),
         }
     }
 
@@ -57,13 +59,14 @@ impl ColorMesh {
         let path: Path<Canvas> = path.transform(&scale_canvas);
         let xy = to_canvas.transform(&self.xy);
 
-        let norm = normalize_unit(&self.data);
+        //let norm = normalize_unit(&self.data);
 
         let colormap = &self.color_map;
 
         let mut colors = TensorVec::<u32>::new();
-        for v in norm.iter() {
-            colors.push(colormap.map(*v).to_rgba());
+        for v in self.data.iter() {
+            let v = self.norm.norm(*v);
+            colors.push(colormap.map(v).to_rgba());
         }
 
         let colors = colors.into_tensor();
@@ -139,12 +142,13 @@ impl Artist<Data> for ColorMesh {
         }
 
         self.xy = xy.into_tensor();
+        self.norm.set_bounds(&self.data);
     }
     
     fn get_extent(&mut self) -> Bounds<Data> {
         let (rows, cols) = match self.shading {
             Shading::Gouraud => (self.data.rows() - 1, self.data.cols() - 1),
-            Shading::Solid => (self.data.rows(), self.data.cols())
+            Shading::Flat => (self.data.rows(), self.data.cols())
         };
 
         Bounds::new(
@@ -164,7 +168,7 @@ impl Artist<Data> for ColorMesh {
             Shading::Gouraud => {
                 self.draw_gouraud_shading(renderer, to_canvas, clip, style);
             },
-            Shading::Solid => {
+            Shading::Flat => {
                 self.draw_solid_shading(renderer, to_canvas, clip, style);
             }
         }

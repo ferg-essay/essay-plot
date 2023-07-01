@@ -4,6 +4,7 @@ use crate::{graph::{Graph}, artist::{LinesOpt, ContainerOpt}};
 mod pcolormesh;
 mod contour;
 mod bar;
+mod matplot;
 mod pie;
 mod scatter;
 mod plot;
@@ -28,6 +29,10 @@ pub use tricontour::{
 
 pub use plot::{
     plot, 
+};
+
+pub use matplot::{
+    matplot, 
 };
 
 pub use pie::{

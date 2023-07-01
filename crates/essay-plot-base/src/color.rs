@@ -92,6 +92,26 @@ impl Color {
     }
 
     #[inline]
+    pub fn r8(&self) -> u8 {
+        ((self.0 >> 24) & 0xff) as u8
+    }
+
+    #[inline]
+    pub fn g8(&self) -> u8 {
+        ((self.0 >> 16) & 0xff) as u8
+    }
+
+    #[inline]
+    pub fn b8(&self) -> u8 {
+        ((self.0 >> 8) & 0xff) as u8
+    }
+
+    #[inline]
+    pub fn a8(&self) -> u8 {
+        (self.0 & 0xff) as u8
+    }
+
+    #[inline]
     pub fn to_rgba(&self) -> u32 {
         self.0
     }

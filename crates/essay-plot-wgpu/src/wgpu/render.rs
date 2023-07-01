@@ -5,35 +5,38 @@ use essay_plot_base::{
 };
 use essay_tensor::Tensor;
 
-use super::{text::{TextRender}, shape2d::Shape2dRender, tesselate::tesselate, triangle2d::GridMesh2dRender, bezier::BezierRender};
+use super::{text::{TextRender}, shape2d::Shape2dRender, tesselate::tesselate, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender};
 
 pub struct FigureRenderer {
     canvas: Canvas,
 
-    shape2d_render: Shape2dRender,
-    text_render: TextRender,
+    image_render: ImageRender,
     triangle_render: GridMesh2dRender,
+    shape2d_render: Shape2dRender,
     bezier_render: BezierRender,
+    text_render: TextRender,
 
     to_gpu: Affine2d,
 
     is_request_redraw: bool,
 }
 
-impl<'a> FigureRenderer {
+impl FigureRenderer {
     pub(crate) fn new(
         device: &wgpu::Device,
         format: wgpu::TextureFormat,
     ) -> Self {
     
-        let shape2d_render = Shape2dRender::new(device, format);
-        let text_render = TextRender::new(device, format, 512, 512);
+        let image_render = ImageRender::new(device, format);
         let triangle_render = GridMesh2dRender::new(device, format);
+        let shape2d_render = Shape2dRender::new(device, format);
         let bezier_render = BezierRender::new(device, format);
+        let text_render = TextRender::new(device, format, 512, 512);
         
         Self {
             canvas: Canvas::new((), 1.),
 
+            image_render,
             shape2d_render,
             text_render,
             triangle_render,
@@ -292,6 +295,89 @@ impl<'a> FigureRenderer {
     }
 }
 
+pub(crate) struct DrawRenderer<'a> {
+    device: &'a wgpu::Device,
+    figure: &'a mut FigureRenderer,
+}
+
+impl<'a> DrawRenderer<'a> {
+    pub fn new(
+        device: &'a wgpu::Device,
+        figure: &'a mut FigureRenderer
+    ) -> Self {
+        Self {
+            device,
+            figure
+        }
+    }
+
+}
+
+impl Renderer for DrawRenderer<'_> {
+    fn get_canvas(&self) -> &Canvas {
+        self.figure.get_canvas()
+    }
+
+    fn draw_path(
+        &mut self, 
+        path: &Path<Canvas>, 
+        style: &dyn PathOpt, 
+        clip: &Clip,
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_path(path, style, clip)
+    }
+
+    fn draw_markers(
+        &mut self, 
+        marker: &Path<Canvas>, 
+        xy: &Tensor,
+        scale: &Tensor,
+        color: &Tensor<u32>,
+        style: &dyn PathOpt, 
+        clip: &Clip,
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_markers(marker, xy, scale, color, style, clip)
+    }
+
+    fn draw_text(
+        &mut self, 
+        xy: Point, // location in Canvas coordinates
+        text: &str,
+        angle: f32,
+        style: &dyn PathOpt, 
+        text_style: &TextStyle,
+        clip: &Clip,
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_text(xy, text, angle, style, text_style, clip)
+    }
+
+    fn draw_triangles(
+        &mut self,
+        vertices: Tensor<f32>,  // Nx2 x,y in canvas coordinates
+        colors: Tensor<u32>,    // N in rgba
+        triangles: Tensor<u32>, // Mx3 vertex indices
+        clip: &Clip,
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_triangles(vertices, colors, triangles, clip)
+    }
+
+    fn draw_image(
+        &mut self,
+        bounds: &Bounds<Canvas>,
+        colors: &Tensor<u8>,
+        clip: &Clip
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_image(self.device, bounds, colors, clip)
+    }
+
+    fn request_redraw(
+        &mut self,
+        bounds: &Bounds<Canvas>
+    ) {
+        self.figure.request_redraw(bounds)
+    }
+}
+
 pub(crate) fn line_normal(
     p0: Point, 
     p1: Point, 
@@ -338,7 +424,7 @@ pub(crate) fn line_intersection(
     Point(x, y)
 }
 
-impl Renderer for FigureRenderer {
+impl FigureRenderer {
     ///
     /// Returns the boundary of the canvas, usually in pixels or points.
     ///
@@ -545,6 +631,21 @@ impl Renderer for FigureRenderer {
         }
 
         self.triangle_render.draw_style(&self.to_gpu);
+
+        Ok(())
+    }
+
+    fn draw_image(
+        &mut self,
+        device: &wgpu::Device,
+        bounds: &Bounds<Canvas>,  // Nx2 x,y in canvas coordinates
+        colors: &Tensor<u8>,    // N in rgba
+        _clip: &Clip,
+    ) -> Result<(), RenderErr> {
+        assert!(colors.rank() == 2, "colors rank must be 2 shape={:?}", colors.shape().as_slice());
+        println!("Image: {:?}", colors.shape().as_slice());
+
+        self.image_render.draw(device, bounds, colors, &self.to_gpu);
 
         Ok(())
     }
@@ -816,8 +917,11 @@ impl FigureRenderer {
         self.set_scale_factor(scale_factor * pt_to_px_factor);
         let draw_bounds = self.canvas.bounds().clone();
 
-        figure.draw(self, &draw_bounds);
+        let mut renderer = DrawRenderer::new(device, self);
 
+        figure.draw(&mut renderer, &draw_bounds);
+
+        self.image_render.flush(queue, view, encoder);
         self.triangle_render.flush(device, queue, view, encoder);
         self.bezier_render.flush(queue, view, encoder);
         self.shape2d_render.flush(device, queue, view, encoder);

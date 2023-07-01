@@ -1,6 +1,6 @@
 use std::f32::consts::TAU;
 
-use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, graph::{Graph, PlotOpt}, plot::{bar_y, pcolormesh, contour, triplot, tricontour}};
+use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, graph::{Graph, PlotOpt}, plot::{bar_y, pcolormesh, contour, triplot, tricontour, matplot}};
 use essay_plot_base::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
 use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::TensorVec};
 
@@ -11,12 +11,13 @@ fn main() {
     //let x = linspace(0., 2. * PI, 30);
     //let y = x.sin();
 
-    let x = linspace(0., 6.28, 11);
-    let y = linspace(0., 6.28, 11);
-    let [x, y] = meshgrid_ij([x, y]);
+    let x = linspace(0., 2. * 6.28, 101);
+    let y = linspace(0., 6.28, 101);
+    let [x, y] = meshgrid([x, y]);
 
     //let z = x;//&x.sin() + &y.cos();
-    let z = &x.sin() + &y.cos();
+    //let z = &x.sin() + &y.cos();
+    let z = &x.sin() + &y.sin();
     //println!("X: {:?}", x);
     //println!("Y: {:?}", y);
     //println!("z: {:?}", z);
@@ -54,8 +55,8 @@ fn main() {
     //graph.scatter(&x, &y).color("blue").marker(Markers::Asterisk(5, Angle::Deg(0.))); // .size(2500.);
     //graph.plot(&x, &y).color("xkcd:amber"); // .label("cos");
 
-    let x = linspace(0., 6.28, 11);
-    let y = linspace(0., 6.28, 11);
+    let x = linspace(0., 6.28, 21);
+    let y = linspace(0., 6.28, 21);
     let [grid_x, grid_y] = meshgrid([&x, &y]);
     let grid_x = grid_x.flatten();
     let grid_y = grid_y.flatten();
@@ -70,10 +71,13 @@ fn main() {
     vec.push([2.5, 2.]);
     vec.push([2., 1.]);
 
-    let z = &grid_x.sin() + &grid_y.cos();
+    //let z = &grid_x.sin() + &grid_y.cos();
 
     // triplot(graph, vec.into_tensor());
-    tricontour(graph, xy, z);
+    //tricontour(graph, xy, z);
+
+    matplot(graph, z);
+    //pcolormesh(graph, &z);
 
 
     //pcolormesh(graph, &z);

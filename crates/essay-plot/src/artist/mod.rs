@@ -1,3 +1,5 @@
+mod norm;
+mod image;
 mod colormesh;
 mod colorbar;
 mod colormaps;
@@ -51,6 +53,14 @@ pub use colormesh::{
 
 pub use contour::{
     Contour,
+};
+
+pub use norm::{
+    Norm, Norms,
+};
+
+pub use image::{
+    Image,
 };
 
 pub use tricontour::{

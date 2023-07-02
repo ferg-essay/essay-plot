@@ -81,7 +81,7 @@ xtick.label_top:     false
 xtick.label_bottom:  true
 #x_axis.major.size:    3.5
 x_axis.major.size:    3.5
-xtick.minor.size:    2.
+x_axis.minor.size:    2.
 x_axis.major.width:   0.8
 x_axis.minor.width:   0.6
 x_axis.major.pad:     3.5

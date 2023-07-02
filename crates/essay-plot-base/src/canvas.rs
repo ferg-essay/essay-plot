@@ -49,7 +49,6 @@ impl Canvas {
 
     pub fn set_scale_factor(&mut self, scale_factor: f32) {
         assert!(scale_factor > 0.);
-
         self.scale_factor = scale_factor;
     }
 }

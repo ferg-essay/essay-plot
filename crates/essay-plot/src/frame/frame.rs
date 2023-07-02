@@ -487,7 +487,7 @@ impl BottomFrame {
             {
                 let style = major.tick_style().push(style);
                 let tick_length = renderer.to_px(major.get_size());
-                
+
                 let tick = Path::<Canvas>::new(vec![
                     PathCode::MoveTo(Point(x, y)),
                     PathCode::LineTo(Point(x, y - tick_length)),

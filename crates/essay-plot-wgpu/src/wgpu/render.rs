@@ -318,6 +318,10 @@ impl Renderer for DrawRenderer<'_> {
         self.figure.get_canvas()
     }
 
+    fn to_px(&self, size: f32) -> f32 {
+        self.figure.to_px(size)
+    }
+
     fn draw_path(
         &mut self, 
         path: &Path<Canvas>, 

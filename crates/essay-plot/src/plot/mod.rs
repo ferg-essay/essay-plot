@@ -7,6 +7,7 @@ mod bar;
 mod matshow;
 mod pie;
 mod scatter;
+mod stem;
 mod plot;
 mod triplot;
 mod tricontour;
@@ -33,6 +34,10 @@ pub use plot::{
 
 pub use matshow::{
     matshow, 
+};
+
+pub use stem::{
+    stem, 
 };
 
 pub use pie::{

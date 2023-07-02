@@ -1,6 +1,4 @@
-use essay_plot_base::Color;
-
-use crate::artist::color::{Hsva, Hsv};
+use crate::artist::color::{Hsv};
 
 use super::{ColorMap};
 

@@ -2,7 +2,7 @@ use core::fmt;
 
 use crate::{artist::{
     Artist, PlotArtist, PlotId,
-}, frame::{Data, LayoutArc, FrameId, FrameArtist, FrameTextOpt, AxisOpt}};
+}, frame::{Data, LayoutArc, FrameId, FrameArtist, FrameTextOpt, AxisOpt, AspectMode}};
 
 use super::{style::{PlotOptArtist, PlotOpt}};
 
@@ -73,6 +73,15 @@ impl Graph {
         self
     }
 
+    pub fn aspect_mode(&mut self, mode: AspectMode) -> &mut Self {
+        self.layout.borrow_mut()
+            .frame_mut(self.id)
+            .data_mut()
+            .aspect_mode(mode);
+
+        self
+    }
+
     pub fn flip_y(&mut self, is_flip_y: bool) -> &mut Self {
         self.layout.borrow_mut()
             .frame_mut(self.id)
@@ -83,7 +92,7 @@ impl Graph {
     }
 
     pub fn colorbar(&mut self) -> &mut Self {
-        let id = self.layout.borrow_mut()
+        let _id = self.layout.borrow_mut()
             .frame_mut(self.id)
             .colorbar();
 

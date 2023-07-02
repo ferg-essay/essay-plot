@@ -17,7 +17,7 @@ pub use axis::{
 };
 
 pub use data_box::{
-    Data,
+    Data, AspectMode,
 };
 
 pub use frame::{

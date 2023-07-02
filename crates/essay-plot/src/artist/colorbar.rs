@@ -3,7 +3,7 @@ use essay_tensor::{Tensor, init::linspace, tf32};
 
 use crate::frame::Data;
 
-use super::{Artist, colormesh::ColorMesh, paths, PathStyle};
+use super::{Artist, gridmesh::ColorMesh, paths, PathStyle};
 
 pub struct Colorbar {
     bounds: Bounds<Data>,

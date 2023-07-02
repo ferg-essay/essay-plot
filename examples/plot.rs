@@ -1,6 +1,6 @@
 use std::f32::consts::TAU;
 
-use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, graph::{Graph, PlotOpt}, plot::{bar_y, pcolormesh, contour, triplot, tricontour, matshow}};
+use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, graph::{Graph, PlotOpt}, plot::{bar_y, pcolormesh, contour, triplot, tricontour, matshow, stem}};
 use essay_plot_base::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
 use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::TensorVec};
 
@@ -46,7 +46,7 @@ fn main() {
         .line_width(5.);
     */
 
-    let x = linspace(0., 6.28, 3);
+    let x = linspace(0., 6.28, 9);
     let y = x.sin();
     //graph.scatter(&x, &y).color("blue").marker(Markers::Asterisk(5, Angle::Deg(0.))); // .size(2500.);
     //graph.plot(&x, &y).color("xkcd:purple"); // .label("sin");
@@ -54,7 +54,7 @@ fn main() {
     let y = x.cos();
     //graph.scatter(&x, &y).color("blue").marker(Markers::Asterisk(5, Angle::Deg(0.))); // .size(2500.);
     //graph.plot(&x, &y).color("xkcd:amber"); // .label("cos");
-
+    stem(graph, x, y);
     let x = linspace(0., 6.28, 21);
     let y = linspace(0., 6.28, 21);
     let [grid_x, grid_y] = meshgrid([&x, &y]);
@@ -76,13 +76,13 @@ fn main() {
     // triplot(graph, vec.into_tensor());
     //tricontour(graph, xy, z);
 
-    matshow(graph, &z);
+    //matshow(graph, &z);
     //pcolormesh(graph, &z);
 
 
     //pcolormesh(graph, &z);
     //contour(graph, &z);
-    graph.colorbar();
+    //graph.colorbar();
     /*
     let y2 = x.cos();
     graph.plot(&x, &y2).face_color("xkcd:purple");

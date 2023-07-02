@@ -1,9 +1,9 @@
-use essay_plot_base::{Canvas, Bounds, Point, Clip, PathOpt, Path, Affine2d};
-use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
+use essay_plot_base::{Canvas, Bounds, Point, Clip, PathOpt, Affine2d};
+use essay_tensor::{Tensor};
 
 use crate::{frame::Data, artist::{Norms, Norm}};
 
-use super::{Artist, ColorMap, ColorMaps, PathStyle};
+use super::{Artist, ColorMap, ColorMaps};
 
 pub struct Image {
     data: Tensor,
@@ -24,6 +24,18 @@ impl Image {
             color_map: ColorMaps::Default.into(), // ColorMaps::Default.into(),
             image: Tensor::empty()
         }
+    }
+
+    pub fn norm(&mut self, norm: impl Into<Norm>) -> &mut Self {
+        self.norm = norm.into();
+
+        self
+    }
+
+    pub fn cmap(&mut self, cmap: impl Into<ColorMap>) -> &mut Self {
+        self.color_map = cmap.into();
+
+        self
     }
 
     pub(crate) fn set_data(&mut self, data: Tensor) {

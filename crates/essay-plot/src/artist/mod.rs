@@ -1,6 +1,6 @@
 mod norm;
 mod image;
-mod colormesh;
+mod gridmesh;
 mod colorbar;
 mod colormaps;
 mod colormap;
@@ -11,6 +11,7 @@ mod style;
 mod triplot;
 pub mod paths;
 mod text;
+mod stem;
 mod container;
 mod tricontour;
 mod markers;
@@ -47,7 +48,7 @@ pub use colormaps::{
     ColorMaps,
 };
 
-pub use colormesh::{
+pub use gridmesh::{
     ColorMesh,
 };
 
@@ -60,7 +61,7 @@ pub use norm::{
 };
 
 pub use image::{
-    Image,
+    Image, 
 };
 
 pub use tricontour::{
@@ -85,6 +86,10 @@ pub use markers::{
 
 pub use patch::{
     PatchTrait,
+};
+
+pub use stem::{
+    Stem, StemOpt,
 };
 
 pub use style::{

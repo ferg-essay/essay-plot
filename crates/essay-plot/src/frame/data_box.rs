@@ -19,6 +19,7 @@ pub struct DataBox {
     y_margin: Option<f32>,
 
     aspect: Option<f32>,
+    aspect_mode: AspectMode,
     is_flip_y: bool,
 
     artists: PlotContainer<Data>,
@@ -40,6 +41,7 @@ impl DataBox {
             x_margin: cfg.get_as_type("frame", "x_margin"),
             y_margin: cfg.get_as_type("frame", "y_margin"),
             aspect: None,
+            aspect_mode: AspectMode::BoundingBox,
             is_flip_y: false,
 
             artists: PlotContainer::new(frame_id, cfg),
@@ -53,6 +55,12 @@ impl DataBox {
 
     pub fn aspect(&mut self, aspect: f32) -> &mut Self {
         self.aspect = Some(aspect);
+
+        self
+    }
+
+    pub fn aspect_mode(&mut self, mode: AspectMode) -> &mut Self {
+        self.aspect_mode = mode;
 
         self
     }
@@ -135,7 +143,10 @@ impl DataBox {
     }
 
     fn update_aspect(&mut self) {
-        self.update_aspect_pos()
+        match self.aspect_mode {
+            AspectMode::BoundingBox => self.update_aspect_pos(),
+            AspectMode::View => self.update_aspect_view(),
+        }
     }
 
     fn update_aspect_view(&mut self) {
@@ -318,6 +329,11 @@ impl fmt::Debug for DataBox {
             self.view_bounds.width(),
             self.view_bounds.height())
     }
+}
+
+pub enum AspectMode {
+    BoundingBox,
+    View
 }
 
 ///

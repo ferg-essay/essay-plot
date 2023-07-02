@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{ops::Index, f32::consts::TAU};
+use std::{ops::Index};
 
 use essay_plot_base::Color;
 

@@ -73,8 +73,8 @@ pub fn raw_to_full(v: f32, raw_colors: &[(f32, Color)]) -> [f32; 4] {
         None => panic!(),
     };
 
-    let (f0, c0) = raw_colors[i];
-    let (f1, c1) = raw_colors[i + 1];
+    let f0 = raw_colors[i].0;
+    let f1 = raw_colors[i + 1].0;
 
     // let v = v * (len - 1) as f32;
     //let i = v as usize;

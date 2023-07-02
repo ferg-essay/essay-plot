@@ -59,6 +59,7 @@ impl FigureRenderer {
         self.text_render.clear();
         self.shape2d_render.clear();
         self.triangle_render.clear();
+        self.image_render.clear();
     }
 
     pub(crate) fn set_canvas_bounds(&mut self, width: u32, height: u32) {

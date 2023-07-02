@@ -300,12 +300,12 @@ impl ImageStyle {
 }
 
 pub struct RgbaTexture {
-    width: u32,
-    height: u32,
+    //width: u32,
+    //height: u32,
 
     texture: wgpu::Texture,
     bind_group: wgpu::BindGroup,
-    layout: wgpu::BindGroupLayout,
+    //layout: wgpu::BindGroupLayout,
 }
 
 impl RgbaTexture {
@@ -317,24 +317,12 @@ impl RgbaTexture {
         let bind_group = create_texture_bind_group(device, &layout, &texture);
 
         Self {
-            width,
-            height,
+            //width,
+            //height,
             texture,
             bind_group,
-            layout,
+            //layout,
         }
-    }
-
-    pub fn layout(&self) -> &wgpu::BindGroupLayout {
-        &self.layout
-    }
-
-    pub fn bind_group(&self) -> &wgpu::BindGroup {
-        &self.bind_group
-    }
-
-    pub fn write_data(&self, queue: &wgpu::Queue, data: &[u8]) {
-        write_rgba_texture(queue, &self, data, self.width, self.height);
     }
 }
 
@@ -375,22 +363,6 @@ fn create_rgba_texture(device: &wgpu::Device, width: u32, height: u32) -> wgpu::
             usage: wgpu::TextureUsages::TEXTURE_BINDING 
                 | wgpu::TextureUsages::COPY_DST,
             label: Some("rgba_texture"),
-            view_formats: &[],
-        }
-    )
-}
-
-fn create_r8_texture(device: &wgpu::Device, width: u32, height: u32) -> wgpu::Texture {
-    device.create_texture(
-        &wgpu::TextureDescriptor {
-            size: texture_size(width, height),
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::R8Unorm,
-            usage: wgpu::TextureUsages::TEXTURE_BINDING 
-                | wgpu::TextureUsages::COPY_DST,
-            label: Some("text_texture"),
             view_formats: &[],
         }
     )

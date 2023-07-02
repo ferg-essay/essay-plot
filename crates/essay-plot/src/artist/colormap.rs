@@ -1,5 +1,7 @@
 use essay_plot_base::Color;
 
+use super::color::Hsv;
+
 pub struct ColorMap {
     colors: Vec<[f32; 4]>,
     factor: f32,
@@ -194,6 +196,56 @@ impl<const N: usize> From<[&str; N]> for ColorMap {
         let factor = 1. / (value.len().max(2) - 1) as f32;
         for (i, name) in value.iter().enumerate() {
             colors.push((i as f32 * factor, Color::from(*name)));
+        }
+
+        ColorMap::from_colors(colors.as_slice())
+    }
+}
+
+impl From<&[(f32, Hsv)]> for ColorMap {
+    fn from(value: &[(f32, Hsv)]) -> Self {
+        let mut colors = Vec::<(f32, Color)>::new();
+
+        for (v, hsv) in value.iter() {
+            colors.push((*v, Color::from(hsv)));
+        }
+
+        ColorMap::from_colors(colors.as_slice())
+    }
+}
+
+impl<const N: usize> From<[(f32, Hsv); N]> for ColorMap {
+    fn from(value: [(f32, Hsv); N]) -> Self {
+        let mut colors = Vec::<(f32, Color)>::new();
+
+        for (v, hsv) in value.iter() {
+            colors.push((*v, Color::from(hsv)));
+        }
+
+        ColorMap::from_colors(colors.as_slice())
+    }
+}
+
+impl From<&[Hsv]> for ColorMap {
+    fn from(value: &[Hsv]) -> Self {
+        let mut colors = Vec::<(f32, Color)>::new();
+
+        let factor = 1. / (value.len().max(2) - 1) as f32;
+        for (i, hsv) in value.iter().enumerate() {
+            colors.push((i as f32 * factor, Color::from(hsv)));
+        }
+
+        ColorMap::from_colors(colors.as_slice())
+    }
+}
+
+impl<const N: usize> From<[Hsv; N]> for ColorMap {
+    fn from(value: [Hsv; N]) -> Self {
+        let mut colors = Vec::<(f32, Color)>::new();
+
+        let factor = 1. / (value.len().max(2) - 1) as f32;
+        for (i, hsv) in value.iter().enumerate() {
+            colors.push((i as f32 * factor, Color::from(hsv)));
         }
 
         ColorMap::from_colors(colors.as_slice())

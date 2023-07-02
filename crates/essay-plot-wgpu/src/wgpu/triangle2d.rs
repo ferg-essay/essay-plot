@@ -341,13 +341,6 @@ impl GridMesh2dStyle {
             affine_1: [mat[3], mat[4], 0., mat[5]],
         }
     }
-
-    fn empty() -> Self {
-        Self {
-            affine_0: [0., 0., 0., 0.],
-            affine_1: [0., 0., 0., 0.],
-        }
-    }
 }
 
 fn create_gridmesh2d_pipeline(

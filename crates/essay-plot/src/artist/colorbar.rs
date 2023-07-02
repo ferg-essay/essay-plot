@@ -1,4 +1,4 @@
-use essay_plot_base::{Point, Canvas, Bounds, driver::Renderer, Affine2d, Clip, PathOpt, Color};
+use essay_plot_base::{Point, Canvas, Bounds, driver::Renderer, Affine2d, Clip, PathOpt, Color, CapStyle};
 use essay_tensor::{Tensor, init::linspace, tf32};
 
 use crate::frame::Data;
@@ -29,11 +29,11 @@ impl Colorbar {
 
 impl Artist<Data> for Colorbar {
     fn update(&mut self, canvas: &Canvas) {
-        let is_triangle = true;
+        let is_triangle = false;
         if is_triangle {
-            self.bounds = Bounds::new(Point(0., 0.), Point(1., 100.));
+            self.bounds = Bounds::new(Point(0., 0.), Point(2., 100.));
         } else {
-            self.bounds = Bounds::new(Point(0., 0.), Point(1., 101.));
+            self.bounds = Bounds::new(Point(0., 0.), Point(2., 101.));
         }
         let x = linspace(0., 1., 101);//.reshape([101, 1]);
         self.data = x.stack(&[x.clone()], -1);
@@ -59,9 +59,10 @@ impl Artist<Data> for Colorbar {
         let mut pstyle = PathStyle::new();
         pstyle.face_color(Color(0x0));
         pstyle.edge_color(Color(0xff));
-        pstyle.line_width(1.);
-        renderer.draw_path(&path, &pstyle, clip).unwrap();
+        pstyle.cap_style(CapStyle::Projecting);
+        pstyle.line_width(0.7);
 
         self.mesh.draw(renderer, &to_canvas, clip, style);
+        renderer.draw_path(&path, &pstyle, clip).unwrap();
     }
 }

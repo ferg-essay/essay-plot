@@ -100,8 +100,8 @@ impl Axis {
         &self.show_grid
     }
 
-    fn format(&self, value: f32) -> String {
-        self.formatter.format(value)
+    fn format(&self, value: f32, min: f32, max: f32) -> String {
+        self.formatter.format(value, min, max)
     }
 
     pub(crate) fn update(&mut self, canvas: &Canvas) {
@@ -168,13 +168,13 @@ impl AxisTicks {
         &mut self.grid_style
     }
 
-    pub(crate) fn format(&self, axis: &Axis, value: f32) -> String {
+    pub(crate) fn format(&self, axis: &Axis, value: f32, min: f32, max: f32) -> String {
         match &self.formatter {
             Some(formatter) => {
-                formatter.format(value)
+                formatter.format(value, min, max)
             }
             None => { 
-                axis.format(value) 
+                axis.format(value, min, max) 
             }
         }
     }

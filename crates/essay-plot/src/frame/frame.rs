@@ -412,7 +412,9 @@ impl BottomFrame {
         for (xv, _) in self.axis.x_ticks(data) {
             if xmin <= xv && xv <= xmax {
                 self.major_ticks.push(xv);
-                self.major_labels.push(self.axis.major().format(&self.axis, xv));
+                self.major_labels.push(
+                    self.axis.major().format(&self.axis, xv, xmin, xmax)
+                );
             };
         }
     }
@@ -609,7 +611,9 @@ impl LeftFrame {
         for (yv, _) in self.axis.y_ticks(data) {
             if ymin <= yv && yv <= ymax {
                 self.major_ticks.push(yv);
-                self.major_labels.push(self.axis.major().format(&self.axis, yv));
+                self.major_labels.push(
+                    self.axis.major().format(&self.axis, yv, ymin, ymax)
+                );
             };
         }
     }

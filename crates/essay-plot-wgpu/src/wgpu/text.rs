@@ -119,8 +119,9 @@ impl TextRender {
 
         let start = self.vertex_offset;
 
-        let w_inside = size * 0.10;
-        let w_space = size * 0.3;
+        // TODO: proper spacing and kerning
+        let w_inside = size * 0.07;
+        let w_space = size * 0.25;
         
         let mut x = x0;
         let y = y0.round();

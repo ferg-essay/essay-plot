@@ -4,17 +4,21 @@ use essay_plot_base::{driver::FigureApi, Point, CanvasEvent};
 use winit::{
     event::{Event, WindowEvent, ElementState, MouseButton },    
     event_loop::{EventLoop, ControlFlow}, 
-    window::Window,
+    window::{Window, CursorIcon},
 };
 
 use super::{render::{FigureRenderer, DrawRenderer}};
 
 async fn init_wgpu_args(window: &Window) -> EventLoopArgs {
+    window.set_title("Essay Plot");
+    window.set_cursor_icon(CursorIcon::Default);
+
     let size = window.inner_size();
 
     let instance = wgpu::Instance::default();
 
     let surface = unsafe { instance.create_surface(&window) }.unwrap();
+
 
     let adapter = instance
         .request_adapter(&wgpu::RequestAdapterOptions {
@@ -198,6 +202,9 @@ fn run_event_loop(
                             mouse.left_press_start = cursor.position;
                             mouse.left_press_last = cursor.position;
                             mouse.left_press_time = now;
+                            window.set_cursor_icon(CursorIcon::Grab);
+                        } else {
+                            window.set_cursor_icon(CursorIcon::Default);
                         }
                     },
                     MouseButton::Right => {
@@ -212,6 +219,7 @@ fn run_event_loop(
 
                                 mouse.right_press_start = cursor.position;
                                 mouse.right_press_time = Instant::now();
+                                window.set_cursor_icon(CursorIcon::Crosshair);
                             }
                             ElementState::Released => {
                                 figure.event(
@@ -228,6 +236,7 @@ fn run_event_loop(
                                         )
                                     );
                                 }
+                                window.set_cursor_icon(CursorIcon::Default);
                             }
                         }
                     },

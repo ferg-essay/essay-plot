@@ -82,7 +82,7 @@ fn main() {
 
     //pcolormesh(graph, &z);
     //contour(graph, &z);
-    //graph.colorbar();
+    graph.colorbar();
     /*
     let y2 = x.cos();
     graph.plot(&x, &y2).face_color("xkcd:purple");

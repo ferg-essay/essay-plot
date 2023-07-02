@@ -20,11 +20,12 @@ impl From<ColorMaps> for ColorMap {
                 ColorMap::from([
                     (0., "deep blue"),  // bottom 1% distinct
                     // cool, saturated blue to warm, unsaturated blue
-                    (0.01, "cobalt blue"), (0.1, "blue"), (0.2, "azure"),
+                    (0.01, "cobalt blue"), (0.1, "blue"), (0.25, "azure"),
                     //(0.5, "white"),
-                    (0.5, "#f0f0f0"), // tone down to be less distracting
+                    //(0.5, "#f0f0f0"), // tone down to be less distracting
+                    (0.5, "#f0f8e8"), // touch of color between amber and azure
                     // cool, unsaturated orange to warm, saturated orange
-                    (0.8, "amber"), (0.9, "orange"), (0.99, "tomato red"), 
+                    (0.75, "amber"), (0.85, "orange"), (0.99, "tomato red"), 
                     (1.0, "red") // top 1% distinct
                 ])
             }

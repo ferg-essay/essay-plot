@@ -1,6 +1,6 @@
 use std::f32::consts::TAU;
 
-use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, graph::{Graph, PlotOpt}, plot::{bar_y, pcolormesh, contour, triplot, tricontour, matplot}};
+use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, graph::{Graph, PlotOpt}, plot::{bar_y, pcolormesh, contour, triplot, tricontour, matshow}};
 use essay_plot_base::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
 use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::TensorVec};
 
@@ -11,7 +11,7 @@ fn main() {
     //let x = linspace(0., 2. * PI, 30);
     //let y = x.sin();
 
-    let x = linspace(0., 2. * 6.28, 101);
+    let x = linspace(0., 2. * 6.28, 51);
     let y = linspace(0., 6.28, 101);
     let [x, y] = meshgrid([x, y]);
 
@@ -76,7 +76,7 @@ fn main() {
     // triplot(graph, vec.into_tensor());
     //tricontour(graph, xy, z);
 
-    matplot(graph, z);
+    matshow(graph, &z);
     //pcolormesh(graph, &z);
 
 

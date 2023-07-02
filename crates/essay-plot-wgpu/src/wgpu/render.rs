@@ -643,7 +643,6 @@ impl FigureRenderer {
         _clip: &Clip,
     ) -> Result<(), RenderErr> {
         assert!(colors.rank() == 2, "colors rank must be 2 shape={:?}", colors.shape().as_slice());
-        println!("Image: {:?}", colors.shape().as_slice());
 
         self.image_render.draw(device, bounds, colors, &self.to_gpu);
 

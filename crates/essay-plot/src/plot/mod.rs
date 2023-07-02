@@ -4,7 +4,7 @@ use crate::{graph::{Graph}, artist::{LinesOpt, ContainerOpt}};
 mod pcolormesh;
 mod contour;
 mod bar;
-mod matplot;
+mod matshow;
 mod pie;
 mod scatter;
 mod plot;
@@ -31,8 +31,8 @@ pub use plot::{
     plot, 
 };
 
-pub use matplot::{
-    matplot, 
+pub use matshow::{
+    matshow, 
 };
 
 pub use pie::{

@@ -144,6 +144,8 @@ impl Frame {
 
         self.data.set_pos(&pos_data);
 
+        let pos_data = self.data.get_pos();
+
         let pos_left = Bounds::<Canvas>::new(
             Point(pos_data.xmin(), pos_data.ymin()),
             Point(pos_data.xmin(), pos_data.ymax()),

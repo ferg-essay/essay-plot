@@ -246,7 +246,7 @@ impl Color {
         self.0 == 0
     }
 
-    pub fn closest_name(&self) -> String {
+    pub fn nearest_name(&self) -> String {
         lookup_color_name(self)
     }
 }

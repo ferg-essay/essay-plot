@@ -64,6 +64,24 @@ impl Graph {
         opt
     }
 
+    pub fn aspect(&mut self, aspect: f32) -> &mut Self {
+        self.layout.borrow_mut()
+            .frame_mut(self.id)
+            .data_mut()
+            .aspect(aspect);
+
+        self
+    }
+
+    pub fn flip_y(&mut self, is_flip_y: bool) -> &mut Self {
+        self.layout.borrow_mut()
+            .frame_mut(self.id)
+            .data_mut()
+            .flip_y(is_flip_y);
+
+        self
+    }
+
     pub fn colorbar(&mut self) -> &mut Self {
         let id = self.layout.borrow_mut()
             .frame_mut(self.id)

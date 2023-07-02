@@ -233,10 +233,10 @@ impl<M: Coord> fmt::Debug for Bounds<M> {
         write!(f, 
             "Bounds<{}>({},{}; {}x{})", 
             tail,
-            self.xmin(),
-            self.ymin(),
-            self.width(),
-            self.height()
+            self.x0(),
+            self.y0(),
+            self.x1() - self.x0(),
+            self.y1() - self.y0()
         )
     }
 }

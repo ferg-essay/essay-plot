@@ -89,6 +89,7 @@ impl ImageRender {
     pub fn clear(&mut self) {
         self.vertex_offset = 0;
         self.style_offset = 0;
+        self.textures.drain(..); // TODO: check that this properly deallocates
     }
 
     pub fn draw(
@@ -100,12 +101,10 @@ impl ImageRender {
     ) {
         let start = self.vertex_offset;
 
-        let x0 = pos.xmin();
-        let y0 = pos.ymin();
-        let x1 = pos.xmax();
-        let y1 = pos.ymax();
-
-        println!("POS {:?}", pos);
+        let x0 = pos.x0();
+        let y0 = pos.y0();
+        let x1 = pos.x1();
+        let y1 = pos.y1();
 
         //let (x0, y0) = (50., 50.);
         //let (x1, y1) = (100., 100.);
@@ -152,7 +151,7 @@ impl ImageRender {
         encoder: &mut wgpu::CommandEncoder,
     ) {
         //self.text_cache.flush(queue, &self.texture);
-println!("Flush {}", self.image_items.len());
+
         if self.image_items.len() == 0 {
             return;
         }
@@ -200,7 +199,7 @@ println!("Flush {}", self.image_items.len());
             );
 
             rpass.set_bind_group(0, &self.textures[item.tex_index].bind_group, &[]);
-            println!("VERTS: {}, {}", item.start, item.end);
+
             rpass.draw(
                 0..(item.end - item.start) as u32,
                 0..1,
@@ -346,26 +345,6 @@ fn write_rgba_texture(
     data: &[u8], 
     width: u32, 
     height: u32) {
-    // assert!(width % 256 == 0);
-        /*
-    println!("Data W {} H {} {:?}", width, height, data);
-    for v in data {
-        print!(" {:x}", *v);
-    }
-
-    let mut vec = Vec::<u8>::new();
-    for i in 0..width * height {
-        vec.push(0x00);
-        vec.push(0x80);
-        vec.push(0xc0);
-        vec.push(0xff);
-    }
-
-    let mut vec2 = Vec::<u32>::new();
-    for i in 0..width * height {
-        vec2.push(0x0080c0ff);
-    }
-    */
 
     queue.write_texture(
         wgpu::ImageCopyTexture {
@@ -374,9 +353,6 @@ fn write_rgba_texture(
             origin: wgpu::Origin3d::ZERO,
             aspect: wgpu::TextureAspect::All,
         },
-        //bytemuck::cast_slice(vec2.as_slice()),
-        //bytemuck::cast_slice(data),
-        //vec.as_slice(),
         data,
         wgpu::ImageDataLayout {
             offset: 0,

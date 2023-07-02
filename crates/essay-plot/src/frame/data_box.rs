@@ -15,12 +15,18 @@ pub struct DataBox {
     data_bounds: Bounds<Data>,
     view_bounds: Bounds<Data>,
 
+    x_margin: Option<f32>,
+    y_margin: Option<f32>,
+
+    aspect: Option<f32>,
+    is_flip_y: bool,
+
     artists: PlotContainer<Data>,
 
     to_canvas: Affine2d,
     style: PathStyle,
 
-    is_modified: bool,
+    is_stale: bool,
 }
 
 impl DataBox {
@@ -31,22 +37,28 @@ impl DataBox {
             data_bounds: Bounds::<Data>::unit(),
             view_bounds: Bounds::<Data>::unit(),
 
+            x_margin: cfg.get_as_type("frame", "x_margin"),
+            y_margin: cfg.get_as_type("frame", "y_margin"),
+            aspect: None,
+            is_flip_y: false,
+
             artists: PlotContainer::new(frame_id, cfg),
 
             style: PathStyle::default(),
 
             to_canvas: Affine2d::eye(),
-            is_modified: true,
+            is_stale: true,
         }
     }
 
-    ///
-    /// Sets the canvas bounds
-    /// 
-    pub(crate) fn set_pos(&mut self, pos: &Bounds<Canvas>) -> &mut Self {
-        self.pos_canvas = pos.clone();
+    pub fn aspect(&mut self, aspect: f32) -> &mut Self {
+        self.aspect = Some(aspect);
 
-        self.to_canvas = self.view_bounds.affine_to(&self.pos_canvas);
+        self
+    }
+
+    pub fn flip_y(&mut self, is_flip_y: bool) -> &mut Self {
+        self.is_flip_y = is_flip_y;
 
         self
     }
@@ -64,36 +76,117 @@ impl DataBox {
         id
     }
 
-    fn reset_view(&mut self) {
-        let x_margin = 0.1;
-        let y_margin = 0.1;
+    ///
+    /// Sets the canvas bounds
+    /// 
+    pub(crate) fn set_pos(&mut self, pos: &Bounds<Canvas>) -> &mut Self {
+        self.update_view();
 
+        self.pos_canvas = pos.clone();
+
+        self.update_aspect();
+        
+        self.to_canvas = self.view_bounds.affine_to(&self.pos_canvas);
+
+        if self.is_flip_y {
+            self.to_canvas = self.to_canvas
+                .translate(0., - self.pos_canvas.ymin())
+                .scale(1., -1.)
+                .translate(0., self.pos_canvas.ymax());
+        }
+
+        self
+    }
+
+    fn update_view(&mut self) {
         let data = &self.data_bounds;
 
         let (height, width) = (data.height(), data.width());
 
         let (mut xmin, mut xmax) = (data.xmin(), data.xmax());
-        xmin -= x_margin * width;
-        xmax += x_margin * width;
-
         let (mut ymin, mut ymax) = (data.ymin(), data.ymax());
-        ymin -= y_margin * height;
-        ymax += y_margin * height;
+
+        if self.aspect.is_none() {
+            if let Some(x_margin) = self.x_margin {
+                xmin -= x_margin * width;
+                xmax += x_margin * width;
+            }
+
+            if let Some(y_margin) = self.y_margin {
+                ymin -= y_margin * height;
+                ymax += y_margin * height;
+            }
+        }
 
         // single point
         if xmin == xmax {
-            xmin = xmin - 0.1;
-            xmax = xmax + 0.1;
+            xmin = xmin - 1.;
+            xmax = xmax + 1.;
         }
 
         if ymin == ymax {
-            ymin = ymin - 0.1;
-            ymax = ymax + 0.1;
+            ymin = ymin - 1.;
+            ymax = ymax + 1.;
         }
 
-        let bounds = Bounds::new(Point(xmin, ymin), Point(xmax, ymax));
+        self.view_bounds = Bounds::new(Point(xmin, ymin), Point(xmax, ymax));
 
-        self.view_bounds = bounds;
+        // pos.clone()
+    }
+
+    fn update_aspect(&mut self) {
+        self.update_aspect_pos()
+    }
+
+    fn update_aspect_view(&mut self) {
+        if let Some(_aspect) = self.aspect {
+            let mut bounds = self.view_bounds.clone();
+
+            if bounds.height() < bounds.width() {
+                let ymid = bounds.ymid();
+                let h2 = bounds.width() * 0.5;
+
+                bounds = Bounds::new(
+                    Point(bounds.xmin(), ymid - h2),
+                    Point(bounds.xmax(), ymid + h2),
+                );
+            } else {
+                let w2 = bounds.height() * 0.5;
+
+                bounds = Bounds::new(
+                    Point(bounds.xmid() - w2, bounds.ymin()),
+                    Point(bounds.xmid() + w2, bounds.ymax()),
+                );
+            }
+
+            self.view_bounds = bounds;
+        }
+    }
+
+    fn update_aspect_pos(&mut self) {
+        if let Some(_aspect) = self.aspect {
+            let view_ratio = self.view_bounds.width() / self.view_bounds.height().max(f32::EPSILON);
+            let pos = &self.pos_canvas;
+            let pos_ratio = pos.width() / pos.height().max(f32::EPSILON);
+
+            let pos = if pos_ratio < view_ratio {
+                let h2 = pos.width() * 0.5 / view_ratio;
+
+                Bounds::new(
+                    Point(pos.xmin(), pos.ymid() - h2),
+                    Point(pos.xmax(), pos.ymid() + h2),
+                )
+            } else {
+                let w2 = pos.height() * 0.5 * view_ratio;
+
+                Bounds::new(
+                    Point(pos.xmid() - w2, pos.ymin()),
+                    Point(pos.xmid() + w2, pos.ymax()),
+                )
+            };
+
+            self.pos_canvas = pos;
+        }
     }
 
     pub(crate) fn get_pos(&self) -> &Bounds<Canvas> {
@@ -112,7 +205,8 @@ impl DataBox {
     pub fn event(&mut self, _renderer: &mut dyn Renderer, event: &CanvasEvent) -> bool {
         match event {
             CanvasEvent::ResetView(_) => {
-                self.reset_view();
+                //self.update_view();
+                self.is_stale = true;
                 true
             }
             CanvasEvent::Pan(_p_start, p_last, p_now) => {
@@ -181,21 +275,12 @@ impl Artist<Canvas> for DataBox {
     fn update(&mut self, canvas: &Canvas) {
         self.artists.update(canvas);
 
-        if self.is_modified {
-            self.is_modified = false;
+        if self.is_stale {
+            self.is_stale = false;
 
-            self.data_bounds =self.artists.get_extent();
-            /*
-
-            for id in self.artists.iter() {
-                let bounds = self.artists.get_extent();
-
-                self.add_data_bounds(&bounds);
-                // self.add_view_bounds(&bounds);
-            }
-            */
+            self.data_bounds = self.artists.get_extent();
     
-            self.reset_view();
+            self.update_view();
         }
     }
 

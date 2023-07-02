@@ -1,4 +1,4 @@
-use essay_plot_base::{Canvas, Bounds, Point, Clip, PathOpt, Path};
+use essay_plot_base::{Canvas, Bounds, Point, Clip, PathOpt, Path, Affine2d};
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{frame::Data, artist::{Norms, Norm}};
@@ -16,18 +16,18 @@ impl Image {
     pub fn new(data: impl Into<Tensor>) -> Self {
         let data : Tensor = data.into();
 
-        assert!(data.rank() == 2, "colormesh requires 2d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "image requires 2d value {:?}", data.shape().as_slice());
 
         Self {
             data,
             norm: Norm::from(Norms::Linear),
-            color_map: ColorMaps::Default.into(),
+            color_map: ColorMaps::Default.into(), // ColorMaps::Default.into(),
             image: Tensor::empty()
         }
     }
 
     pub(crate) fn set_data(&mut self, data: Tensor) {
-        assert!(data.rank() == 2, "colormesh requires 2d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "image requires 2d value {:?}", data.shape().as_slice());
 
         self.data = data;
     }
@@ -35,16 +35,6 @@ impl Image {
 
 impl Artist<Data> for Image {
     fn update(&mut self, _canvas: &Canvas) {
-        let mut colordata = TensorVec::<u32>::new();
-        let (rows, cols) = (self.data.rows(), self.data.cols());
-
-        for j in 0..rows {
-            for i in 0..cols {
-                let value = self.data[(j, i)];
-                let color = self.color_map.map(value);
-            }
-        }
-
         self.norm.set_bounds(&self.data);
     }
     
@@ -52,18 +42,19 @@ impl Artist<Data> for Image {
         let (rows, cols) = (self.data.rows(), self.data.cols());
 
         Bounds::new(
-            Point(0.0, 0.0), 
-            Point(cols as f32, rows as f32)
+            Point(0.0, 0.),
+            Point(cols as f32, rows as f32),
         )
     }
 
     fn draw(
         &mut self, 
         renderer: &mut dyn essay_plot_base::driver::Renderer,
-        to_canvas: &essay_plot_base::Affine2d,
+        to_canvas: &Affine2d,
         clip: &Clip,
-        style: &dyn PathOpt,
+        _style: &dyn PathOpt,
     ) {
+        //let to_canvas = to_canvas.translate(0., self.).scale(1., -1.);
         let extent = self.get_extent();
         let bounds = Bounds::new(
             to_canvas.transform_point(extent.p0()),
@@ -85,10 +76,6 @@ impl Artist<Data> for Image {
     
         // todo [width, height, 4]
         let colors = Tensor::from(colors).reshape([self.data.rows(), 4 * self.data.cols()]);
-    
-        let mut style = PathStyle::new();
-    
-        style.edge_color("k");
     
         renderer.draw_image(&bounds, &colors, clip).unwrap();
     }

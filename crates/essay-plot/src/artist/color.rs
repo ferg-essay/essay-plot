@@ -1,4 +1,5 @@
-use std::ops::Index;
+use core::fmt;
+use std::{ops::Index, f32::consts::TAU};
 
 use essay_plot_base::Color;
 
@@ -52,5 +53,45 @@ impl ColorCycle {
 impl Default for ColorCycle {
     fn default() -> Self {
         ColorCycle::tableau()
+    }
+}
+
+pub struct Lab(f32, f32, f32);
+
+impl Lab {
+    #[inline]
+    pub fn l(&self) -> f32 {
+        self.0
+    }
+
+    #[inline]
+    pub fn a(&self) -> f32 {
+        self.1
+    }
+
+    #[inline]
+    pub fn b(&self) -> f32 {
+        self.2
+    }
+}
+
+impl fmt::Debug for Lab {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Lab").field(&self.0).field(&self.1).field(&self.2).finish()
+    }
+}
+
+
+impl From<Lab> for Color {
+    fn from(value: Lab) -> Self {
+        Color::from_lab(value.l(), value.a(), value.b())
+    }
+}
+
+impl From<Color> for Lab {
+    fn from(color: Color) -> Self {
+        let [l, a, b] = color.to_lab();
+
+        Self(l, a, b)
     }
 }

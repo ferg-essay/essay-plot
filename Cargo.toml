@@ -1,0 +1,25 @@
+[package]
+name = "essay-plot"
+version = "0.1.0"
+edition = "2021"
+publish=false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+env_logger = { version = "0.10.0" }
+log = { version = "0.4.17" }
+essay-tensor = { git = "https://github.com/ferg-essay/essay-tensor" }
+essay-plot-base = { path = "crates/essay-plot-base" }
+#essay-plot = { path = "crates/essay-plot" }
+essay-plot-wgpu = { path = "crates/essay-plot-wgpu" }
+wgpu = "0.16"
+winit = "0.28"
+wgpu_glyph = "0.20"
+futures = "0.3"
+
+[workspace]
+members = [
+    "crates/*",
+]

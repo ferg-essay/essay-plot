@@ -1,0 +1,11 @@
+[package]
+name = "essay-plot-base"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+log = { version = "0.4.17" }
+essay-tensor = { git = "git://github.com/ferg-essay/essay-tensor"}
+
+[lib]
+doctest = false

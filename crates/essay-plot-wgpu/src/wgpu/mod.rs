@@ -4,7 +4,7 @@ mod shape2d;
 mod image;
 mod main_loop;
 mod render;
-mod tesselate;
+mod triangulate;
 mod text;
 mod text_texture;
 mod text_cache;

@@ -5,7 +5,7 @@ use essay_plot_base::{
 };
 use essay_tensor::Tensor;
 
-use super::{text::{TextRender}, shape2d::Shape2dRender, tesselate::tesselate, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender};
+use super::{text::{TextRender}, shape2d::Shape2dRender, triangulate::triangulate, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender};
 
 pub struct FigureRenderer {
     canvas: Canvas,
@@ -100,7 +100,7 @@ impl FigureRenderer {
             points.push(last);
         }
 
-        let triangles = tesselate(points);
+        let triangles = triangulate(points);
 
         for triangle in &triangles {
             self.shape2d_render.draw_triangle(&triangle[0], &triangle[1], &triangle[2]);

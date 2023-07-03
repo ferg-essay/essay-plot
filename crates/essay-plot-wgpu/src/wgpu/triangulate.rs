@@ -5,7 +5,7 @@ use essay_plot_base::Point;
 #[derive(Clone, Debug, PartialEq)]
 pub struct Triangle(Point, Point, Point);
 
-pub fn tesselate(points: Vec<Point>) -> Vec<Triangle> {
+pub fn triangulate(points: Vec<Point>) -> Vec<Triangle> {
     let mut points = points;
     let mut triangles = Vec::<Triangle>::new();
     

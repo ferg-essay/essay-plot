@@ -1,6 +1,6 @@
 use std::f32::consts::TAU;
 
-use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, graph::{Graph, PlotOpt}, plot::{bar_y, pcolormesh, contour, triplot, tricontour, matshow, stem}};
+use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, graph::{Graph, PlotOpt}, plot::{bar_y, pcolormesh, contour, triplot, tricontour, matshow, stem, fill_between}};
 use essay_plot_base::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
 use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::TensorVec};
 
@@ -46,15 +46,16 @@ fn main() {
         .line_width(5.);
     */
 
-    let x = linspace(0., 6.28, 9);
-    let y = x.sin();
+    let x = linspace(0., 2., 4);
+    let y1 = &x;
     //graph.scatter(&x, &y).color("blue").marker(Markers::Asterisk(5, Angle::Deg(0.))); // .size(2500.);
     //graph.plot(&x, &y).color("xkcd:purple"); // .label("sin");
 
-    let y = x.cos();
+    let y2 = 2. - &x;
     //graph.scatter(&x, &y).color("blue").marker(Markers::Asterisk(5, Angle::Deg(0.))); // .size(2500.);
     //graph.plot(&x, &y).color("xkcd:amber"); // .label("cos");
-    stem(graph, x, y);
+    fill_between(graph, &x, y1, y2);
+    //stem(graph, x, y);
     let x = linspace(0., 6.28, 21);
     let y = linspace(0., 6.28, 21);
     let [grid_x, grid_y] = meshgrid([&x, &y]);

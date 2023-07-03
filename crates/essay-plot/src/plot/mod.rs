@@ -9,6 +9,7 @@ mod pie;
 mod scatter;
 mod stem;
 mod plot;
+mod fill_between;
 mod triplot;
 mod tricontour;
 
@@ -26,6 +27,10 @@ pub use contour::{
 
 pub use tricontour::{
     tricontour, 
+};
+
+pub use fill_between::{
+    fill_between, 
 };
 
 pub use plot::{

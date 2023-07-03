@@ -127,8 +127,10 @@ impl PlotArtist<Data> for Stem {
 
     fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
         self.line_style = PathStyle::from_config(cfg, "stem.lines");
-        self.baseline_style = PathStyle::from_config(cfg, "stem.baseline.lines");
+        self.baseline_style = PathStyle::from_config(cfg, "stem.lines");
         self.marker_style = PathStyle::from_config(cfg, "stem.marker");
+
+        self.baseline_style.color("red"); // C3
 
         unsafe { StemOpt::new(id) }
     }

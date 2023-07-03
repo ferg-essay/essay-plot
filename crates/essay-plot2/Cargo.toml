@@ -1,12 +1,12 @@
 [package]
-name = "essay-plot"
+name = "essay-plot2"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 env_logger = { version = "0.10.0" }
 log = { version = "0.4.17" }
-essay-tensor = { path = "../essay-tensor" }
+essay-tensor = { git = "git://github.com/ferg-essay/essay-tensor" }
 essay-plot-base = { path = "../essay-plot-base" }
 essay-plot-macro = { path = "../essay-plot-macro" }
 essay-plot-wgpu = { path = "../essay-plot-wgpu" }

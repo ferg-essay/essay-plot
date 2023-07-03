@@ -1,6 +1,6 @@
 use std::f32::consts::TAU;
 
-use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, graph::{Graph, PlotOpt}, plot::{bar_y, pcolormesh, contour, triplot, tricontour, matshow, stem, fill_between}};
+use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, plot::{bar_y, pcolormesh, contour, triplot, tricontour, matshow, stem, fill_between}, graph::{Graph, PlotOpt}};
 use essay_plot_base::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
 use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::TensorVec};
 

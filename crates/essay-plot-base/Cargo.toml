@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 log = { version = "0.4.17" }
-essay-tensor = { path = "../essay-tensor"}
+essay-tensor = { git = "git://github.com/ferg-essay/essay-tensor"}
 
 [lib]
 doctest = false

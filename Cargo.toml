@@ -1,5 +1,5 @@
 [package]
-name = "essay-ml"
+name = "essay-plot"
 version = "0.1.0"
 edition = "2021"
 publish=false
@@ -10,15 +10,10 @@ path = "src/lib.rs"
 [dependencies]
 env_logger = { version = "0.10.0" }
 log = { version = "0.4.17" }
-essay-tensor = { path = "crates/essay-tensor" }
+essay-tensor = { git = "https://github.com/ferg-essay/essay-tensor" }
 essay-plot-base = { path = "crates/essay-plot-base" }
-essay-plot = { path = "crates/essay-plot" }
+#essay-plot = { path = "crates/essay-plot" }
 essay-plot-wgpu = { path = "crates/essay-plot-wgpu" }
-#essay-opencl = { path = "crates/essay-opencl" }
-#essay-nn = { path = "crates/essay-nn" }
-dfdx = {version ="0.11"}
-ndarray = "0.15"
-ocl = "0.19"
 wgpu = "0.16"
 winit = "0.28"
 wgpu_glyph = "0.20"
@@ -28,22 +23,3 @@ futures = "0.3"
 members = [
     "crates/*",
 ]
-
-#[workspace.dependencies]
-#essay-tensor 
-
-[[bench]]
-name = "tensor-add"
-harness = false
-
-[[bench]]
-name = "open-cl"
-harness = false
-
-[[bench]]
-name = "dfdx"
-harness = false
-
-[[bench]]
-name = "ndarray"
-harness = false

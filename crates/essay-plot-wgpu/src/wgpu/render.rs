@@ -5,7 +5,7 @@ use essay_plot_base::{
 };
 use essay_tensor::Tensor;
 
-use super::{text::{TextRender}, shape2d::Shape2dRender, triangulate2::triangulate2, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender};
+use super::{text::{TextRender}, shape2d::Shape2dRender, triangulate::triangulate2, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender};
 
 pub struct FigureRenderer {
     canvas: Canvas,

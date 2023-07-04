@@ -5,7 +5,6 @@ mod image;
 mod main_loop;
 mod render;
 mod triangulate;
-mod triangulate2;
 mod text;
 mod text_texture;
 mod text_cache;

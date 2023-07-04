@@ -364,7 +364,7 @@ impl BezierRender {
     }
 }
 
-fn intersection(p0: Point, p1: Point, q0: Point, q1: Point) -> Point {
+pub(crate) fn intersection(p0: Point, p1: Point, q0: Point, q1: Point) -> Point {
     let det = (p0.x() - p1.x()) * (q0.y() - q1.y())
         - (p0.y() - p1.y()) * (q0.x() - q1.x());
 

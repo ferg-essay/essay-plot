@@ -1,5 +1,5 @@
 mod wgpu;
 
 pub use crate::wgpu::{
-    WgpuBackend,
+    WgpuBackend, PlotCanvas, PlotRenderer,
 };

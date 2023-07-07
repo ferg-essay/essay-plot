@@ -7,7 +7,7 @@ use winit::{
     window::{Window, CursorIcon},
 };
 
-use super::{render::{FigureRenderer, DrawRenderer}};
+use super::{render::{PlotCanvas, PlotRenderer}};
 
 async fn init_wgpu_args(window: &Window) -> EventLoopArgs {
     window.set_title("Essay Plot");
@@ -134,7 +134,7 @@ fn run_event_loop(
 
     //let mut staging_belt = wgpu::util::StagingBelt::new(1024);
 
-    let mut figure_renderer = FigureRenderer::new(
+    let mut figure_renderer = PlotCanvas::new(
         &device,
         config.format,
     );
@@ -157,7 +157,7 @@ fn run_event_loop(
             &queue,
         );
 
-        let mut draw_renderer = DrawRenderer::new(&device, &mut figure_renderer);
+        let mut draw_renderer = PlotRenderer::new(&mut figure_renderer, &device, None, None);
 
         let mut is_draw = false;
     
@@ -286,6 +286,16 @@ fn run_event_loop(
         }
 
         if is_draw || figure_renderer.is_request_redraw() {
+            main_renderer.render(|device, queue, view| {
+                figure_renderer.draw(
+                    &mut figure,
+                    (config.width, config.height),
+                    window.scale_factor() as f32,
+                    device, 
+                    queue, 
+                    view);
+            });
+            /*
             main_renderer.render(|device, queue, view, encoder| {
                 figure_renderer.draw(
                     &mut figure,
@@ -296,6 +306,7 @@ fn run_event_loop(
                     view, 
                     encoder);
             });
+            */
         }
 });
 }
@@ -325,7 +336,7 @@ impl<'a> MainRenderer<'a> {
             &wgpu::Device,
             &wgpu::Queue, 
             &wgpu::TextureView, 
-            &mut wgpu::CommandEncoder
+            // &mut wgpu::CommandEncoder
         )
     ) {
         let frame = self.surface
@@ -365,10 +376,13 @@ impl<'a> MainRenderer<'a> {
             });
         }
 
-        view_renderer(&self.device, &self.queue, &view, &mut encoder);
+        self.queue.submit(Some(encoder.finish()));
+
+        //view_renderer(&self.device, &self.queue, &view, &mut encoder);
+        view_renderer(&self.device, &self.queue, &view);
 
         //self.staging_belt.finish();
-        self.queue.submit(Some(encoder.finish()));
+
         frame.present();
         //self.staging_belt.recall();
     }

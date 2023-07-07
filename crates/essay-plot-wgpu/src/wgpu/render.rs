@@ -7,7 +7,7 @@ use essay_tensor::Tensor;
 
 use super::{text::{TextRender}, shape2d::Shape2dRender, triangulate::triangulate2, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender};
 
-pub struct FigureRenderer {
+pub struct PlotCanvas {
     canvas: Canvas,
 
     image_render: ImageRender,
@@ -21,8 +21,8 @@ pub struct FigureRenderer {
     is_request_redraw: bool,
 }
 
-impl FigureRenderer {
-    pub(crate) fn new(
+impl PlotCanvas {
+    pub fn new(
         device: &wgpu::Device,
         format: wgpu::TextureFormat,
     ) -> Self {
@@ -62,7 +62,7 @@ impl FigureRenderer {
         self.image_render.clear();
     }
 
-    pub(crate) fn set_canvas_bounds(&mut self, width: u32, height: u32) {
+    pub fn set_canvas_bounds(&mut self, width: u32, height: u32) {
         self.canvas.set_bounds([width as f32, height as f32]);
 
         let pos_gpu = Bounds::<Canvas>::new(
@@ -73,7 +73,7 @@ impl FigureRenderer {
         self.to_gpu = self.canvas.bounds().affine_to(&pos_gpu);
     }
 
-    pub(crate) fn set_scale_factor(&mut self, scale_factor: f32) {
+    pub fn set_scale_factor(&mut self, scale_factor: f32) {
         // traditional pt to px
         let pt_to_px = 4. / 3.;
 
@@ -299,92 +299,6 @@ impl FigureRenderer {
     }
 }
 
-pub(crate) struct DrawRenderer<'a> {
-    device: &'a wgpu::Device,
-    figure: &'a mut FigureRenderer,
-}
-
-impl<'a> DrawRenderer<'a> {
-    pub fn new(
-        device: &'a wgpu::Device,
-        figure: &'a mut FigureRenderer
-    ) -> Self {
-        Self {
-            device,
-            figure
-        }
-    }
-
-}
-
-impl Renderer for DrawRenderer<'_> {
-    fn get_canvas(&self) -> &Canvas {
-        self.figure.get_canvas()
-    }
-
-    fn to_px(&self, size: f32) -> f32 {
-        self.figure.to_px(size)
-    }
-
-    fn draw_path(
-        &mut self, 
-        path: &Path<Canvas>, 
-        style: &dyn PathOpt, 
-        clip: &Clip,
-    ) -> Result<(), RenderErr> {
-        self.figure.draw_path(path, style, clip)
-    }
-
-    fn draw_markers(
-        &mut self, 
-        marker: &Path<Canvas>, 
-        xy: &Tensor,
-        scale: &Tensor,
-        color: &Tensor<u32>,
-        style: &dyn PathOpt, 
-        clip: &Clip,
-    ) -> Result<(), RenderErr> {
-        self.figure.draw_markers(marker, xy, scale, color, style, clip)
-    }
-
-    fn draw_text(
-        &mut self, 
-        xy: Point, // location in Canvas coordinates
-        text: &str,
-        angle: f32,
-        style: &dyn PathOpt, 
-        text_style: &TextStyle,
-        clip: &Clip,
-    ) -> Result<(), RenderErr> {
-        self.figure.draw_text(xy, text, angle, style, text_style, clip)
-    }
-
-    fn draw_triangles(
-        &mut self,
-        vertices: Tensor<f32>,  // Nx2 x,y in canvas coordinates
-        colors: Tensor<u32>,    // N in rgba
-        triangles: Tensor<u32>, // Mx3 vertex indices
-        clip: &Clip,
-    ) -> Result<(), RenderErr> {
-        self.figure.draw_triangles(vertices, colors, triangles, clip)
-    }
-
-    fn draw_image(
-        &mut self,
-        bounds: &Bounds<Canvas>,
-        colors: &Tensor<u8>,
-        clip: &Clip
-    ) -> Result<(), RenderErr> {
-        self.figure.draw_image(self.device, bounds, colors, clip)
-    }
-
-    fn request_redraw(
-        &mut self,
-        bounds: &Bounds<Canvas>
-    ) {
-        self.figure.request_redraw(bounds)
-    }
-}
 
 pub(crate) fn line_normal(
     p0: Point, 
@@ -432,7 +346,7 @@ pub(crate) fn line_intersection(
     Point(x, y)
 }
 
-impl FigureRenderer {
+impl PlotCanvas {
     ///
     /// Returns the boundary of the canvas, usually in pixels or points.
     ///
@@ -904,7 +818,7 @@ impl Cursor {
 struct Gpu {}
 impl Coord for Gpu {}
 
-impl FigureRenderer {
+impl PlotCanvas {
     pub(crate) fn draw(
         &mut self,
         figure: &mut Box<dyn FigureApi>,
@@ -913,25 +827,157 @@ impl FigureRenderer {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         view: &wgpu::TextureView,
-        encoder: &mut wgpu::CommandEncoder,
+        // encoder: &mut wgpu::CommandEncoder,
     ) {
         let (width, height) = bounds;
 
-        self.clear();
+        //self.clear();
 
         self.set_canvas_bounds(width, height);
         let pt_to_px_factor = 4. / 3.;
         self.set_scale_factor(scale_factor * pt_to_px_factor);
         let draw_bounds = self.canvas.bounds().clone();
 
-        let mut renderer = DrawRenderer::new(device, self);
+        /*
+        let mut renderer = DrawRenderer::new(
+            self, 
+            device, 
+            Some(queue), 
+            Some(view)
+        );
+        */
+        let mut renderer = self.renderer(device, queue, view);
 
         figure.draw(&mut renderer, &draw_bounds);
 
-        self.image_render.flush(queue, view, encoder);
-        self.triangle_render.flush(device, queue, view, encoder);
-        self.bezier_render.flush(queue, view, encoder);
-        self.shape2d_render.flush(device, queue, view, encoder);
-        self.text_render.flush(queue, view, encoder);
+        renderer.flush();
+
+        //self.image_render.flush(queue, view, encoder);
+        //self.triangle_render.flush(device, queue, view, encoder);
+        //self.bezier_render.flush(queue, view, encoder);
+        //self.shape2d_render.flush(device, queue, view, encoder);
+        //self.text_render.flush(queue, view, encoder);
+    }
+
+    pub fn renderer<'a>(
+        &'a mut self, 
+        device: &'a wgpu::Device, 
+        queue: &'a wgpu::Queue, 
+        view: &'a wgpu::TextureView
+    ) -> PlotRenderer<'a> {
+        self.clear();
+
+        PlotRenderer::new(self, device, Some(queue), Some(view))
+    }
+}
+
+pub struct PlotRenderer<'a> {
+    figure: &'a mut PlotCanvas,
+    device: &'a wgpu::Device,
+    queue: Option<&'a wgpu::Queue>,
+    view: Option<&'a wgpu::TextureView>,
+}
+
+impl<'a> PlotRenderer<'a> {
+    pub fn new(
+        figure: &'a mut PlotCanvas,
+        device: &'a wgpu::Device,
+        queue: Option<&'a wgpu::Queue>,
+        view: Option<&'a wgpu::TextureView>,
+    ) -> Self {
+        Self {
+            device,
+            figure,
+            queue,
+            view,
+        }
+    }
+
+    pub fn flush(&mut self) {
+        if let Some(queue) = self.queue {
+            if let Some(view) = self.view {
+                println!("Flush");
+                let mut encoder =
+                    self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+
+                self.figure.image_render.flush(queue, view, &mut encoder);
+                self.figure.triangle_render.flush(self.device, queue, view, &mut encoder);
+                self.figure.bezier_render.flush(queue, view, &mut encoder);
+                self.figure.shape2d_render.flush(self.device, queue, view, &mut encoder);
+                self.figure.text_render.flush(queue, view, &mut encoder);
+        
+                queue.submit(Some(encoder.finish()));
+            }
+        }
+    }
+
+}
+
+impl Renderer for PlotRenderer<'_> {
+    fn get_canvas(&self) -> &Canvas {
+        self.figure.get_canvas()
+    }
+
+    fn to_px(&self, size: f32) -> f32 {
+        self.figure.to_px(size)
+    }
+
+    fn draw_path(
+        &mut self, 
+        path: &Path<Canvas>, 
+        style: &dyn PathOpt, 
+        clip: &Clip,
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_path(path, style, clip)
+    }
+
+    fn draw_markers(
+        &mut self, 
+        marker: &Path<Canvas>, 
+        xy: &Tensor,
+        scale: &Tensor,
+        color: &Tensor<u32>,
+        style: &dyn PathOpt, 
+        clip: &Clip,
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_markers(marker, xy, scale, color, style, clip)
+    }
+
+    fn draw_text(
+        &mut self, 
+        xy: Point, // location in Canvas coordinates
+        text: &str,
+        angle: f32,
+        style: &dyn PathOpt, 
+        text_style: &TextStyle,
+        clip: &Clip,
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_text(xy, text, angle, style, text_style, clip)
+    }
+
+    fn draw_triangles(
+        &mut self,
+        vertices: Tensor<f32>,  // Nx2 x,y in canvas coordinates
+        colors: Tensor<u32>,    // N in rgba
+        triangles: Tensor<u32>, // Mx3 vertex indices
+        clip: &Clip,
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_triangles(vertices, colors, triangles, clip)
+    }
+
+    fn draw_image(
+        &mut self,
+        bounds: &Bounds<Canvas>,
+        colors: &Tensor<u8>,
+        clip: &Clip
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_image(self.device, bounds, colors, clip)
+    }
+
+    fn request_redraw(
+        &mut self,
+        bounds: &Bounds<Canvas>
+    ) {
+        self.figure.request_redraw(bounds)
     }
 }

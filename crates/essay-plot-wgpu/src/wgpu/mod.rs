@@ -13,3 +13,8 @@ mod wgpu;
 pub use self::wgpu::{
     WgpuBackend
 };
+
+pub use render::{
+    PlotCanvas, PlotRenderer,
+};
+

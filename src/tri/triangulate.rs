@@ -32,7 +32,7 @@ impl Triangulation {
     pub fn edges(&self) -> Tensor<usize> {
         let mut edges = TensorVec::<[usize; 2]>::new();
 
-        for triangle in self.triangles.iter_slice() {
+        for triangle in self.triangles.iter_row() {
             let (a, b, c) = (triangle[0], triangle[1], triangle[2]);
 
             if a < b {

@@ -36,7 +36,7 @@ impl Artist<Data> for Colorbar {
             self.bounds = Bounds::new(Point(0., 0.), Point(2., 101.));
         }
         let x = linspace(0., 1., 101);//.reshape([101, 1]);
-        self.data = x.stack(&[x.clone()], -1);
+        self.data = x.stack([x.clone()], -1);
         self.mesh.set_data(self.data.clone());
         self.mesh.update(canvas);
     }

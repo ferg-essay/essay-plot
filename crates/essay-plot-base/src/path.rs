@@ -1,7 +1,7 @@
 use core::fmt;
-use std::{marker::PhantomData};
+use std::marker::PhantomData;
 
-use essay_tensor::{prelude::*};
+use essay_tensor::prelude::*;
 
 use crate::{Coord, Affine2d, Bounds, Point, affine};
 
@@ -150,6 +150,10 @@ impl<M: Coord> Path<M> {
     pub fn rotate_deg<C: Coord>(&self, deg: f32) -> Path<C> {
         self.transform(&affine::rotate_deg(deg))
     }
+
+    pub fn move_to(x: f32, y: f32) -> PathBuilder<M> {
+        PathBuilder::new().move_to(x, y)
+    }
 }
 
 impl<M: Coord> Clone for Path<M> {
@@ -271,5 +275,50 @@ impl PathCode {
             PathCode::Bezier3(_, _, p3) => *p3,
             PathCode::ClosePoly(p1) => *p1,
         }
+    }
+}
+
+pub struct PathBuilder<M: Coord> {
+    codes: Vec<PathCode>,
+    marker: PhantomData<M>,
+}
+
+impl<M: Coord> PathBuilder<M> {
+    pub fn new() -> Self {
+        Self {
+            codes: Default::default(),
+            marker: PhantomData,
+        }
+    }
+
+    pub fn move_to(mut self, x: f32, y: f32) -> Self {
+        self.codes.push(PathCode::MoveTo(Point(x, y)));
+
+        self
+    }
+
+    pub fn line_to(mut self, x: f32, y: f32) -> Self {
+        self.codes.push(PathCode::LineTo(Point(x, y)));
+
+        self
+    }
+
+    pub fn close_poly(mut self, x: f32, y: f32) -> Self {
+        self.codes.push(PathCode::ClosePoly(Point(x, y)));
+
+        self
+    }
+
+    pub fn to_path(self) -> Path::<M> {
+        Path {
+            codes: self.codes,
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<M: Coord> From<PathBuilder<M>> for Path<M> {
+    fn from(value: PathBuilder<M>) -> Self {
+        value.to_path()
     }
 }

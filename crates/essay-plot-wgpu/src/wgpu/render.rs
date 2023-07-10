@@ -439,7 +439,7 @@ impl PlotCanvas {
         if path.is_closed_path() && ! face_color.is_none() {
             self.fill_path(&path, clip);
 
-            for (i, xy) in xy.iter_slice().enumerate() {
+            for (i, xy) in xy.iter_row().enumerate() {
                 let affine = marker_affine(xy[0], xy[1], i, scale);
                 let color = marker_color(i, color, face_color);
 
@@ -450,7 +450,7 @@ impl PlotCanvas {
             if face_color != edge_color && ! edge_color.is_none() {
                 self.draw_lines(&path, style, clip);
 
-                for (i, xy) in xy.iter_slice().enumerate() {
+                for (i, xy) in xy.iter_row().enumerate() {
                     let affine = marker_affine(xy[0], xy[1], i, scale);
     
                     self.shape2d_render.draw_style(edge_color, &self.to_gpu.matmul(&affine));
@@ -460,7 +460,7 @@ impl PlotCanvas {
         } else if ! edge_color.is_none() {
             self.draw_lines(&path, style, clip);
 
-            for (i, xy) in xy.iter_slice().enumerate() {
+            for (i, xy) in xy.iter_row().enumerate() {
                 let affine = marker_affine(xy[0], xy[1], i, scale);
                 let color = marker_color(i, color, edge_color);
 
@@ -544,11 +544,11 @@ impl PlotCanvas {
 
         self.triangle_render.start_triangles();
 
-        for (xy, color) in vertices.iter_slice().zip(rgba.iter()) {
+        for (xy, color) in vertices.iter_row().zip(rgba.iter()) {
             self.triangle_render.draw_vertex(xy[0], xy[1], *color);
         }
 
-        for tri in triangles.iter_slice() {
+        for tri in triangles.iter_row() {
             self.triangle_render.draw_triangle(tri[0], tri[1], tri[2]);
         }
 
@@ -896,7 +896,6 @@ impl<'a> PlotRenderer<'a> {
     pub fn flush(&mut self) {
         if let Some(queue) = self.queue {
             if let Some(view) = self.view {
-                println!("Flush");
                 let mut encoder =
                     self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 

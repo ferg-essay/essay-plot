@@ -117,6 +117,11 @@ impl Color {
     }
 
     #[inline]
+    pub fn to_rgba_vec(&self) -> [u8; 4] {
+        [self.r8(), self.g8(), self.b8(), self.a8() ]
+    }
+
+    #[inline]
     pub fn srgb_to_lrgb(srgb: f32) -> f32 {
         if srgb > 0.04045 {
             ((srgb + 0.055) / 1.055).powf(2.4)

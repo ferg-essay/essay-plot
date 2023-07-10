@@ -64,7 +64,7 @@ fn main() {
     let grid_x = grid_x.flatten();
     let grid_y = grid_y.flatten();
 
-    let xy = grid_x.stack(&[grid_y.clone()], -1);
+    let xy = grid_x.stack([grid_y.clone()], -1);
     let mut vec = TensorVec::<[f32; 2]>::new();
     vec.push([0., 0.]);
     vec.push([4., 0.]);

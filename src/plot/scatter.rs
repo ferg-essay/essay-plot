@@ -15,7 +15,7 @@ pub fn scatter(
     let x : Tensor = x.into();
     let y : Tensor = y.into();
 
-    let plot = ScatterPlot::new(x.stack(&[y], -1));
+    let plot = ScatterPlot::new(x.stack([y], -1));
 
     graph.add_plot_artist(plot)
 }

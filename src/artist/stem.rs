@@ -1,6 +1,6 @@
 use core::fmt;
 
-use essay_tensor::{Tensor, tensor::Axis};
+use essay_tensor::{Tensor, array::Axis};
 
 use essay_plot_base::{
     Affine2d, Bounds, Point, Canvas, Path, PathCode, PathOpt,
@@ -42,7 +42,7 @@ impl Stem {
             x.shape().as_slice(), y.shape().as_slice()
         );
 
-        let xy = x.stack(&[y], Axis::axis(-1));
+        let xy = x.stack([y], Axis::axis(-1));
 
         Self {
             xy,
@@ -158,7 +158,7 @@ fn build_paths(xy: &Tensor) -> Vec<Path<Data>> {
     
     let mut paths = Vec::<Path<Data>>::new();
 
-    for xy in xy.iter_slice() {
+    for xy in xy.iter_row() {
         let path = Path::<Data>::new(vec![
             PathCode::MoveTo(Point(xy[0], 0.)),
             PathCode::LineTo(Point(xy[0], xy[1])),

@@ -54,7 +54,7 @@ impl Tiles {
 
         let mut tiles = Vec::<Tile>::new();
 
-        for (i, verts) in tri.triangles().iter_slice().enumerate() {
+        for (i, verts) in tri.triangles().iter_row().enumerate() {
             let a = VertId(verts[0]);
             let b = VertId(verts[1]);
             let c = VertId(verts[2]);

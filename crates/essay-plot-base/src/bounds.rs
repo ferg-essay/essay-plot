@@ -294,7 +294,7 @@ impl<M: Coord> From<&Tensor> for Bounds<M> {
         let mut x1 = f32::MIN;
         let mut y1 = f32::MIN;
 
-        for point in value.iter_slice() {
+        for point in value.iter_row() {
             x0 = x0.min(point[0]);
             y0 = y0.min(point[1]);
 

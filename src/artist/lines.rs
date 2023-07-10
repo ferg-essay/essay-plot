@@ -1,17 +1,15 @@
 use core::fmt;
 
-use essay_tensor::{Tensor, tensor::Axis};
-
 use essay_plot_base::{
     Affine2d, Bounds, Point, Canvas, Path, PathCode, PathOpt,
     driver::Renderer, Clip
 };
+use essay_tensor::Tensor;
 
 use crate::{
     artist::PathStyle, 
     frame::{Data, LegendHandler}, 
-    graph::{ConfigArc},
-    data_artist_option_struct, path_style_options
+    data_artist_option_struct, path_style_options, graph::ConfigArc
 };
 
 use super::{Artist, PlotArtist, PlotId};
@@ -40,7 +38,7 @@ impl Lines2d {
 
         assert_eq!(x.len(), y.len());
 
-        let lines = x.stack(&[y], Axis::axis(-1));
+        let lines = x.stack([y], -1);
 
         let path = build_path(&lines);
 
@@ -60,7 +58,7 @@ fn build_path(line: &Tensor) -> Path<Data> {
     let mut codes = Vec::<PathCode>::new();
     
     let mut is_active = false;
-    for xy in line.iter_slice() {
+    for xy in line.iter_row() {
         if ! is_active {
             codes.push(PathCode::MoveTo(Point(xy[0], xy[1])));
             is_active = true;

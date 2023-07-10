@@ -370,7 +370,7 @@ fn initial_points(points: &Tensor) -> Vec<Point> {
 
     let mut vec_points: Vec<Point> = Vec::new();
 
-    for point in points.iter_slice() {
+    for point in points.iter_row() {
         let (x, y) = (point[0], point[1]);
 
         vec_points.push(Point(x, y));
@@ -747,7 +747,7 @@ mod test {
     }
 
     fn assert_in_triangle(tensor: &Tensor, a: Point, b: Point, c: Point) {
-        for xy in tensor.iter_slice() {
+        for xy in tensor.iter_row() {
             assert!(in_triangle(Point(xy[0], xy[1]), a, b, c))
         }
     }

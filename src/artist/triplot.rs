@@ -49,7 +49,7 @@ impl Artist<Data> for TriPlot {
             let mut codes = Vec::<PathCode>::new();
 
             let xy = tri.vertices();
-            for edge in tri.edges().iter_slice() {
+            for edge in tri.edges().iter_row() {
                 let (x0, y0) = (xy[(edge[0], 0)], xy[(edge[0], 1)]);
                 let (x1, y1) = (xy[(edge[1], 0)], xy[(edge[1], 1)]);
 

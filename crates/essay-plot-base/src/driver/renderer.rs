@@ -50,7 +50,7 @@ pub trait Renderer {
     fn draw_image(
         &mut self,
         bounds: &Bounds<Canvas>,
-        colors: &Tensor<u8>,
+        colors: &Tensor<u8>,  // [rows, cols, 4]
         clip: &Clip
     ) -> Result<(), RenderErr>;
 

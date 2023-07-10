@@ -125,8 +125,8 @@ impl ImageRender {
 
         let texture = RgbaTexture::new(
             device, 
-            image.cols() as u32 / 4, 
-            image.rows() as u32
+            image.dim(1) as u32, 
+            image.dim(0) as u32
         );
 
         let tex_index = self.textures.len();
@@ -195,7 +195,7 @@ impl ImageRender {
             ));
 
             write_rgba_texture(queue, &self.textures[item.tex_index], &item.image, 
-                item.image.cols() as u32 / 4, item.image.rows() as u32
+                item.image.dim(1) as u32, item.image.dim(0) as u32
             );
 
             rpass.set_bind_group(0, &self.textures[item.tex_index].bind_group, &[]);

@@ -564,7 +564,8 @@ impl PlotCanvas {
         colors: &Tensor<u8>,    // N in rgba
         _clip: &Clip,
     ) -> Result<(), RenderErr> {
-        assert!(colors.rank() == 2, "colors rank must be 2 shape={:?}", colors.shape().as_slice());
+        assert!(colors.rank() == 3, "colors rank must be 3 shape={:?}", colors.shape().as_slice());
+        assert!(colors.cols() == 4, "colors must have 4-width columns shape={:?}", colors.shape().as_slice());
 
         self.image_render.draw(device, bounds, colors, &self.to_gpu);
 

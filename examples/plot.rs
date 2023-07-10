@@ -56,7 +56,7 @@ fn main() {
     //graph.scatter(&x, &y).color("blue").marker(Markers::Asterisk(5, Angle::Deg(0.))); // .size(2500.);
     //graph.plot(&x, &y).color("xkcd:amber"); // .label("cos");
     //fill_between(graph, &x, y1, y2);
-    fill_between(graph, &x, y1, y2);
+    //fill_between(graph, &x, y1, y2);
     //stem(graph, x, y);
     let x = linspace(0., 6.28, 21);
     let y = linspace(0., 6.28, 21);
@@ -79,7 +79,7 @@ fn main() {
     // triplot(graph, vec.into_tensor());
     //tricontour(graph, xy, z);
 
-    //matshow(graph, &z);
+    matshow(graph, &z);
     //pcolormesh(graph, &z);
 
 

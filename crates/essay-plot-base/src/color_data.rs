@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Mutex};
 
 use super::Color;
 
-const COLORMAP: Mutex<ColorMap> = Mutex::new(ColorMap { map: None });
+static COLORMAP: Mutex<ColorMap> = Mutex::new(ColorMap { map: None });
 
 pub(crate) fn lookup_color(name: &str) -> Option<Color> {
     COLORMAP.lock().unwrap().color(name)

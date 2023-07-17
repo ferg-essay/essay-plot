@@ -83,11 +83,11 @@ impl Layout {
         assert!(1. <= bounds.width() && bounds.width() <= 11.);
         assert!(1. <= bounds.height() && bounds.height() <= 11.);
         
-        let x_min = canvas.width() * self.sizes.left;
-        let x_max = canvas.width() * self.sizes.right;
+        let x_min = canvas.x_min() + canvas.width() * self.sizes.left;
+        let x_max = canvas.x_min() + canvas.width() * self.sizes.right;
         
-        let y_min = canvas.height() * self.sizes.bottom;
-        let y_max = canvas.height() * self.sizes.top;
+        let y_min = canvas.y_min() + canvas.height() * self.sizes.bottom;
+        let y_max = canvas.y_min() + canvas.height() * self.sizes.top;
 
         // TODO: nonlinear grid sizes
         let h = y_max - y_min; // canvas.height();
@@ -115,11 +115,17 @@ impl Layout {
         bounds
     }
 
-    pub(crate) fn draw(&mut self, renderer: &mut dyn Renderer) {
-        self.layout(renderer.get_canvas());
+    pub(crate) fn draw(
+        &mut self, 
+        renderer: &mut dyn Renderer,
+        bounds: &Bounds<Canvas>,
+    ) {
+        let canvas = Canvas::new(bounds.clone(), renderer.to_px(1.));
+        
+        self.layout(&canvas);
 
         for item in &mut self.frames {
-            item.draw(renderer);
+            item.draw(renderer, &canvas);
         }
     }
 
@@ -199,12 +205,16 @@ impl LayoutArc {
     }
     */
 
-    pub(crate) fn draw(&mut self, renderer: &mut dyn Renderer) {
-        self.0.lock().unwrap().draw(renderer);
+    pub(crate) fn draw(&mut self, renderer: &mut dyn Renderer, bounds: &Bounds<Canvas>) {
+        self.0.lock().unwrap().draw(renderer, bounds);
     }
 
     pub(crate) fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
         self.0.lock().unwrap().event(renderer, event);
+    }
+
+    pub(crate) fn update_canvas(&mut self, canvas: &Canvas) {
+        self.0.lock().unwrap().layout(&canvas);
     }
 }
 
@@ -303,8 +313,8 @@ impl LayoutBox {
         &mut self.frame
     }
 
-    fn draw(&mut self, renderer: &mut dyn Renderer) {
-        self.frame.update(renderer.get_canvas());
+    fn draw(&mut self, renderer: &mut dyn Renderer, canvas: &Canvas) {
+        self.frame.update(canvas);
         let pos_frame = self.pos_canvas.clone();
         self.frame.set_pos(&pos_frame);
 

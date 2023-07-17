@@ -51,6 +51,14 @@ impl Canvas {
         assert!(scale_factor > 0.);
         self.scale_factor = scale_factor;
     }
+
+    pub fn x_min(&self) -> f32 {
+        self.bounds.xmin()
+    }
+
+    pub fn y_min(&self) -> f32 {
+        self.bounds.ymin()
+    }
 }
 
 impl Coord for Canvas {}

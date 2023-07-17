@@ -115,7 +115,9 @@ impl FigureInner {
 
         let frame_id = self.layout.add_frame(grid.clone());
 
-        let graph = Graph::new(frame_id, self.layout.clone());
+        let id = GraphId(self.graphs.len());
+
+        let graph = Graph::new(id, frame_id, self.layout.clone());
 
         self.graphs.push(graph);
 
@@ -129,11 +131,15 @@ impl FigureInner {
     pub fn graph_mut(&mut self, id: GraphId) -> &mut Graph {
         &mut self.graphs[id.index()]
     }
+
+    pub fn window_bounds(&mut self, canvas: &Canvas) {
+        self.layout.update_canvas(canvas);
+    }
 }
 
 impl FigureApi for FigureInner {
-    fn draw(&mut self, renderer: &mut dyn Renderer, _bounds: &Bounds<Canvas>) {
-        self.layout.draw(renderer);
+    fn draw(&mut self, renderer: &mut dyn Renderer, bounds: &Bounds<Canvas>) {
+        self.layout.draw(renderer, bounds);
     }
 
     fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {

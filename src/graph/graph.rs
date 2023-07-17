@@ -5,18 +5,20 @@ use crate::{
     frame::{Data, LayoutArc, FrameId, FrameArtist, FrameTextOpt, AxisOpt, AspectMode}
 };
 
-use super::style::{PlotOptArtist, PlotOpt};
+use super::{style::{PlotOptArtist, PlotOpt}, GraphId};
 
 pub struct Graph {
-    id: FrameId,
+    id: GraphId,
+    frame_id: FrameId,
 
     layout: LayoutArc,
 }
 
 impl Graph {
-    pub(crate) fn new(id: FrameId, layout: LayoutArc) -> Self {
+    pub(crate) fn new(id: GraphId, frame_id: FrameId, layout: LayoutArc) -> Self {
         let mut graph = Self {
-            id, 
+            id,
+            frame_id, 
             layout,
         };
 
@@ -26,13 +28,18 @@ impl Graph {
     }
 
     #[inline]
-    pub fn id(&self) -> FrameId {
+    pub fn id(&self) -> GraphId {
         self.id
+    }
+
+    #[inline]
+    pub fn frame_id(&self) -> FrameId {
+        self.frame_id
     }
 
     fn text_opt(&self, artist: FrameArtist) -> FrameTextOpt {
         let layout = self.layout.clone();
-        self.layout.read(|l| l.frame(self.id).text_opt(layout, artist))
+        self.layout.read(|l| l.frame(self.frame_id).text_opt(layout, artist))
     }
 
     pub fn title(&mut self, label: &str) -> FrameTextOpt {
@@ -44,13 +51,13 @@ impl Graph {
     pub fn x(&mut self) -> AxisOpt {
         let layout = self.layout.clone();
 
-        AxisOpt::new(layout, self.id(), FrameArtist::X)
+        AxisOpt::new(layout, self.frame_id(), FrameArtist::X)
     }
 
     pub fn y(&mut self) -> AxisOpt {
         let layout = self.layout.clone();
 
-        AxisOpt::new(layout, self.id(), FrameArtist::Y)
+        AxisOpt::new(layout, self.frame_id(), FrameArtist::Y)
     }
 
     pub fn x_label(&mut self, label: &str) -> FrameTextOpt {
@@ -67,7 +74,7 @@ impl Graph {
 
     pub fn aspect(&mut self, aspect: f32) -> &mut Self {
         self.layout.write(|l| {
-            l.frame_mut(self.id)
+            l.frame_mut(self.frame_id)
             .data_mut()
             .aspect(aspect);
         });
@@ -77,7 +84,7 @@ impl Graph {
 
     pub fn aspect_mode(&mut self, mode: AspectMode) -> &mut Self {
         self.layout.write(|l| {
-            l.frame_mut(self.id)
+            l.frame_mut(self.frame_id)
             .data_mut()
             .aspect_mode(mode);
         });
@@ -87,7 +94,7 @@ impl Graph {
 
     pub fn flip_y(&mut self, is_flip_y: bool) -> &mut Self {
         self.layout.write(|l| {
-            l.frame_mut(self.id)
+            l.frame_mut(self.frame_id)
             .data_mut()
             .flip_y(is_flip_y);
         });
@@ -97,7 +104,7 @@ impl Graph {
 
     pub fn colorbar(&mut self) -> &mut Self {
         let _id = self.layout.write(|l|
-            l.frame_mut(self.id)
+            l.frame_mut(self.frame_id)
             .colorbar()
         );
 
@@ -128,7 +135,7 @@ impl Graph {
         A: PlotArtist<Data> + 'static
     {
         let id = self.layout.write(|l|
-            l.frame_mut(self.id)
+            l.frame_mut(self.frame_id)
             .data_mut()
             .add_artist(artist)
         );
@@ -152,10 +159,10 @@ impl Graph {
 
 impl fmt::Debug for Graph {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let pos = self.layout.read(|l| l.frame(self.id).pos().clone());
+        let pos = self.layout.read(|l| l.frame(self.frame_id).pos().clone());
 
         write!(f, "Graph[{}]({},{}; {}x{})",
-            self.id.index(),
+            self.frame_id.index(),
             pos.xmin(),
             pos.ymin(),
             pos.width(),

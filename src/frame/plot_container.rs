@@ -123,7 +123,7 @@ impl<M: Coord> Artist<M> for PlotContainer<M> {
     }
 }
 
-trait ArtistHandleTrait<M: Coord> {
+trait ArtistHandleTrait<M: Coord> : Send {
     fn id(&self) -> ArtistId;
 
     //fn style_mut(&mut self) -> &mut PathStyle;
@@ -193,6 +193,8 @@ where
     }
 }
 
+// TODO: replace with downcast crate
+
 pub(crate) struct PlotPtr<M: Coord> {
     id: ArtistId,
     type_id: TypeId, 
@@ -245,3 +247,6 @@ impl<M: Coord> PlotPtr<M> {
         &mut *self.data.as_ptr().cast::<A>()
     }
 }
+
+// TODO: replace with downcast
+unsafe impl<M: Coord> Send for PlotPtr<M> {}

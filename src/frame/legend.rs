@@ -131,13 +131,13 @@ impl Artist<Canvas> for Legend {
 
 pub struct LegendHandler {
     label: String,
-    draw: Box<dyn Fn(&mut dyn Renderer, &Bounds<Canvas>)>,
+    draw: Box<dyn Fn(&mut dyn Renderer, &Bounds<Canvas>) + Send>,
 }
 
 impl LegendHandler {
     pub fn new(
         label: String,
-        draw: impl Fn(&mut dyn Renderer, &Bounds<Canvas>) + 'static
+        draw: impl Fn(&mut dyn Renderer, &Bounds<Canvas>) + Send + 'static
     ) -> Self {
         Self {
             label,

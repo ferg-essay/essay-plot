@@ -1,4 +1,4 @@
-pub trait TickFormatter {
+pub trait TickFormatter : Send {
     fn format(&self, value: f32, axis_min: f32, axis_max: f32) -> String;
 }
 

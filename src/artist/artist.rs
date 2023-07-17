@@ -5,7 +5,7 @@ use essay_plot_api::{
 
 use crate::{graph::ConfigArc, frame::{LayoutArc, ArtistId, LegendHandler}};
 
-pub trait Artist<M: Coord> {
+pub trait Artist<M: Coord> : Send {
     fn update(&mut self, canvas: &Canvas);
 
     fn get_extent(&mut self) -> Bounds<M>;

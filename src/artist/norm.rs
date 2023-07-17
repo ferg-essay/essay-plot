@@ -7,11 +7,11 @@ pub struct Norm {
     min: f32,
     max: f32,
 
-    scale: Box<dyn Fn(f32) -> f32>,
+    scale: Box<dyn Fn(f32) -> f32 + Send>,
 }
 
 impl Norm {
-    pub fn new(fun: impl Fn(f32) -> f32 + 'static) -> Self {
+    pub fn new(fun: impl Fn(f32) -> f32 + Send + 'static) -> Self {
         Self {
             vmin: None,
             vmax: None,

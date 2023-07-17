@@ -1,4 +1,4 @@
-use super::{FigureApi};
+use super::FigureApi;
 
 #[derive(Debug)]
 pub enum DeviceErr {

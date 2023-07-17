@@ -83,7 +83,7 @@ pub struct FigureInner {
 }
 
 impl FigureInner {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let config = read_config();
         Self {
             layout: LayoutArc::new(config),
@@ -92,7 +92,7 @@ impl FigureInner {
         }
     }
 
-    fn new_graph(
+    pub fn new_graph(
         &mut self, 
         grid: impl Into<Bounds<Layout>>, 
     ) -> &mut Graph {
@@ -122,11 +122,11 @@ impl FigureInner {
         &mut self.graphs[len]
     }
 
-    fn graph(&self, id: GraphId) -> &Graph {
+    pub fn graph(&self, id: GraphId) -> &Graph {
         &self.graphs[id.index()]
     }
 
-    fn graph_mut(&mut self, id: GraphId) -> &mut Graph {
+    pub fn graph_mut(&mut self, id: GraphId) -> &mut Graph {
         &mut self.graphs[id.index()]
     }
 }
@@ -141,7 +141,7 @@ impl FigureApi for FigureInner {
     }
 }
 
-impl Coord for Figure {}
+//impl Coord for Figure {}
 
 pub trait PolyRow<'a> {
     type Item;

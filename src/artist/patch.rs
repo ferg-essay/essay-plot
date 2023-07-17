@@ -9,7 +9,7 @@ use crate::frame::Data;
 
 use super::{Artist, paths, PathStyle};
 
-pub trait PatchTrait<M: Coord> {
+pub trait PatchTrait<M: Coord> : Send {
     fn get_path(&mut self) -> &Path<M>;
 }
 

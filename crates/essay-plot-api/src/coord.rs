@@ -1,5 +1,5 @@
 
-pub trait Coord: 'static {}
+pub trait Coord: Send + 'static {}
 
 ///
 /// Display coordinates are in pixels for screens, or points for text rendering.

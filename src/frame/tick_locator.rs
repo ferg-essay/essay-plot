@@ -2,7 +2,7 @@
 
 use essay_tensor::{Tensor, init::linspace, tf32};
 
-pub trait TickLocator  {
+pub trait TickLocator : Send {
     fn tick_values(&self, min: f32, max: f32) -> Tensor<f32>;
 
     fn view_limits(&self, min: f32, max: f32) -> (f32, f32) {

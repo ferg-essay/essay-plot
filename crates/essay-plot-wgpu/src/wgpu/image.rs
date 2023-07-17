@@ -1,4 +1,4 @@
-use essay_plot_base::{Bounds, Canvas, Affine2d};
+use essay_plot_api::{Bounds, Canvas, Affine2d};
 use essay_tensor::Tensor;
 use wgpu::util::DeviceExt;
 

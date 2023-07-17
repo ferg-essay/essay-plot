@@ -21,10 +21,10 @@ macro_rules! frame_option_struct {
             }
         
             fn write(&mut self, fun: impl FnOnce(&mut $ty)) {
-                fun(self.layout.borrow_mut()
-                    .frame_mut(self.frame_id)
-                    .$getter(self.artist)
-                )
+                self.layout.write(|l|
+                    fun(l.frame_mut(self.frame_id)
+                        .$getter(self.artist))
+                );
             }
         }
     }
@@ -49,10 +49,10 @@ macro_rules! data_artist_option_struct {
             }
         
             fn write(&mut self, fun: impl FnOnce(&mut $ty)) {
-                fun(self.layout.borrow_mut()
-                    .frame_mut(self.id.frame())
-                    .get_data_artist_mut::<$ty>(self.id)
-                )
+                self.layout.write(|l| {
+                    fun(l.frame_mut(self.id.frame())
+                        .get_data_artist_mut::<$ty>(self.id))
+            });
             }
         }
     }
@@ -62,17 +62,17 @@ macro_rules! data_artist_option_struct {
 macro_rules! path_style_options {
     ($field: ident) => {
 
-        pub fn color(&mut self, color: impl Into<essay_plot_base::Color>) -> &mut Self {
+        pub fn color(&mut self, color: impl Into<essay_plot_api::Color>) -> &mut Self {
             self.write(|ticks| { ticks.$field.color(color); });
             self
         }
 
-        pub fn face_color(&mut self, color: impl Into<essay_plot_base::Color>) -> &mut Self {
+        pub fn face_color(&mut self, color: impl Into<essay_plot_api::Color>) -> &mut Self {
             self.write(|ticks| { ticks.$field.face_color(color); });
             self
         }
 
-        pub fn edge_color(&mut self, color: impl Into<essay_plot_base::Color>) -> &mut Self {
+        pub fn edge_color(&mut self, color: impl Into<essay_plot_api::Color>) -> &mut Self {
             self.write(|ticks| { ticks.$field.edge_color(color); });
             self
         }
@@ -82,7 +82,7 @@ macro_rules! path_style_options {
             self
         }
     
-        pub fn line_style(&mut self, style: impl Into<essay_plot_base::LineStyle>) -> &mut Self {
+        pub fn line_style(&mut self, style: impl Into<essay_plot_api::LineStyle>) -> &mut Self {
             self.write(|ticks| { ticks.$field.line_style(style); });
             self
         }

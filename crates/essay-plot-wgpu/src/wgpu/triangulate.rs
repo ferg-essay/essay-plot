@@ -1,6 +1,6 @@
-use std::{ops::{Index, IndexMut}};
+use std::ops::{Index, IndexMut};
 
-use essay_plot_base::{Point, Canvas, Path, PathCode};
+use essay_plot_api::{Point, Canvas, Path, PathCode};
 
 use super::bezier::intersection;
 
@@ -449,7 +449,7 @@ impl Index<usize> for Triangle {
 
 #[cfg(test)]
 mod test {
-    use essay_plot_base::{Path, PathCode, Point, Canvas};
+    use essay_plot_api::{Path, PathCode, Point, Canvas};
 
     use crate::wgpu::triangulate::{Triangle, triangulate2};
 

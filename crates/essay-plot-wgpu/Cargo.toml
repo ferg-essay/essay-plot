@@ -7,7 +7,7 @@ edition = "2021"
 env_logger = { version = "0.10.0" }
 log = { version = "0.4.17" }
 essay-tensor = { git = "git://github.com/ferg-essay/essay-tensor" }
-essay-plot-base = { path = "../essay-plot-base" }
+essay-plot-api = { path = "../essay-plot-api" }
 wgpu = "0.16"
 wgpu_glyph = "0.20"
 winit = "0.28"

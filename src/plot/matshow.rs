@@ -1,6 +1,6 @@
 use essay_tensor::Tensor;
 
-use crate::{graph::Graph, artist::{ColorMesh, Image}};
+use crate::{graph::Graph, artist::Image};
 
 pub fn matshow(
     graph: &mut Graph, 

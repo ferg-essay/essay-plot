@@ -1,4 +1,4 @@
-use essay_plot_base::{Affine2d, Path, Bounds, Canvas, PathOpt, driver::Renderer, JoinStyle, affine, Clip};
+use essay_plot_api::{Affine2d, Path, Bounds, Canvas, PathOpt, driver::Renderer, JoinStyle, affine, Clip};
 use essay_tensor::Tensor;
 
 use crate::{

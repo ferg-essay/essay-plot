@@ -1,4 +1,4 @@
-use essay_plot_base::{Affine2d};
+use essay_plot_api::Affine2d;
 use wgpu::util::DeviceExt;
 
 pub struct GridMesh2dRender {

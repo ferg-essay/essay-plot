@@ -1,4 +1,4 @@
-use essay_plot_base::{
+use essay_plot_api::{
     Canvas, Affine2d, Point, Bounds, Path, PathOpt, Color, PathCode, 
     driver::{RenderErr, Renderer, FigureApi}, 
     TextStyle, Coord, HorizAlign, VertAlign, JoinStyle, CapStyle, LineStyle, Clip
@@ -52,7 +52,7 @@ impl PlotCanvas {
         self.is_request_redraw
     }
 
-    pub(crate) fn clear(&mut self) {
+    pub fn clear(&mut self) {
         self.is_request_redraw = false;
 
         self.bezier_render.clear();

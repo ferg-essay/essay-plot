@@ -1,6 +1,6 @@
 [package]
-name = "essay-plot-base"
-version = "0.1.0"
+name = "essay-plot-api"
+version = "0.1.13-dev"
 edition = "2021"
 
 [dependencies]

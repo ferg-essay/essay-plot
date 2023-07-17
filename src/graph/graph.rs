@@ -1,10 +1,11 @@
 use core::fmt;
 
-use crate::{artist::{
-    Artist, PlotArtist, PlotId,
-}, frame::{Data, LayoutArc, FrameId, FrameArtist, FrameTextOpt, AxisOpt, AspectMode}};
+use crate::{
+    artist::{Artist, PlotArtist, PlotId},
+    frame::{Data, LayoutArc, FrameId, FrameArtist, FrameTextOpt, AxisOpt, AspectMode}
+};
 
-use super::{style::{PlotOptArtist, PlotOpt}};
+use super::style::{PlotOptArtist, PlotOpt};
 
 pub struct Graph {
     id: FrameId,
@@ -31,7 +32,7 @@ impl Graph {
 
     fn text_opt(&self, artist: FrameArtist) -> FrameTextOpt {
         let layout = self.layout.clone();
-        self.layout.borrow().frame(self.id).text_opt(layout, artist)
+        self.layout.read(|l| l.frame(self.id).text_opt(layout, artist))
     }
 
     pub fn title(&mut self, label: &str) -> FrameTextOpt {
@@ -65,36 +66,40 @@ impl Graph {
     }
 
     pub fn aspect(&mut self, aspect: f32) -> &mut Self {
-        self.layout.borrow_mut()
-            .frame_mut(self.id)
+        self.layout.write(|l| {
+            l.frame_mut(self.id)
             .data_mut()
             .aspect(aspect);
+        });
 
         self
     }
 
     pub fn aspect_mode(&mut self, mode: AspectMode) -> &mut Self {
-        self.layout.borrow_mut()
-            .frame_mut(self.id)
+        self.layout.write(|l| {
+            l.frame_mut(self.id)
             .data_mut()
             .aspect_mode(mode);
+        });
 
         self
     }
 
     pub fn flip_y(&mut self, is_flip_y: bool) -> &mut Self {
-        self.layout.borrow_mut()
-            .frame_mut(self.id)
+        self.layout.write(|l| {
+            l.frame_mut(self.id)
             .data_mut()
             .flip_y(is_flip_y);
+        });
 
         self
     }
 
     pub fn colorbar(&mut self) -> &mut Self {
-        let _id = self.layout.borrow_mut()
-            .frame_mut(self.id)
-            .colorbar();
+        let _id = self.layout.write(|l|
+            l.frame_mut(self.id)
+            .colorbar()
+        );
 
         self
     }
@@ -122,10 +127,11 @@ impl Graph {
     where
         A: PlotArtist<Data> + 'static
     {
-        let id = self.layout.borrow_mut()
-            .frame_mut(self.id)
+        let id = self.layout.write(|l|
+            l.frame_mut(self.id)
             .data_mut()
-            .add_artist(artist);
+            .add_artist(artist)
+        );
 
         let plot_id = PlotId::new(
             self.layout.clone(),
@@ -146,12 +152,14 @@ impl Graph {
 
 impl fmt::Debug for Graph {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let pos = self.layout.read(|l| l.frame(self.id).pos().clone());
+
         write!(f, "Graph[{}]({},{}; {}x{})",
             self.id.index(),
-            self.layout.borrow().frame(self.id).pos().xmin(),
-            self.layout.borrow().frame(self.id).pos().ymin(),
-            self.layout.borrow().frame(self.id).pos().width(),
-            self.layout.borrow().frame(self.id).pos().height(),
+            pos.xmin(),
+            pos.ymin(),
+            pos.width(),
+            pos.height(),
         )
     }
 }

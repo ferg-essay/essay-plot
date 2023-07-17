@@ -1,6 +1,6 @@
 use std::{alloc, any::TypeId, marker::PhantomData, ptr::{NonNull, self}, mem::{ManuallyDrop, self}};
 
-use essay_plot_base::{Coord, Bounds, driver::Renderer, Affine2d, Canvas, PathOpt, Clip};
+use essay_plot_api::{Coord, Bounds, driver::Renderer, Affine2d, Canvas, PathOpt, Clip};
 
 use crate::{artist::{Artist, StyleCycle, PlotArtist}, graph::Config};
 

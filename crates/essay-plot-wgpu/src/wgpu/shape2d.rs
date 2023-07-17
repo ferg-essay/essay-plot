@@ -1,4 +1,4 @@
-use essay_plot_base::{Point, Color, Affine2d};
+use essay_plot_api::{Point, Color, Affine2d};
 use wgpu::util::DeviceExt;
 
 use super::render::line_normal;

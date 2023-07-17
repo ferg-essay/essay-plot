@@ -1,4 +1,4 @@
-use essay_plot_base::{TextStyle, Canvas};
+use essay_plot_api::{TextStyle, Canvas};
 
 use crate::{artist::{PathStyle, Text, Artist}, graph::Config, frame_option_struct, path_style_options};
 

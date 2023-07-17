@@ -1,4 +1,4 @@
-use essay_plot_base::Color;
+use essay_plot_api::Color;
 
 use super::color::Hsv;
 

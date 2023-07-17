@@ -1,7 +1,7 @@
-use essay_plot_base::{Canvas, Bounds, Point, Clip, PathOpt, Path};
-use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
+use essay_plot_api::{Canvas, Bounds, Clip, PathOpt, Path, Affine2d, driver::Renderer};
+use essay_tensor::{Tensor, math::normalize_unit};
 
-use crate::{frame::Data, contour::{ContourGenerator, TriContourGenerator}, tri::Triangulation};
+use crate::{frame::Data, contour::TriContourGenerator, tri::Triangulation};
 
 use super::{Artist, ColorMap, ColorMaps, PathStyle};
 
@@ -99,8 +99,8 @@ impl Artist<Data> for TriContour {
 
     fn draw(
         &mut self, 
-        renderer: &mut dyn essay_plot_base::driver::Renderer,
-        to_canvas: &essay_plot_base::Affine2d,
+        renderer: &mut dyn Renderer,
+        to_canvas: &Affine2d,
         clip: &Clip,
         _style: &dyn PathOpt,
     ) {

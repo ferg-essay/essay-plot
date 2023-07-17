@@ -1,11 +1,9 @@
-use essay_plot_base::{Affine2d, Path, Bounds, Canvas, PathOpt, driver::Renderer, Clip, PathCode, Point};
+use essay_plot_api::{Path, PathOpt, PathCode, Point};
 use essay_tensor::Tensor;
 
 use crate::{
-    artist::{Container, paths, patch::{PathPatch}, Artist}, 
+    artist::patch::PathPatch, 
     graph::{Graph, PlotOpt}, 
-    frame::{Data}, 
-    data_artist_option_struct
 };
 
 pub fn fill_between(

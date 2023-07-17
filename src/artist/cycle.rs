@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use essay_plot_base::{Color, LineStyle, PathOpt, JoinStyle, CapStyle, TextureId, path_opt::StyleErr};
+use essay_plot_api::{Color, LineStyle, PathOpt, JoinStyle, CapStyle, TextureId, path_opt::StyleErr};
 
 use crate::graph::Config;
 

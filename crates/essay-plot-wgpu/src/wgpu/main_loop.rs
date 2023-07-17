@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use essay_plot_base::{driver::FigureApi, Point, CanvasEvent};
+use essay_plot_api::{driver::FigureApi, Point, CanvasEvent};
 use winit::{
     event::{Event, WindowEvent, ElementState, MouseButton },    
     event_loop::{EventLoop, ControlFlow}, 

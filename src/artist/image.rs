@@ -1,5 +1,6 @@
-use essay_plot_base::{Canvas, Bounds, Point, Clip, PathOpt, Affine2d};
-use essay_tensor::{Tensor};
+use essay_plot_api::driver::Renderer;
+use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Affine2d};
+use essay_tensor::Tensor;
 
 use crate::{frame::Data, artist::{Norms, Norm}};
 
@@ -61,7 +62,7 @@ impl Artist<Data> for Image {
 
     fn draw(
         &mut self, 
-        renderer: &mut dyn essay_plot_base::driver::Renderer,
+        renderer: &mut dyn Renderer,
         to_canvas: &Affine2d,
         clip: &Clip,
         _style: &dyn PathOpt,

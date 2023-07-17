@@ -2,7 +2,7 @@ use std::ops;
 
 use essay_plot_wgpu::WgpuBackend;
 
-use essay_plot_base::{
+use essay_plot_api::{
     driver::{Renderer, Backend, FigureApi},
     Coord, Bounds, Point, CanvasEvent, Canvas,
 };

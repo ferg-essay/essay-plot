@@ -11,7 +11,7 @@ path = "src/lib.rs"
 env_logger = { version = "0.10.0" }
 log = { version = "0.4.17" }
 essay-tensor = { git = "https://github.com/ferg-essay/essay-tensor" }
-essay-plot-base = { path = "crates/essay-plot-base" }
+essay-plot-api = { path = "crates/essay-plot-api" }
 #essay-plot = { path = "crates/essay-plot" }
 essay-plot-wgpu = { path = "crates/essay-plot-wgpu" }
 wgpu = "0.16"

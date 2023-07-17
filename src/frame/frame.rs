@@ -1,8 +1,8 @@
 use std::f32::consts::PI;
 
-use essay_plot_base::{
+use essay_plot_api::{
     PathCode, Path, PathOpt,
-    driver::{Renderer}, Bounds, Canvas, Affine2d, Point, CanvasEvent, HorizAlign, VertAlign, Color, Clip, 
+    driver::Renderer, Bounds, Canvas, Affine2d, Point, CanvasEvent, HorizAlign, VertAlign, Color, Clip, 
 };
 
 use crate::{
@@ -855,7 +855,9 @@ impl FrameTextOpt {
     }
 
     fn write(&mut self, fun: impl FnOnce(&mut Text)) {
-        fun(self.layout.borrow_mut().frame_mut(self.id).get_text_mut(self.artist))
+        self.layout.write(|l| {
+            fun(l.frame_mut(self.id).get_text_mut(self.artist))
+        })
     }
 
     pub fn label(&mut self, label: &str) -> &mut Self {

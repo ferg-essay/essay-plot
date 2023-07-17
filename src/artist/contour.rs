@@ -1,4 +1,4 @@
-use essay_plot_base::{Canvas, Bounds, Point, Clip, PathOpt, Path};
+use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Path, Affine2d, driver::Renderer};
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{frame::Data, contour::ContourGenerator};
@@ -107,8 +107,8 @@ impl Artist<Data> for Contour {
 
     fn draw(
         &mut self, 
-        renderer: &mut dyn essay_plot_base::driver::Renderer,
-        to_canvas: &essay_plot_base::Affine2d,
+        renderer: &mut dyn Renderer,
+        to_canvas: &Affine2d,
         clip: &Clip,
         _style: &dyn PathOpt,
     ) {

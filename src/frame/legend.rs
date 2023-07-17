@@ -1,4 +1,7 @@
-use essay_plot_base::{Bounds, Canvas, Clip, PathOpt, Affine2d, driver::Renderer, PathCode, Path, Point, TextStyle, VertAlign, HorizAlign};
+use essay_plot_api::{
+    Bounds, Canvas, Clip, PathOpt, Affine2d, driver::Renderer, 
+    PathCode, Path, Point, TextStyle, VertAlign, HorizAlign
+};
 
 use crate::artist::{Artist, PathStyle};
 

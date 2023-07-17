@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use essay_plot_base::{Path, Angle, PathCode, Point, Canvas, path_opt::StyleErr};
+use essay_plot_api::{Path, Angle, PathCode, Point, Canvas, path_opt::StyleErr};
 use essay_tensor::tf32;
 
 use super::paths::{Unit, self};

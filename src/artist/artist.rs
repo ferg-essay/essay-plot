@@ -1,9 +1,9 @@
-use essay_plot_base::{
+use essay_plot_api::{
     Coord, Bounds, Affine2d, Canvas, PathOpt,
     driver::Renderer, Clip,
 };
 
-use crate::{graph::{ConfigArc}, frame::{LayoutArc, ArtistId, LegendHandler}};
+use crate::{graph::ConfigArc, frame::{LayoutArc, ArtistId, LegendHandler}};
 
 pub trait Artist<M: Coord> {
     fn update(&mut self, canvas: &Canvas);

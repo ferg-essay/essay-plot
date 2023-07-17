@@ -1,5 +1,5 @@
-use essay_plot_base::{Bounds, Point, Canvas, Clip, PathOpt, Path, Color, PathCode};
-use essay_tensor::{tf32, tensor::{self, TensorVec}, Tensor, math::normalize_unit};
+use essay_plot_api::{Bounds, Point, Canvas, Clip, PathOpt, Path, Color, PathCode, Affine2d, driver::Renderer};
+use essay_tensor::{Tensor};
 
 use crate::{frame::Data, tri::{Triangulation, triangulate}};
 
@@ -40,8 +40,8 @@ impl Artist<Data> for TriPlot {
 
     fn draw(
         &mut self, 
-        renderer: &mut dyn essay_plot_base::driver::Renderer,
-        to_canvas: &essay_plot_base::Affine2d,
+        renderer: &mut dyn Renderer,
+        to_canvas: &Affine2d,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

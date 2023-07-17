@@ -1,11 +1,10 @@
-use essay_plot_base::{Affine2d, Path, Bounds, Canvas, PathOpt, driver::Renderer, Clip};
+use essay_plot_api::{Affine2d, Path, Bounds, Canvas, PathOpt, driver::Renderer, Clip};
 use essay_tensor::Tensor;
 
 use crate::{
-    artist::{Container, paths, patch::{PathPatch}, Artist}, 
+    artist::{Container, paths, Artist, patch::PathPatch}, 
     graph::{Graph, PlotOpt}, 
-    frame::{Data}, 
-    data_artist_option_struct
+    data_artist_option_struct, frame::Data
 };
 
 // self as essay_plot needed for #[derive_plot_opt]

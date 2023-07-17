@@ -1,9 +1,9 @@
-use essay_plot_base::{
+use essay_plot_api::{
     Bounds, Affine2d, Coord, Canvas, PathOpt,
-    driver::{Renderer}, Clip
+    driver::Renderer, Clip
 };
 
-use crate::{graph::{ConfigArc}, frame::{Data, LegendHandler}, data_artist_option_struct};
+use crate::{graph::ConfigArc, frame::{Data, LegendHandler}, data_artist_option_struct};
 
 use super::{Artist, PathStyle, StyleCycle, PlotArtist, PlotId};
 

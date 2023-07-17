@@ -1,7 +1,7 @@
 use core::fmt;
 
-use essay_plot_base::{
-    driver::{Renderer}, PathOpt,
+use essay_plot_api::{
+    driver::Renderer, PathOpt,
     Bounds, Affine2d, Point, Canvas, Coord, CanvasEvent, Clip,
 };
 

@@ -1,10 +1,10 @@
 use core::fmt;
 
-use essay_plot_base::{Color, JoinStyle, CapStyle, PathOpt, LineStyle};
+use essay_plot_api::{Color, JoinStyle, CapStyle, PathOpt, LineStyle, TextureId};
 
 use crate::graph::Config;
 
-use super::{Markers};
+use super::Markers;
 
 pub trait PathStyleOpt : PathOpt {
     fn get_marker(&self) -> &Option<Markers>;
@@ -191,7 +191,7 @@ impl PathOpt for PathStyle {
         &self.alpha
     }
 
-    fn get_texture(&self) -> &Option<essay_plot_base::TextureId> {
+    fn get_texture(&self) -> &Option<TextureId> {
         todo!()
     }
 }

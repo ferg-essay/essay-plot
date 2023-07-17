@@ -1,13 +1,13 @@
-use std::{cell::{RefCell, Ref, RefMut}, rc::Rc};
+use std::sync::{Arc, Mutex};
 
-use essay_plot_base::{Bounds, Canvas, Point, Coord, driver::Renderer, CanvasEvent};
+use essay_plot_api::{Bounds, Canvas, Point, Coord, driver::Renderer, CanvasEvent};
 
 use crate::{graph::{Config, ConfigArc}, artist::Artist};
 
 use super::{Frame, ArtistId, Data};
 
 #[derive(Clone)]
-pub struct LayoutArc(Rc<RefCell<Layout>>);
+pub struct LayoutArc(Arc<Mutex<Layout>>);
 
 pub struct Layout {
     config: ConfigArc,
@@ -156,37 +156,27 @@ impl Coord for Layout {}
 
 impl LayoutArc {
     pub(crate) fn new(config: Config) -> LayoutArc {
-        LayoutArc(Rc::new(RefCell::new(Layout::new(config))))
+        LayoutArc(Arc::new(Mutex::new(Layout::new(config))))
     }
 }
 
 impl LayoutArc {
     #[inline]
     pub fn bounds(&self) -> Bounds<Layout> {
-        self.0.borrow().bounds().clone()
+        self.0.lock().unwrap().bounds().clone()
     }
 
     #[inline]
     pub fn add_frame(&mut self, bound: impl Into<Bounds<Layout>>) -> FrameId {
-        self.0.borrow_mut().add_frame(bound).id()
-    }
-
-    #[inline]
-    pub fn borrow(&self) -> Ref<Layout> {
-        self.0.borrow()
-    }
-
-    #[inline]
-    pub fn borrow_mut(&self) -> RefMut<Layout> {
-        self.0.borrow_mut()
+        self.0.lock().unwrap().add_frame(bound).id()
     }
 
     pub fn read<R>(&self, fun: impl FnOnce(&Layout) -> R) -> R {
-        fun(&self.0.borrow())
+        fun(&self.0.lock().unwrap())
     }
 
     pub fn write<R>(&self, fun: impl FnOnce(&mut Layout) -> R) -> R {
-        self.0.borrow_mut().write(fun)
+        fun(&mut self.0.lock().unwrap())
     }
 
     pub fn write_artist<A, R>(&self, id: ArtistId, fun: impl FnOnce(&Layout, &mut A) -> R) -> R
@@ -210,11 +200,11 @@ impl LayoutArc {
     */
 
     pub(crate) fn draw(&mut self, renderer: &mut dyn Renderer) {
-        self.0.borrow_mut().draw(renderer);
+        self.0.lock().unwrap().draw(renderer);
     }
 
     pub(crate) fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
-        self.0.borrow_mut().event(renderer, event);
+        self.0.lock().unwrap().event(renderer, event);
     }
 }
 

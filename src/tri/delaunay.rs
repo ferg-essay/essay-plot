@@ -1,6 +1,6 @@
 use core::fmt;
 
-use essay_plot_base::Point;
+use essay_plot_api::Point;
 use essay_tensor::{Tensor, tensor::TensorVec};
 
 use super::triangulate::Triangulation;
@@ -497,12 +497,12 @@ fn det(r0: [f32; 3], r1: [f32; 3], r2: [f32; 3]) -> f32 {
 
 #[cfg(test)]
 mod test {
-    use essay_plot_base::Point;
+    use essay_plot_api::Point;
     use essay_tensor::{tf32, Tensor};
 
     use crate::tri::{delaunay::{TriDelaunay, VertId, EdgeId, in_triangle}, triangulate::Triangulation};
 
-    use super::{initial_points};
+    use super::initial_points;
 
     #[test]
     fn init_triangle_points() {

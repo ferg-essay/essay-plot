@@ -52,6 +52,22 @@ impl Lines2d {
             extent: Bounds::<Data>::none(),
         }
     }
+
+    pub fn set_xy(&mut self, x: impl Into<Tensor>, y: impl Into<Tensor>) -> &mut Self {
+        let x = x.into();
+        let y = y.into();
+
+        assert_eq!(x.len(), y.len());
+
+        let xy = x.stack([y], -1);
+
+        let path = build_path(&xy);
+
+        self.xy = xy;
+        self.path = path;
+
+        self
+    }
 }
 
 fn build_path(line: &Tensor) -> Path<Data> {
@@ -135,6 +151,14 @@ impl LinesOpt {
             } else {
                 artist.label = None;
             }
+        });
+
+        self
+    }
+
+    pub fn set_xy(&mut self, x: impl Into<Tensor>, y: impl Into<Tensor>) -> &mut Self {
+        self.write(|artist| {
+            artist.set_xy(x, y);
         });
 
         self

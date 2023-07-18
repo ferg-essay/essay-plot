@@ -286,6 +286,7 @@ impl Artist<Canvas> for DataBox {
     fn update(&mut self, canvas: &Canvas) {
         self.artists.update(canvas);
 
+        self.is_stale = true;
         if self.is_stale {
             self.is_stale = false;
 

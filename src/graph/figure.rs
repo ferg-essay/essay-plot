@@ -132,7 +132,7 @@ impl FigureInner {
         &mut self.graphs[id.index()]
     }
 
-    pub fn window_bounds(&mut self, canvas: &Canvas) {
+    pub fn update_canvas(&mut self, canvas: &Canvas) {
         self.layout.update_canvas(canvas);
     }
 }

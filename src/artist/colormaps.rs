@@ -5,8 +5,11 @@ use super::{ColorMap};
 pub enum ColorMaps {
     Default,
     BlueOrange,
+    WhiteRed,
+
     BlueYellow,
     BlackWhite,
+    WhiteBlack,
 }
 
 impl From<ColorMaps> for ColorMap {
@@ -33,6 +36,21 @@ impl From<ColorMaps> for ColorMap {
                 ])
             }
 
+            ColorMaps::WhiteRed => {
+                // use color temperature (hue) to reinforce transition from
+                // unsaturated/bright to saturated/dark, which distinguishes
+                // quartiles
+                ColorMap::from([
+                    (0.0, Hsv(0.25, 0.10, 0.97)), // "css:beige // touch of color between amber and azure
+
+                    // cool, unsaturated orange to warm, saturated orange
+                    (0.50, Hsv(0.13, 0.90, 0.97)), // "golden yellow"
+                    (0.80, Hsv(0.06, 0.95, 0.97)), // "bright orange"
+                    (0.99, Hsv(0.02, 1.0, 0.94)), // "tomato red"
+                    (1.0, Hsv(0.99, 1., 0.90)), // "red" // top 1% distinct
+                ])
+            }
+
             ColorMaps::BlueYellow => {
                 // Top 1% options: vermillion, red, bright red, tomato red
                 // Bottom 1% options: navy, dark navy, ultramarine blue, night blue
@@ -53,6 +71,13 @@ impl From<ColorMaps> for ColorMap {
                 ColorMap::from([
                     (0., "black"),
                     (1., "white"),
+                ])
+            }
+
+            ColorMaps::WhiteBlack => {
+                ColorMap::from([
+                    (0., "white"),
+                    (1., "black"),
                 ])
             }
         }

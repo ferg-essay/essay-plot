@@ -126,12 +126,16 @@ impl PlotArtist<Data> for Lines2d {
             Some(label) => {
                 let style = self.style.clone();
                 Some(LegendHandler::new(label.clone(), 
-                move |renderer, bounds| {
+                move |renderer, top_style, bounds| {
                     let line = Path::<Canvas>::from([
                         [bounds.xmin(), bounds.ymid()],
                         [bounds.xmax(), bounds.ymid()],
                     ]);
-                    renderer.draw_path(&line, &style, &Clip::None).unwrap();
+                    renderer.draw_path(
+                        &line, 
+                        &style.push(top_style), 
+                        &Clip::None
+                    ).unwrap();
                 }))
             },
             None => None,

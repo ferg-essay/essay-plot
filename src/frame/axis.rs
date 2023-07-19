@@ -15,6 +15,8 @@ pub struct Axis {
 
     locator: Box<dyn TickLocator>,
     formatter: Box<dyn TickFormatter>,
+
+    is_visible: bool,
 }
 
 impl Axis {
@@ -26,6 +28,7 @@ impl Axis {
             minor: AxisTicks::new(cfg, &cfg.join(prefix, "minor")),
             locator: Box::new(MaxNLocator::new(None)),
             formatter: Box::new(Formatter::Plain),
+            is_visible: true,
         }
     }
 
@@ -98,6 +101,14 @@ impl Axis {
 
     pub(crate) fn get_show_grid(&self) -> &ShowGrid {
         &self.show_grid
+    }
+
+    pub(crate) fn visible(&mut self, is_visible: bool) {
+        self.is_visible = is_visible;
+    }
+
+    pub(crate) fn is_visible(&self) -> bool {
+        self.is_visible
     }
 
     fn format(&self, value: f32, min: f32, max: f32) -> String {
@@ -201,6 +212,11 @@ frame_option_struct!(AxisOpt, Axis, get_axis_mut);
 impl AxisOpt {
     pub fn show_grid(&mut self, show: impl Into<ShowGrid>) -> &mut Self {
         self.write(|axis| { axis.show_grid = show.into(); });
+        self
+    }
+
+    pub fn visible(&mut self, is_visible: bool) -> &mut Self {
+        self.write(|axis| { axis.is_visible = is_visible; });
         self
     }
 

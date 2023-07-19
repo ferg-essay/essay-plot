@@ -49,7 +49,7 @@ pub use colormaps::{
 };
 
 pub use gridmesh::{
-    ColorMesh,
+    ColorMesh, ColorGridOpt,
 };
 
 pub use contour::{

@@ -1,9 +1,9 @@
 use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Path, driver::Renderer, Affine2d};
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
-use crate::{frame::Data, artist::{Norm, Norms}};
+use crate::{frame::{Data, LegendHandler}, artist::{Norm, Norms}, graph::ConfigArc, data_artist_option_struct};
 
-use super::{Artist, ColorMap, ColorMaps, PathStyle};
+use super::{Artist, ColorMap, ColorMaps, PathStyle, PlotArtist, PlotId};
 
 pub enum Shading {
     Flat,
@@ -16,6 +16,8 @@ pub struct ColorMesh {
     color_map: ColorMap,
     shading: Shading,
     norm: Norm,
+
+    is_stale: bool,
 }
 
 impl ColorMesh {
@@ -30,6 +32,7 @@ impl ColorMesh {
             color_map: ColorMaps::Default.into(),
             shading: Shading::Flat,
             norm: Norm::from(Norms::Linear),
+            is_stale: true,
         }
     }
 
@@ -172,5 +175,46 @@ impl Artist<Data> for ColorMesh {
                 self.draw_solid_shading(renderer, to_canvas, clip, style);
             }
         }
+    }
+}
+
+impl PlotArtist<Data> for ColorMesh {
+    type Opt = ColorGridOpt;
+
+    fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+        // self.style = PathStyle::from_config(cfg, "color_grid");
+
+        unsafe { ColorGridOpt::new(id) }
+    }
+
+    fn get_legend(&self) -> Option<LegendHandler> {
+        None
+    }
+}
+
+data_artist_option_struct!(ColorGridOpt, ColorMesh);
+
+impl ColorGridOpt {
+    // path_style_options!(style);
+
+    pub fn data(&mut self, data: impl Into<Tensor>) -> &mut Self {
+        let data = data.into();
+        assert!(data.rank() == 2, "ColorGrid data must be rank-2. Shape={:?}", data.shape().as_slice());
+
+        self.write(|artist| {
+            artist.data = data;
+            artist.is_stale = true;
+        });
+
+        self
+    }
+
+    pub fn color_map(&mut self, cmap: impl Into<ColorMap>) -> &mut Self {
+            self.write(|artist| {
+            artist.color_map = cmap.into();
+            artist.is_stale = true;
+        });
+
+        self
     }
 }

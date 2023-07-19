@@ -83,7 +83,7 @@ impl Frame {
 
             to_canvas: Affine2d::eye(),
 
-            legend: Legend::new(),
+            legend: Legend::new(cfg),
 
             is_stale: true,
             is_share_x: false,
@@ -438,6 +438,10 @@ impl BottomFrame {
             patch.draw(renderer, to_canvas, clip, style);
         }
 
+        if ! self.axis.is_visible() {
+            return;
+        }
+
         self.draw_ticks(renderer, &data, clip, style);
 
         let mut y = data.get_pos().ymin();
@@ -635,6 +639,10 @@ impl LeftFrame {
             ));
 
             patch.draw(renderer, to_canvas, clip, style);
+        }
+
+        if ! self.axis.is_visible() {
+            return;
         }
 
         self.draw_ticks(renderer, &data, clip, style);

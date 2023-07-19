@@ -72,7 +72,9 @@ impl<M: Coord> Path<M> {
     }
 
     pub fn is_closed_path(&self) -> bool {
-        if let PathCode::ClosePoly(_) = self.codes[self.codes.len() - 1] {
+        if self.codes.len() == 0 {
+            false
+        } else if let PathCode::ClosePoly(_) = self.codes[self.codes.len() - 1] {
             true
         } else {
             false

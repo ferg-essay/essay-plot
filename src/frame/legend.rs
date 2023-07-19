@@ -3,7 +3,7 @@ use essay_plot_api::{
     PathCode, Path, Point, TextStyle, VertAlign, HorizAlign
 };
 
-use crate::artist::{Artist, PathStyle};
+use crate::{artist::{Artist, PathStyle, ColorCycle, StyleCycle}, graph::Config};
 
 use super::data_box::DataBox;
 
@@ -15,18 +15,20 @@ pub struct Legend {
 
     path_style: PathStyle,
     text_style: TextStyle,
+    style_cycle: StyleCycle,
 
     glyph_size: f32,
 }
 
 impl Legend {
-    pub fn new() -> Self {
+    pub fn new(cfg: &Config) -> Self {
         let mut legend = Self {
             pos: Bounds::zero(),
             extent: Bounds::zero(),
 
             path_style: PathStyle::new(),
             text_style: TextStyle::new(),
+            style_cycle: StyleCycle::from_config(cfg, "frame.cycle"),
 
             handlers: Vec::new(),
 
@@ -124,20 +126,23 @@ impl Artist<Canvas> for Legend {
                 Point(x_symbol + rect_width, y - dh)
              );
 
-             handler.draw(renderer, &rect);
+            let style = self.style_cycle.push(style, i);
+             //let color = self.cycle.
+             
+             handler.draw(renderer, &style, &rect);
         }
     }
 }
 
 pub struct LegendHandler {
     label: String,
-    draw: Box<dyn Fn(&mut dyn Renderer, &Bounds<Canvas>) + Send>,
+    draw: Box<dyn Fn(&mut dyn Renderer, &dyn PathOpt, &Bounds<Canvas>) + Send>,
 }
 
 impl LegendHandler {
     pub fn new(
         label: String,
-        draw: impl Fn(&mut dyn Renderer, &Bounds<Canvas>) + Send + 'static
+        draw: impl Fn(&mut dyn Renderer, &dyn PathOpt, &Bounds<Canvas>) + Send + 'static
     ) -> Self {
         Self {
             label,
@@ -149,7 +154,12 @@ impl LegendHandler {
         &self.label
     }
 
-    pub fn draw(&self, renderer: &mut dyn Renderer, rect: &Bounds<Canvas>) {
-        (self.draw)(renderer, rect);
+    pub fn draw(
+        &self, 
+        renderer: &mut dyn Renderer, 
+        style: &dyn PathOpt,
+        rect: &Bounds<Canvas>
+    ) {
+        (self.draw)(renderer, style, rect);
     }
 }

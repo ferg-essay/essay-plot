@@ -5,7 +5,7 @@ use essay_plot_api::{
 };
 use essay_tensor::Tensor;
 
-use super::{text::{TextRender}, shape2d::Shape2dRender, triangulate::triangulate2, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender};
+use super::{text::TextRender, shape2d::Shape2dRender, triangulate::triangulate2, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender};
 
 pub struct PlotCanvas {
     canvas: Canvas,
@@ -902,7 +902,7 @@ impl<'a> PlotRenderer<'a> {
 
                 self.figure.image_render.flush(queue, view, &mut encoder);
                 self.figure.triangle_render.flush(self.device, queue, view, &mut encoder);
-                self.figure.bezier_render.flush(queue, view, &mut encoder);
+                self.figure.bezier_render.flush(self.device, queue, view, &mut encoder);
                 self.figure.shape2d_render.flush(self.device, queue, view, &mut encoder);
                 self.figure.text_render.flush(queue, view, &mut encoder);
         

@@ -140,12 +140,16 @@ impl PlotArtist<Data> for Stem {
             Some(label) => {
                 let style = self.line_style.clone();
                 Some(LegendHandler::new(label.clone(), 
-                move |renderer, bounds| {
+                move |renderer, parent_style, bounds| {
                     let line = Path::<Canvas>::from([
                         [bounds.xmin(), bounds.ymid()],
                         [bounds.xmax(), bounds.ymid()],
                     ]);
-                    renderer.draw_path(&line, &style, &Clip::None).unwrap();
+                    renderer.draw_path(
+                        &line,
+                        &style.push(parent_style), 
+                        &Clip::None
+                    ).unwrap();
                 }))
             },
             None => None,

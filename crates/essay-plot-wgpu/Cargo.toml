@@ -1,14 +1,14 @@
 [package]
 name = "essay-plot-wgpu"
-version = "0.1.1"
+version = "0.1.13"
 edition = "2021"
 
 [dependencies]
 env_logger = { version = "0.10.0" }
 log = { version = "0.4.17" }
-essay-tensor = { git = "git://github.com/ferg-essay/essay-tensor" }
+essay-tensor = { git = "git://github.com/ferg-essay/essay-tensor", version="0.1.13" }
 essay-plot-api = { path = "../essay-plot-api" }
-wgpu = "0.16"
+wgpu = "0.17"
 wgpu_glyph = "0.20"
 winit = "0.28"
 pollster = "0.3"

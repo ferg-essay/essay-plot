@@ -1,11 +1,11 @@
 [package]
 name = "essay-plot-api"
-version = "0.1.13-dev"
+version = "0.1.13"
 edition = "2021"
 
 [dependencies]
 log = { version = "0.4.17" }
-essay-tensor = { git = "git://github.com/ferg-essay/essay-tensor", version="0.1.1-dev"}
+essay-tensor = { git = "git://github.com/ferg-essay/essay-tensor", version="0.1.13" }
 
 [lib]
 doctest = false

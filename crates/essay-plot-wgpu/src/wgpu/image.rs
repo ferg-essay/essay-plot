@@ -1,4 +1,4 @@
-use essay_plot_api::{Bounds, Canvas, Affine2d};
+use essay_plot_api::{Bounds, Canvas, Affine2d, Image};
 use essay_tensor::Tensor;
 use wgpu::util::DeviceExt;
 
@@ -16,6 +16,9 @@ pub struct ImageRender {
     style_buffer: wgpu::Buffer,
     style_offset: usize,
 
+    texture_items: Vec<TextureItem>,
+
+    image_id: usize,
     image_items: Vec<ImageItem>,
 
     pipeline: wgpu::RenderPipeline,
@@ -80,7 +83,10 @@ impl ImageRender {
             style_buffer,
             style_offset: 0,
 
+            texture_items: Vec::new(),
+
             image_items: Vec::new(),
+            image_id: 1,
 
             pipeline,
         }
@@ -89,7 +95,36 @@ impl ImageRender {
     pub fn clear(&mut self) {
         self.vertex_offset = 0;
         self.style_offset = 0;
-        self.textures.drain(..); // TODO: check that this properly deallocates
+
+         // TODO: check that this properly deallocates
+        self.textures.retain(|texture| texture.image_id.is_live());
+        //for texture in &mut self.textures {
+        //    texture.is_stale = false;
+        //}
+    }
+
+    pub(crate) fn create_image(&mut self, device: &wgpu::Device, colors: &Tensor<u8>) -> Image {
+        let image_id = self.image_id;
+        self.image_id += 1;
+
+        let image = Image::new(image_id);
+
+        let texture = RgbaTexture::new(
+            device, 
+            image.clone(),
+            colors.dim(1) as u32, 
+            colors.dim(0) as u32,
+        );
+
+        let tex_index = self.textures.len();
+        self.textures.push(texture);
+       
+        self.texture_items.push(TextureItem {
+            tex_index,
+            image: colors.clone(),
+        });
+
+        image
     }
 
     pub fn draw(
@@ -97,6 +132,66 @@ impl ImageRender {
         device: &wgpu::Device,
         pos: &Bounds<Canvas>,
         image: &Tensor<u8>,
+        affine: &Affine2d,
+    ) {
+        todo!();
+        /*
+        let start = self.vertex_offset;
+
+        let x0 = pos.x0();
+        let y0 = pos.y0();
+        let x1 = pos.x1();
+        let y1 = pos.y1();
+
+        //let (x0, y0) = (50., 50.);
+        //let (x1, y1) = (100., 100.);
+
+        let (tx0, ty0) = (0., 0.);
+        //let (tx1, ty1) = (image.rows() as f32, image.cols() as f32);
+        let (tx1, ty1) = (1., 1.);
+
+        self.vertex(x0, y0, tx0, ty0);
+        self.vertex(x0, y1, tx0, ty1);
+        self.vertex(x1, y1, tx1, ty1);
+
+        self.vertex(x1, y1, tx1, ty1);
+        self.vertex(x1, y0, tx1, ty0);
+        self.vertex(x0, y0, tx0, ty0);
+
+        let end = self.vertex_offset;
+
+        let image_id = self.image_id;
+        self.image_id += 1;
+
+        let texture = RgbaTexture::new(
+            device, 
+            image,
+            image.dim(1) as u32, 
+            image.dim(0) as u32,
+        );
+
+        let tex_index = self.textures.len();
+        self.textures.push(texture);
+       
+        self.image_items.push(ImageItem {
+            // style: GpuTextStyle::new(&affine, color.get_srgba()),
+            start,
+            end,
+            index: self.style_offset,
+            tex_index,
+            image: Some(image.clone()),
+        });
+
+        self.style_vec[self.style_offset] = ImageStyle::new(&affine, 0xff);
+        self.style_offset += 1;
+        */
+    }
+
+    pub fn draw_image(
+        &mut self, 
+        device: &wgpu::Device,
+        pos: &Bounds<Canvas>,
+        image: &Image,
         affine: &Affine2d,
     ) {
         let start = self.vertex_offset;
@@ -123,14 +218,12 @@ impl ImageRender {
 
         let end = self.vertex_offset;
 
-        let texture = RgbaTexture::new(
-            device, 
-            image.dim(1) as u32, 
-            image.dim(0) as u32
-        );
+        //let image_id = self.image_id;
+        //self.image_id += 1;
 
-        let tex_index = self.textures.len();
-        self.textures.push(texture);
+        let tex_index = self.textures.iter()
+            .position(|tex| &tex.image_id == image)
+            .unwrap();
        
         self.image_items.push(ImageItem {
             // style: GpuTextStyle::new(&affine, color.get_srgba()),
@@ -138,8 +231,9 @@ impl ImageRender {
             end,
             index: self.style_offset,
             tex_index,
-            image: image.clone(),
+            image: None,
         });
+
         self.style_vec[self.style_offset] = ImageStyle::new(&affine, 0xff);
         self.style_offset += 1;
     }
@@ -181,6 +275,16 @@ impl ImageRender {
             bytemuck::cast_slice(self.style_vec.as_slice())
         );
 
+        for item in self.texture_items.drain(..) {
+            write_rgba_texture(
+                queue, 
+                &self.textures[item.tex_index], 
+                &item.image, 
+                item.image.dim(1) as u32, 
+                item.image.dim(0) as u32
+            );
+        }
+
         for item in self.image_items.drain(..) {
             rpass.set_pipeline(&self.pipeline);
 
@@ -194,9 +298,12 @@ impl ImageRender {
                 (stride * item.index) as u64..(stride * (item.index + 1)) as u64
             ));
 
-            write_rgba_texture(queue, &self.textures[item.tex_index], &item.image, 
-                item.image.dim(1) as u32, item.image.dim(0) as u32
-            );
+            if let Some(image) = item.image {
+                todo!();
+                //write_rgba_texture(queue, &self.textures[item.tex_index], &image, 
+                //    image.dim(1) as u32, image.dim(0) as u32
+                //);
+            }
 
             rpass.set_bind_group(0, &self.textures[item.tex_index].bind_group, &[]);
 
@@ -250,13 +357,12 @@ impl ImageVertex {
 }
 
 pub struct ImageItem {
-    //style: GpuTextStyle,
     start: usize,
     end: usize,
     index: usize,
 
     tex_index: usize,
-    image: Tensor<u8>,
+    image: Option<Tensor<u8>>,
 }
 
 #[repr(C)]
@@ -299,40 +405,44 @@ impl ImageStyle {
     }
 }
 
-pub struct RgbaTexture {
-    //width: u32,
-    //height: u32,
+pub struct TextureItem {
+    tex_index: usize,
+    image: Tensor<u8>,
+}
 
+pub struct RgbaTexture {
     texture: wgpu::Texture,
     bind_group: wgpu::BindGroup,
-    //layout: wgpu::BindGroupLayout,
+    image_id: Image,
+    is_stale: bool,
 }
 
 impl RgbaTexture {
-    pub fn new(device: &wgpu::Device, width: u32, height: u32) -> Self {
-        //assert!(width % 256 == 0);
-
+    pub fn new(device: &wgpu::Device, image_id: Image, width: u32, height: u32) -> Self {
         let texture = create_rgba_texture(device, width, height);
         let layout = create_bind_group_layout(device);
         let bind_group = create_texture_bind_group(device, &layout, &texture);
+        //let image_id = Image::new(id);
 
         Self {
-            //width,
-            //height,
             texture,
             bind_group,
-            //layout,
+            image_id,
+            is_stale: true,
         }
     }
 }
 
 fn write_rgba_texture(
     queue: &wgpu::Queue, 
-    //texture: &wgpu::Texture, 
     texture: &RgbaTexture,
     data: &[u8], 
     width: u32, 
     height: u32) {
+
+    if ! texture.is_stale {
+        return;
+    }
 
     queue.write_texture(
         wgpu::ImageCopyTexture {

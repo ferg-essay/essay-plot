@@ -10,7 +10,7 @@ use essay_plot_api::{
 use crate::{
     artist::{PathStyle, Markers}, 
     frame::{Data, LegendHandler}, 
-    graph::{ConfigArc},
+    graph::ConfigArc,
     data_artist_option_struct, path_style_options
 };
 
@@ -224,5 +224,5 @@ impl fmt::Debug for Stem {
 
 #[cfg(test)]
 mod test {
-    use essay_tensor::prelude::*;
+    //use essay_tensor::prelude::*;
 }

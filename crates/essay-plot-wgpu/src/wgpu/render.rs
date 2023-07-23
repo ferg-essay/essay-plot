@@ -1,7 +1,7 @@
 use essay_plot_api::{
     Canvas, Affine2d, Point, Bounds, Path, PathOpt, Color, PathCode, 
     driver::{RenderErr, Renderer, FigureApi}, 
-    TextStyle, Coord, HorizAlign, VertAlign, JoinStyle, CapStyle, LineStyle, Clip
+    TextStyle, Coord, HorizAlign, VertAlign, JoinStyle, CapStyle, LineStyle, Clip, Image
 };
 use essay_tensor::Tensor;
 
@@ -572,6 +572,25 @@ impl PlotCanvas {
         Ok(())
     }
 
+    fn create_image(&mut self, device: &wgpu::Device, colors: &Tensor<u8>) -> Image {
+        assert!(colors.rank() == 3, "colors rank must be 3 shape={:?}", colors.shape().as_slice());
+        assert!(colors.cols() == 4, "colors must have 4-width columns shape={:?}", colors.shape().as_slice());
+
+        self.image_render.create_image(device, colors)
+    }
+
+    fn draw_image_ref(
+        &mut self,
+        device: &wgpu::Device,
+        bounds: &Bounds<Canvas>,  // Nx2 x,y in canvas coordinates
+        image: Image,    // N in rgba
+        _clip: &Clip,
+    ) -> Result<(), RenderErr> {
+            self.image_render.draw_image(device, bounds, &image, &self.to_gpu);
+
+        Ok(())
+    }
+
     fn request_redraw(&mut self, _bounds: &Bounds<Canvas>) {
         self.is_request_redraw = true;
     }
@@ -965,19 +984,38 @@ impl Renderer for PlotRenderer<'_> {
         self.figure.draw_triangles(vertices, colors, triangles, clip)
     }
 
+    fn request_redraw(
+        &mut self,
+        bounds: &Bounds<Canvas>
+    ) {
+        self.figure.request_redraw(bounds)
+    }
+
     fn draw_image(
         &mut self,
         bounds: &Bounds<Canvas>,
         colors: &Tensor<u8>,
         clip: &Clip
     ) -> Result<(), RenderErr> {
-        self.figure.draw_image(self.device, bounds, colors, clip)
+        let image = self.figure.create_image(self.device, colors);
+
+        self.figure.draw_image_ref(self.device, bounds, image, clip)
     }
 
-    fn request_redraw(
+    fn create_image(
         &mut self,
-        bounds: &Bounds<Canvas>
-    ) {
-        self.figure.request_redraw(bounds)
+        colors: &Tensor<u8>, // [rows, cols, 4]
+        _clip: &Clip
+    ) -> Image {
+        self.figure.create_image(self.device, colors)
+    }
+
+    fn draw_image_ref(
+        &mut self,
+        bounds: &Bounds<Canvas>,
+        image: Image,
+        clip: &Clip
+    ) -> Result<(), RenderErr> {
+        self.figure.draw_image_ref(self.device, bounds, image, clip)
     }
 }

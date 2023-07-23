@@ -1,3 +1,4 @@
+mod image;
 mod clip;
 mod instance;
 mod point;
@@ -13,40 +14,28 @@ mod path;
 pub mod path_opt;
 mod text;
 
-pub use affine::{
-    Affine2d,
-};
+pub use affine::Affine2d;
 
-pub use bounds::{
-    Bounds,
-};
+pub use bounds::Bounds;
 
-pub use canvas::{
-    Canvas,
-};
+pub use canvas::Canvas;
 
-pub use clip::{
-    Clip,
-};
+pub use clip::Clip;
 
-pub use color::{
-    Color
-};
+pub use color::Color;
 
-pub use coord::{
-    Coord,
-};
+pub use coord::Coord;
 
-pub use event::{
-    CanvasEvent,
-};
+pub use event::CanvasEvent;
 
 pub use path::{
     Path, PathCode,
 };
 
-pub use instance::{
-    Instance,
+pub use instance::Instance;
+
+pub use image::{
+    Image, ImageId
 };
 
 pub use point::{

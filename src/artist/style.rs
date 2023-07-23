@@ -1,6 +1,6 @@
 use core::fmt;
 
-use essay_plot_api::{Color, JoinStyle, CapStyle, PathOpt, LineStyle, ImageId, TextureId};
+use essay_plot_api::{Color, JoinStyle, CapStyle, PathOpt, LineStyle, ImageIndex, TextureId};
 
 use crate::graph::Config;
 

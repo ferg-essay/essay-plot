@@ -1,6 +1,6 @@
 use essay_tensor::Tensor;
 
-use crate::{Path, PathOpt, TextStyle, Bounds, Point, Canvas, Clip, Image};
+use crate::{Path, PathOpt, TextStyle, Bounds, Point, Canvas, Clip, ImageId};
 
 pub trait Renderer {
     ///
@@ -57,13 +57,12 @@ pub trait Renderer {
     fn create_image(
         &mut self,
         colors: &Tensor<u8>, // [rows, cols, 4]
-        clip: &Clip
-    ) -> Image;
+    ) -> ImageId;
 
     fn draw_image_ref(
         &mut self,
         bounds: &Bounds<Canvas>,
-        image: Image,
+        image: ImageId,
         clip: &Clip
     ) -> Result<(), RenderErr>;
 

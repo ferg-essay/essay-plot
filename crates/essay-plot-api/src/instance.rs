@@ -1,4 +1,4 @@
-use crate::{Affine2d, Color, ImageId};
+use crate::{Affine2d, Color, ImageIndex};
 
 ///
 /// Offset and color information for repeated paths like markers.
@@ -13,7 +13,7 @@ use crate::{Affine2d, Color, ImageId};
 pub struct Instance {
     affine: Affine2d,
     color: Option<Color>,
-    texture: Option<ImageId>,
+    texture: Option<ImageIndex>,
 }
 
 impl Instance {
@@ -21,7 +21,7 @@ impl Instance {
     pub fn new(
         affine: Affine2d,
         color: Option<Color>,
-        texture: Option<ImageId>,
+        texture: Option<ImageIndex>,
     ) -> Self {
         Self {
             affine,
@@ -50,7 +50,7 @@ impl Instance {
     /// The texture of the instance.
     ///
     #[inline]
-    pub fn texture(&self) -> &Option<ImageId> {
+    pub fn texture(&self) -> &Option<ImageIndex> {
         &self.texture
     }
 

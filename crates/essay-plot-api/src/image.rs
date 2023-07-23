@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 #[derive(Clone)]
-pub struct Image(Arc<ImageId>);
+pub struct ImageId(Arc<ImageIndex>);
 
-impl Image {
-    pub fn new(id: usize) -> Image {
-        Image(Arc::new(ImageId(id)))
+impl ImageId {
+    pub fn new(id: usize) -> ImageId {
+        ImageId(Arc::new(ImageIndex(id)))
     }
 
     #[inline]
@@ -19,15 +19,15 @@ impl Image {
     }
 }
 
-impl PartialEq for Image {
+impl PartialEq for ImageId {
     fn eq(&self, other: &Self) -> bool {
         self.0.index() == other.0.index()
     }
 }
 
-pub struct ImageId(usize);
+pub struct ImageIndex(usize);
 
-impl ImageId {
+impl ImageIndex {
     #[inline]
     pub fn index(&self) -> usize {
         self.0

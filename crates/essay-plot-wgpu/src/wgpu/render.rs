@@ -1,7 +1,7 @@
 use essay_plot_api::{
     Canvas, Affine2d, Point, Bounds, Path, PathOpt, Color, PathCode, 
     driver::{RenderErr, Renderer, FigureApi}, 
-    TextStyle, Coord, HorizAlign, VertAlign, JoinStyle, CapStyle, LineStyle, Clip, Image
+    TextStyle, Coord, HorizAlign, VertAlign, JoinStyle, CapStyle, LineStyle, Clip, ImageId
 };
 use essay_tensor::Tensor;
 
@@ -572,7 +572,7 @@ impl PlotCanvas {
         Ok(())
     }
 
-    fn create_image(&mut self, device: &wgpu::Device, colors: &Tensor<u8>) -> Image {
+    fn create_image(&mut self, device: &wgpu::Device, colors: &Tensor<u8>) -> ImageId {
         assert!(colors.rank() == 3, "colors rank must be 3 shape={:?}", colors.shape().as_slice());
         assert!(colors.cols() == 4, "colors must have 4-width columns shape={:?}", colors.shape().as_slice());
 
@@ -583,7 +583,7 @@ impl PlotCanvas {
         &mut self,
         device: &wgpu::Device,
         bounds: &Bounds<Canvas>,  // Nx2 x,y in canvas coordinates
-        image: Image,    // N in rgba
+        image: ImageId,    // N in rgba
         _clip: &Clip,
     ) -> Result<(), RenderErr> {
             self.image_render.draw_image(device, bounds, &image, &self.to_gpu);
@@ -1005,15 +1005,14 @@ impl Renderer for PlotRenderer<'_> {
     fn create_image(
         &mut self,
         colors: &Tensor<u8>, // [rows, cols, 4]
-        _clip: &Clip
-    ) -> Image {
+    ) -> ImageId {
         self.figure.create_image(self.device, colors)
     }
 
     fn draw_image_ref(
         &mut self,
         bounds: &Bounds<Canvas>,
-        image: Image,
+        image: ImageId,
         clip: &Clip
     ) -> Result<(), RenderErr> {
         self.figure.draw_image_ref(self.device, bounds, image, clip)

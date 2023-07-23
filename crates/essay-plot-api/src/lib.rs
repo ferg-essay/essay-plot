@@ -35,7 +35,7 @@ pub use path::{
 pub use instance::Instance;
 
 pub use image::{
-    Image, ImageId
+    ImageId, ImageIndex
 };
 
 pub use point::{

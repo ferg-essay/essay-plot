@@ -1,4 +1,4 @@
-use essay_plot_api::{Bounds, Canvas, Affine2d, Image};
+use essay_plot_api::{Bounds, Canvas, Affine2d, ImageId};
 use essay_tensor::Tensor;
 use wgpu::util::DeviceExt;
 
@@ -103,11 +103,11 @@ impl ImageRender {
         //}
     }
 
-    pub(crate) fn create_image(&mut self, device: &wgpu::Device, colors: &Tensor<u8>) -> Image {
+    pub(crate) fn create_image(&mut self, device: &wgpu::Device, colors: &Tensor<u8>) -> ImageId {
         let image_id = self.image_id;
         self.image_id += 1;
 
-        let image = Image::new(image_id);
+        let image = ImageId::new(image_id);
 
         let texture = RgbaTexture::new(
             device, 
@@ -191,7 +191,7 @@ impl ImageRender {
         &mut self, 
         device: &wgpu::Device,
         pos: &Bounds<Canvas>,
-        image: &Image,
+        image: &ImageId,
         affine: &Affine2d,
     ) {
         let start = self.vertex_offset;
@@ -413,12 +413,12 @@ pub struct TextureItem {
 pub struct RgbaTexture {
     texture: wgpu::Texture,
     bind_group: wgpu::BindGroup,
-    image_id: Image,
+    image_id: ImageId,
     is_stale: bool,
 }
 
 impl RgbaTexture {
-    pub fn new(device: &wgpu::Device, image_id: Image, width: u32, height: u32) -> Self {
+    pub fn new(device: &wgpu::Device, image_id: ImageId, width: u32, height: u32) -> Self {
         let texture = create_rgba_texture(device, width, height);
         let layout = create_bind_group_layout(device);
         let bind_group = create_texture_bind_group(device, &layout, &texture);

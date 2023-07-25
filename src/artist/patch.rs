@@ -13,63 +13,22 @@ pub trait PatchTrait<M: Coord> : Send {
     fn get_path(&mut self) -> &Path<M>;
 }
 
-pub struct DataPatch {
-    patch: Box<dyn PatchTrait<Data>>,
-    bounds: Bounds<Data>,
-    affine: Affine2d,
-    style: PathStyle,
-}
-
-impl DataPatch {
-    pub fn new(patch: impl PatchTrait<Data> + 'static) -> Self {
-        let mut patch = Box::new(patch);
-
-        // TODO:
-        let bounds = Bounds::none();
-        Self {
-            patch,
-            bounds,
-            affine: Affine2d::eye(),
-            style: PathStyle::new(),
-        }
-    }
-}
-
-impl Artist<Data> for DataPatch {
-    fn update(&mut self, _canvas: &Canvas) {
-    }
-    
-    fn get_extent(&mut self) -> Bounds<Data> {
-        self.bounds.clone()
-    }
-
-    fn draw(
-        &mut self, 
-        renderer: &mut dyn Renderer,
-        to_device: &Affine2d,
-        clip: &Clip,
-        style: &dyn PathOpt,
-    ) {
-        todo!()
-    }
-}
-
 pub struct CanvasPatch {
     bounds: Bounds<Canvas>,
     pos: Bounds<Canvas>,
 
-    patch: Box<dyn PatchTrait<Canvas>>,
+    path: Path<Canvas>,
     to_canvas: Affine2d,
     style: PathStyle,
 }
 
 impl CanvasPatch {
-    pub fn new(patch: impl PatchTrait<Canvas> + 'static) -> Self {
+    pub fn new(path: impl Into<Path<Canvas>>) -> Self {
         Self {
             bounds: Bounds::unit(),
             pos: Bounds::none(),
 
-            patch: Box::new(patch),
+            path: path.into(),
             to_canvas: Affine2d::eye(),
             style: PathStyle::new(),
         }
@@ -97,7 +56,7 @@ impl Artist<Canvas> for CanvasPatch {
         style: &dyn PathOpt,
     ) {
         let to_canvas = to_canvas.matmul(&self.to_canvas);
-        let path = self.patch.get_path().transform(&to_canvas);
+        let path = self.path.transform(&to_canvas);
         let style = self.style.push(style);
 
         renderer.draw_path(

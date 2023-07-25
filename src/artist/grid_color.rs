@@ -1,4 +1,4 @@
-use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Path, driver::Renderer, Affine2d};
+use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Path, driver::Renderer, Affine2d, JoinStyle, CapStyle};
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{frame::{Data, LegendHandler}, artist::{Norm, Norms}, graph::ConfigArc, data_artist_option_struct};
@@ -10,7 +10,7 @@ pub enum Shading {
     Gouraud,
 }
 
-pub struct ColorMesh {
+pub struct GridColor {
     data: Tensor,
     xy: Tensor,
     color_map: ColorMap,
@@ -20,7 +20,7 @@ pub struct ColorMesh {
     is_stale: bool,
 }
 
-impl ColorMesh {
+impl GridColor {
     pub fn new(data: impl Into<Tensor>) -> Self {
         let data : Tensor = data.into();
 
@@ -40,10 +40,6 @@ impl ColorMesh {
         assert!(data.rank() == 2, "colormesh requires 2d value {:?}", data.shape().as_slice());
 
         self.data = data;
-    }
-
-    pub(crate) fn shading(&mut self, shading: Shading) {
-        self.shading = shading;
     }
 
     fn draw_solid_shading(
@@ -76,7 +72,9 @@ impl ColorMesh {
 
         let mut style = PathStyle::new();
 
-        style.edge_color("k");
+        // style.edge_color("k");
+        style.join_style(JoinStyle::Bevel);
+        style.cap_style(CapStyle::Butt);
 
         renderer.draw_markers(&path, &xy, &tf32!(), &colors, &style, clip).unwrap();
     }
@@ -133,7 +131,7 @@ impl ColorMesh {
     }
 }
 
-impl Artist<Data> for ColorMesh {
+impl Artist<Data> for GridColor {
     fn update(&mut self, _canvas: &Canvas) {
         let mut xy = TensorVec::<[f32; 2]>::new();
         let (rows, cols) = (self.data.rows(), self.data.cols());
@@ -178,13 +176,13 @@ impl Artist<Data> for ColorMesh {
     }
 }
 
-impl PlotArtist<Data> for ColorMesh {
-    type Opt = ColorGridOpt;
+impl PlotArtist<Data> for GridColor {
+    type Opt = GridColorOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+    fn config(&mut self, _cfg: &ConfigArc, id: PlotId) -> Self::Opt {
         // self.style = PathStyle::from_config(cfg, "color_grid");
 
-        unsafe { ColorGridOpt::new(id) }
+        unsafe { GridColorOpt::new(id) }
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {
@@ -192,9 +190,9 @@ impl PlotArtist<Data> for ColorMesh {
     }
 }
 
-data_artist_option_struct!(ColorGridOpt, ColorMesh);
+data_artist_option_struct!(GridColorOpt, GridColor);
 
-impl ColorGridOpt {
+impl GridColorOpt {
     // path_style_options!(style);
 
     pub fn data(&mut self, data: impl Into<Tensor>) -> &mut Self {
@@ -209,12 +207,30 @@ impl ColorGridOpt {
         self
     }
 
-    pub fn color_map(&mut self, cmap: impl Into<ColorMap>) -> &mut Self {
+    pub fn norm(&mut self, norm: impl Into<Norm>) -> &mut Self {
             self.write(|artist| {
-            artist.color_map = cmap.into();
+            artist.norm = norm.into();
             artist.is_stale = true;
         });
 
         self
     }
+
+    pub fn color_map(&mut self, cmap: impl Into<ColorMap>) -> &mut Self {
+        self.write(|artist| {
+        artist.color_map = cmap.into();
+        artist.is_stale = true;
+    });
+
+    self
+}
+
+    pub fn shading(&mut self, shading: Shading) -> &mut Self {
+        self.write(|artist| {
+        artist.shading = shading;
+        artist.is_stale = true;
+    });
+
+    self
+}
 }

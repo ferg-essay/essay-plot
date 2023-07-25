@@ -281,6 +281,13 @@ impl BezierRender {
         let end = self.vertex_offset;
 
         let len = self.shape_items.len();
+
+        if self.style_offset == self.style_vec.len() {
+            self.is_stale = true;
+            self.style_vec.resize(self.style_vec.len() + 2048, BezierStyle::empty());
+
+        }
+
         let item = &mut self.shape_items[len - 1];
         item.v_end = end;
 
@@ -477,6 +484,14 @@ impl BezierStyle {
             array_stride: std::mem::size_of::<BezierStyle>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Instance,
             attributes: &Self::ATTRS,
+        }
+    }
+
+    fn empty() -> Self {
+        Self {
+            affine_0: [0., 0., 0., 0.],
+            affine_1: [0., 0., 0., 0.],
+            color: [0., 0., 0., 0.],
         }
     }
 

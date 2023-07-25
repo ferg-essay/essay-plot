@@ -1,6 +1,6 @@
 mod norm;
 mod image;
-mod gridmesh;
+mod grid_color;
 mod colorbar;
 mod colormaps;
 mod colormap;
@@ -48,8 +48,8 @@ pub use colormaps::{
     ColorMaps,
 };
 
-pub use gridmesh::{
-    ColorMesh, ColorGridOpt,
+pub use grid_color::{
+    GridColor, GridColorOpt, Shading,
 };
 
 pub use contour::{

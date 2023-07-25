@@ -26,7 +26,7 @@ impl Figure {
         }
     }
 
-    pub fn new_graph(&mut self, grid: impl Into<Bounds<Layout>>) -> &mut Graph {
+    pub fn new_graph(&mut self, grid: impl Into<Bounds<Layout>>) -> Graph {
         self.inner.new_graph(grid)
     }
 
@@ -95,7 +95,7 @@ impl FigureInner {
     pub fn new_graph(
         &mut self, 
         grid: impl Into<Bounds<Layout>>, 
-    ) -> &mut Graph {
+    ) -> Graph {
         let len = self.graphs.len();
         let id = GraphId(len);
 
@@ -121,7 +121,7 @@ impl FigureInner {
 
         self.graphs.push(graph);
 
-        &mut self.graphs[len]
+        Graph::new(id, frame_id, self.layout.clone())
     }
 
     pub fn graph(&self, id: GraphId) -> &Graph {
@@ -197,7 +197,7 @@ impl<'a> PolyRow<'a> for [usize; 2] {
 }
 
 impl<'a> PolyCol<'a> for [usize; 0] {
-    type Item = &'a mut Graph;
+    type Item = Graph;
 
     fn axes(figure: &'a mut Figure, layout: Self, row: usize, col: &mut Counter) -> Self::Item {
         PolyCol::axes(figure, [1], row, col)
@@ -205,7 +205,7 @@ impl<'a> PolyCol<'a> for [usize; 0] {
 }
 
 impl<'a> PolyCol<'a> for [usize; 1] {
-    type Item = &'a mut Graph;
+    type Item = Graph;
 
     fn axes(figure: &'a mut Figure, layout: Self, row: usize, col: &mut Counter) -> Self::Item {
         let cols = layout[0];
@@ -222,7 +222,7 @@ impl<'a> PolyCol<'a> for [usize; 1] {
 }
 
 impl<'a> PolyCol<'a> for [usize; 2] {
-    type Item = &'a mut Graph;
+    type Item = Graph;
 
     fn axes(figure: &'a mut Figure, layout: Self, row: usize, col: &mut Counter) -> Self::Item {
         let cols = layout[0];

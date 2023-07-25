@@ -14,9 +14,8 @@ essay-tensor = { git = "https://github.com/ferg-essay/essay-tensor", version="0.
 essay-plot-api = { path = "crates/essay-plot-api" }
 #essay-plot = { path = "crates/essay-plot" }
 essay-plot-wgpu = { path = "crates/essay-plot-wgpu" }
-wgpu = "0.17"
-winit = "0.28"
-#wgpu_glyph = "0.20"
+#wgpu = "0.17"
+#winit = "0.28"
 futures = "0.3"
 
 [workspace]

@@ -3,12 +3,12 @@ use essay_tensor::{Tensor, init::linspace, tf32};
 
 use crate::frame::Data;
 
-use super::{Artist, gridmesh::ColorMesh, paths, PathStyle};
+use super::{Artist, grid_color::GridColor, paths, PathStyle};
 
 pub struct Colorbar {
     bounds: Bounds<Data>,
     pos: Bounds<Canvas>,
-    mesh: ColorMesh,
+    mesh: GridColor,
     data: Tensor,
 }
 
@@ -18,7 +18,7 @@ impl Colorbar {
             bounds: Bounds::zero(),
             pos: Bounds::zero(),
             data: tf32!([0., 1.]),
-            mesh: ColorMesh::new(tf32!([[0.]])),
+            mesh: GridColor::new(tf32!([[0.]])),
         }
     }
 

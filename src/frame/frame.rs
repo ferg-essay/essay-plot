@@ -7,7 +7,7 @@ use essay_plot_api::{
 
 use crate::{
     artist::{
-        patch::{CanvasPatch, Line}, Text, Artist, PathStyle, Colorbar
+        patch::CanvasPatch, Text, Artist, PathStyle, Colorbar, paths
     }, 
     graph::Config
 };
@@ -328,7 +328,7 @@ impl TopFrame {
         Self {
             bounds: Bounds::new(Point(0., 0.), Point(0., 20.)),
             pos: Bounds::none(),
-            spine: Some(CanvasPatch::new(Line::new(Point(0., 0.), Point(1., 0.)))),
+            spine: Some(CanvasPatch::new(paths::line(Point(0., 0.), Point(1., 0.)))),
         }
     }
 
@@ -386,7 +386,7 @@ impl BottomFrame {
     pub fn new(cfg: &Config) -> Self {
         let mut frame = Self {
             sizes: FrameSizes::new(cfg),
-            spine: Some(CanvasPatch::new(Line::new(Point(0., 0.), Point(1., 0.)))),
+            spine: Some(CanvasPatch::new(paths::line(Point(0., 0.), Point(1., 0.)))),
             axis: Axis::new(cfg, "x_axis"),
 
             major_ticks: Vec::new(),
@@ -565,7 +565,7 @@ impl LeftFrame {
 
             sizes: FrameSizes::new(cfg),
 
-            spine: Some(CanvasPatch::new(Line::new(Point(0., 0.), Point(0., 1.)))),
+            spine: Some(CanvasPatch::new(paths::line(Point(0., 0.), Point(0., 1.)))),
             axis: Axis::new(cfg, "y_axis"),
             ticks: Vec::new(),
 
@@ -725,7 +725,7 @@ impl Artist<Canvas> for LeftFrame {
         self.title.update(canvas);
         self.axis.update(canvas);
 
-        let mut width = self.sizes.line_width;
+        let width = self.sizes.line_width;
         //width += self.sizes.major_size;
         //width += self.sizes.major_gap;
 
@@ -791,7 +791,7 @@ impl RightFrame {
         Self {
             bounds: Bounds::new(Point(0., 0.), Point(20., 0.)),
             pos: Bounds::none(),
-            spine: Some(CanvasPatch::new(Line::new(Point(0., 0.), Point(0., 1.)))),
+            spine: Some(CanvasPatch::new(paths::line(Point(0., 0.), Point(0., 1.)))),
             colorbar: None,
         }
     }

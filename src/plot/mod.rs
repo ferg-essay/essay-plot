@@ -1,7 +1,7 @@
 use essay_tensor::Tensor;
-use crate::{graph::{Graph}, artist::{LinesOpt, ContainerOpt}};
+use crate::{graph::Graph, artist::{LinesOpt, ContainerOpt}};
 
-mod pcolormesh;
+mod grid_color;
 mod contour;
 mod bar;
 mod matshow;
@@ -17,37 +17,21 @@ pub use bar::{
     bar_y, BarOpt,
 };
 
-pub use pcolormesh::{
-    pcolormesh, 
-};
+pub use grid_color::grid_color;
 
-pub use contour::{
-    contour, 
-};
+pub use contour::contour;
 
-pub use tricontour::{
-    tricontour, 
-};
+pub use tricontour::tricontour;
 
-pub use fill_between::{
-    fill_between, 
-};
+pub use fill_between::fill_between;
 
-pub use plot::{
-    plot, 
-};
+pub use plot::plot;
 
-pub use matshow::{
-    matshow, 
-};
+pub use matshow::matshow;
 
-pub use stem::{
-    stem, 
-};
+pub use stem::stem;
 
-pub use pie::{
-    pie, 
-};
+pub use pie::pie;
 
 pub use scatter::{
     scatter, ScatterOpt,

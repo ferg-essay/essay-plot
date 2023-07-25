@@ -200,3 +200,10 @@ pub(crate) fn bounds(pos: &Bounds<Canvas>) -> Path<Canvas> {
         PathCode::ClosePoly(Point(pos.xmin(), pos.ymax())),
     ])
 }
+
+pub fn line<C: Coord>(p0: impl Into<Point>, p1: impl Into<Point>) -> Path<C> {
+    Path::new(vec![
+        PathCode::MoveTo(p0.into()),
+        PathCode::LineTo(p1.into())
+    ])
+}

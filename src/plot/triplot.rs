@@ -1,6 +1,6 @@
 use essay_tensor::Tensor;
 
-use crate::{graph::Graph, artist::{ColorMesh, TriPlot}};
+use crate::{graph::Graph, artist::{GridColor, TriPlot}};
 
 pub fn triplot(
     graph: &mut Graph, 

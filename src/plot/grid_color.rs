@@ -10,3 +10,9 @@ pub fn grid_color(
     
     graph.add_plot_artist(colormesh)
 }
+
+impl Graph {
+    pub fn grid_color(&mut self, data: impl Into<Tensor>) -> GridColorOpt {
+        grid_color(self, data)
+    }
+}

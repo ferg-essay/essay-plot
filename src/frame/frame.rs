@@ -409,11 +409,15 @@ impl BottomFrame {
         let xmin = data.get_view_bounds().xmin();
         let xmax = data.get_view_bounds().xmax();
 
-        for (xv, _) in self.axis.x_ticks(data) {
+        let xvalues : Vec<f32> = self.axis.x_ticks(data).iter().map(|x| x.0).collect();
+
+        let delta = Axis::value_delta(&xvalues);
+
+        for xv in xvalues {
             if xmin <= xv && xv <= xmax {
                 self.major_ticks.push(xv);
                 self.major_labels.push(
-                    self.axis.major().format(&self.axis, xv, xmin, xmax)
+                    self.axis.major().format(&self.axis, xv, delta)
                 );
             };
         }
@@ -612,11 +616,15 @@ impl LeftFrame {
         let ymin = data.get_view_bounds().ymin();
         let ymax = data.get_view_bounds().ymax();
 
+        let yvalues : Vec<f32> = self.axis.y_ticks(data).iter().map(|y| y.0).collect();
+
+        let delta = Axis::value_delta(&yvalues);
+
         for (yv, _) in self.axis.y_ticks(data) {
             if ymin <= yv && yv <= ymax {
                 self.major_ticks.push(yv);
                 self.major_labels.push(
-                    self.axis.major().format(&self.axis, yv, ymin, ymax)
+                    self.axis.major().format(&self.axis, yv, delta)
                 );
             };
         }

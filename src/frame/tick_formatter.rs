@@ -1,5 +1,5 @@
 pub trait TickFormatter : Send {
-    fn format(&self, value: f32, axis_min: f32, axis_max: f32) -> String;
+    fn format(&self, value: f32, delta: f32) -> String;
 }
 
 pub enum Formatter {
@@ -7,17 +7,16 @@ pub enum Formatter {
 }
 
 impl TickFormatter for Formatter {
-    fn format(&self, value: f32, axis_min: f32, axis_max: f32) -> String {
+    fn format(&self, value: f32, delta: f32) -> String {
         match self {
             Formatter::Plain => {
-                format_tick(value, axis_min, axis_max)
+                format_tick(value, delta)
             }
         }
     }
 }
 
-fn format_tick(value: f32, min: f32, max: f32) -> String {
-    let values = (max - min) * 1e-4;
+fn format_tick(value: f32, delta: f32) -> String {
     /*
     if values.fract() == 0. {
         format!("{}", value.round() as u64)
@@ -29,5 +28,6 @@ fn format_tick(value: f32, min: f32, max: f32) -> String {
         format!("{:.2}", value)
     }
     */
-    format!("{:.2}", value)
+    let precision = (- delta.log10().floor()).max(0.) as usize;
+    format!("{:-#.*}", precision, value)
 }

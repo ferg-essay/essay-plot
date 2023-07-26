@@ -1,5 +1,3 @@
-use std::f32::consts::TAU;
-
 use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers}, plot::{bar_y, grid_color, contour, triplot, tricontour, matshow, stem, fill_between, plot}, graph::{Graph, PlotOpt}};
 use essay_plot_api::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
 use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::TensorVec};
@@ -7,28 +5,15 @@ use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::
 fn main() {
     //let mut gui = WgpuBackend::new();
 
+    let mut figure = Figure::new();
+    let mut graph = figure.new_graph([1., 1.]);
 
     //let x = linspace(0., 2. * PI, 30);
     //let y = x.sin();
 
-    let x = linspace(0., 2. * 6.28, 51);
-    let y = linspace(0., 6.28, 101);
-    let [x, y] = meshgrid([x, y]);
-
-    //let z = x;//&x.sin() + &y.cos();
-    //let z = &x.sin() + &y.cos();
-    let z = &x.sin() + &y.sin();
-    //println!("X: {:?}", x);
-    //println!("Y: {:?}", y);
-    //println!("z: {:?}", z);
-    //println!("Z: {:?}", z.shape().as_slice());
-    //let y = x.sin();
-
-    let x = linspace(0., 1., 3);
+    let x = linspace(0., 10., 4);
     let y = x.clone();
     // gui.main_loop().unwrap();
-    let mut figure = Figure::new();
-    let mut graph = figure.new_graph([1., 1.]);
     //axes.pcolor();
 
     // axes.title("My Title").style().color(0x008033);
@@ -36,8 +21,9 @@ fn main() {
     // axes.ylabel("Y-Label").style().color("r");
 
     graph.title("My Title"); // .color(0x008033).size(18.);
-    graph.x_label("My X-Label"); // .color("brown");
-    graph.y_label("Y-Label"); // .color("teal").size(8.);
+    //graph.x_label("My X-Label"); // .color("brown");
+    //graph.y_label("Y-Label"); // .color("teal").size(8.);
+    graph.plot(&x, &y);
 /*
     graph.scatter(&x, &y).color("blue").marker("X")
         .line_color(0xff8000)
@@ -58,6 +44,7 @@ fn main() {
     //fill_between(graph, &x, y1, y2);
     //fill_between(graph, &x, y1, y2);
     //stem(graph, x, y);
+    /*
     let x = linspace(0., 6.28, 21);
     let y = linspace(0., 6.28, 21);
     let [grid_x, grid_y] = meshgrid([&x, &y]);
@@ -73,13 +60,14 @@ fn main() {
     vec.push([1.5, 2.]);
     vec.push([2.5, 2.]);
     vec.push([2., 1.]);
+    */
 
     //let z = &grid_x.sin() + &grid_y.cos();
 
     // triplot(graph, vec.into_tensor());
     //tricontour(graph, xy, z);
 
-    matshow(&mut graph, &z);
+    //matshow(&mut graph, &z);
     //pcolormesh(graph, &z);
 
 

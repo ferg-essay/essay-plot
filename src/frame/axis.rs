@@ -99,6 +99,21 @@ impl Axis {
         }
     }
 
+    pub fn value_delta(xvalues: &Vec<f32>) -> f32 {
+        let len = xvalues.len();
+
+        if len <= 1 {
+            return 1.;
+        }
+
+        let mut delta = (xvalues[len - 1] - xvalues[0]).abs();
+        for i in 0..len - 1 {
+            delta = (xvalues[i + 1] - xvalues[i]).abs().min(delta);
+        }
+
+        delta
+    }
+
     pub(crate) fn get_show_grid(&self) -> &ShowGrid {
         &self.show_grid
     }
@@ -111,8 +126,8 @@ impl Axis {
         self.is_visible
     }
 
-    fn format(&self, value: f32, min: f32, max: f32) -> String {
-        self.formatter.format(value, min, max)
+    fn format(&self, value: f32, delta: f32) -> String {
+        self.formatter.format(value, delta)
     }
 
     pub(crate) fn update(&mut self, canvas: &Canvas) {
@@ -179,13 +194,13 @@ impl AxisTicks {
         &mut self.grid_style
     }
 
-    pub(crate) fn format(&self, axis: &Axis, value: f32, min: f32, max: f32) -> String {
+    pub(crate) fn format(&self, axis: &Axis, value: f32, delta: f32) -> String {
         match &self.formatter {
             Some(formatter) => {
-                formatter.format(value, min, max)
+                formatter.format(value, delta)
             }
             None => { 
-                axis.format(value, min, max) 
+                axis.format(value, delta) 
             }
         }
     }

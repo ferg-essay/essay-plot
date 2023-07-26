@@ -12,7 +12,7 @@ use crate::{
     graph::Config
 };
 
-use super::{data_box::DataBox, axis::{Axis, AxisTicks, XAxis}, layout::FrameId, LayoutArc, legend::Legend, Data, ArtistId};
+use super::{data_box::DataBox, axis::{Axis, AxisTicks, XAxis, YAxis}, layout::FrameId, LayoutArc, legend::Legend, Data, ArtistId};
 
 pub struct Frame {
     id: FrameId,
@@ -204,7 +204,7 @@ impl Frame {
     pub(crate) fn get_axis_mut(&mut self, artist: FrameArtist) -> &mut Axis {
         match artist {
             FrameArtist::X => self.bottom.axis_mut(),
-            FrameArtist::Y => &mut self.left.axis,
+            FrameArtist::Y => self.left.axis_mut(),
 
             _ => panic!("Invalid axis {:?}", artist)
         }
@@ -214,8 +214,8 @@ impl Frame {
         match artist {
             FrameArtist::XMajor => self.bottom.axis_mut().major_mut(),
             FrameArtist::XMinor => self.bottom.axis_mut().minor_mut(),
-            FrameArtist::YMajor => self.left.axis.major_mut(),
-            FrameArtist::YMinor => self.left.axis.minor_mut(),
+            FrameArtist::YMajor => self.left.axis_mut().major_mut(),
+            FrameArtist::YMinor => self.left.axis_mut().minor_mut(),
 
             _ => panic!("Invalid axis-texts {:?}", artist)
         }
@@ -440,32 +440,13 @@ pub struct LeftFrame {
 
     sizes: FrameSizes,
 
-    spine: Option<CanvasPatch>,
-
-    axis: Axis,
-    ticks: Vec<Box<dyn Artist<Canvas>>>,
-
-    is_grid_major: bool,
-    style_major: PathStyle,
-    grid_major: Vec<Box<dyn Artist<Canvas>>>,
-    style_minor: PathStyle,
-    grid_minor: Vec<Box<dyn Artist<Canvas>>>,
-
-    major_ticks: Vec<f32>,
-    major_labels: Vec<String>,
+    y_axis: YAxis,
 
     title: Text,
 }
 
 impl LeftFrame {
     pub fn new(cfg: &Config) -> Self {
-        let mut style_major = PathStyle::new();
-        style_major.line_width(1.0);
-        style_major.color(0xbfbfbf);
-        let mut style_minor = PathStyle::new();
-        style_minor.line_width(1.);
-        style_minor.color(0x404040);
-
         let mut label = Text::new();
         label.angle(PI / 2.);
 
@@ -475,24 +456,11 @@ impl LeftFrame {
 
             sizes: FrameSizes::new(cfg),
 
-            spine: Some(CanvasPatch::new(paths::line(Point(0., 0.), Point(0., 1.)))),
-            axis: Axis::new(cfg, "y_axis"),
-            ticks: Vec::new(),
-
-            is_grid_major: false,
-            grid_major: Vec::new(),
-            style_major,
-            grid_minor: Vec::new(),
-            style_minor,
-
-            major_ticks: Vec::new(),
-            major_labels: Vec::new(),
+            y_axis: YAxis::new(cfg, "y_axis"),
 
             title: label,
         };
 
-        frame.axis.major_mut().label_style_mut().valign(VertAlign::Center);
-        frame.axis.major_mut().label_style_mut().halign(HorizAlign::Right);
         frame.title.text_style_mut().valign(VertAlign::BaselineBottom);
 
         frame
@@ -501,12 +469,14 @@ impl LeftFrame {
     pub fn set_pos(&mut self, pos: Bounds<Canvas>) {
         self.pos = pos.clone();
 
+        /*
         if let Some(spine) = &mut self.spine {
             spine.set_pos(Bounds::new(
                 Point(pos.xmax() - 1., pos.ymin()),
                 Point(pos.xmax(), pos.ymax()),
             ))
         }
+        */
 
         let x0 = pos.xmax();
         self.title.set_pos(Bounds::new(
@@ -516,24 +486,7 @@ impl LeftFrame {
     }
 
     pub fn update_axis(&mut self, data: &DataBox) {
-        self.major_ticks = Vec::new();
-        self.major_labels = Vec::new();
-
-        let ymin = data.get_view_bounds().ymin();
-        let ymax = data.get_view_bounds().ymax();
-
-        let yvalues : Vec<f32> = self.axis.y_ticks(data).iter().map(|y| y.0).collect();
-
-        let delta = Axis::value_delta(&yvalues);
-
-        for (yv, _) in self.axis.y_ticks(data) {
-            if ymin <= yv && yv <= ymax {
-                self.major_ticks.push(yv);
-                self.major_labels.push(
-                    self.axis.major().format(&self.axis, yv, delta)
-                );
-            };
-        }
+        self.y_axis.update_axis(data);
     }
 
     fn draw(
@@ -544,29 +497,7 @@ impl LeftFrame {
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
-        let pos = data.get_pos();
-
-        if let Some(patch) = &mut self.spine {
-            patch.set_pos(Bounds::new(
-                Point(pos.xmin() - 1., pos.ymin()),
-                Point(pos.xmin(), pos.ymax()),
-            ));
-
-            patch.draw(renderer, to_canvas, clip, style);
-        }
-
-        if ! self.axis.is_visible() {
-            return;
-        }
-
-        self.draw_ticks(renderer, &data, clip, style);
-
-        let width = self.major_labels.iter().map(|s| s.len()).max().unwrap();
-        
-        let mut x = data.get_pos().xmin();
-        x -= renderer.to_px(self.axis.major().get_size());
-        x -= renderer.to_px(self.axis.major().get_pad());
-        x -= 0.5 * width as f32 * self.axis.major().get_label_height();
+        let mut x = self.y_axis.draw(renderer, data, to_canvas, clip, style);
         x -= renderer.to_px(self.sizes.label_pad);
 
         self.title.set_pos(Bounds::new(
@@ -577,115 +508,17 @@ impl LeftFrame {
         self.title.draw(renderer, to_canvas, clip, style);
     }
 
-    fn draw_ticks(
-        &mut self, 
-        renderer: &mut dyn Renderer, 
-        data: &DataBox,
-        clip: &Clip,
-        style: &dyn PathOpt,
-    ) {
-        let pos = &data.get_pos();
-
-        let xv = data.get_view_bounds().xmin();
-        let to_canvas = data.get_canvas_transform();
-
-        for (yv, label) in self.major_ticks.iter().zip(self.major_labels.iter()) {
-            let point = to_canvas.transform_point(Point(xv, *yv));
-
-            let y = point.y();
-            let mut x = pos.xmin();
-            let major = self.axis.major();
-
-            // Grid
-            if self.axis.get_show_grid().is_show_major() {
-                let style = major.grid_style().push(style);
-                // grid
-                let grid = Path::<Canvas>::new(vec![
-                    PathCode::MoveTo(Point(pos.xmin(), y)),
-                    PathCode::LineTo(Point(pos.xmax(), y)),
-                ]);
-
-                renderer.draw_path(&grid, &style, clip).unwrap();
-            }
-
-            // Tick
-            {
-                let style = major.tick_style().push(style);
-                let tick_length = renderer.to_px(major.get_size());
-                
-                let tick = Path::<Canvas>::new(vec![
-                    PathCode::MoveTo(Point(x - tick_length, y)),
-                    PathCode::LineTo(Point(x, y)),
-                ]);
-
-                renderer.draw_path(&tick, &style, clip).unwrap();
-
-                x -= tick_length;
-                x -= renderer.to_px(major.get_pad());
-            }
-
-            // Label
-            renderer.draw_text(Point(x, y), label, 0., style, major.label_style(), clip).unwrap();
-        }
-    }
-
     fn label(&mut self, text: &str) -> &mut Text {
         self.title.label(text)
     }
-}
 
-impl Artist<Canvas> for LeftFrame {
     fn update(&mut self, canvas: &Canvas) {
         self.title.update(canvas);
-        self.axis.update(canvas);
-
-        let width = self.sizes.line_width;
-        //width += self.sizes.major_size;
-        //width += self.sizes.major_gap;
-
-        //self.sizes.tick_text_height_px = 5. * canvas.scale_factor() * 14.;
-        //width += self.sizes.tick_text_height_px;
-        //width += self.sizes.margin;
-        
-        self.extent = Bounds::new(Point(0., 0.), Point(width, 0.))
+        self.y_axis.update(canvas);
     }
 
-    fn get_extent(&mut self) -> Bounds<Canvas> {
-        self.extent.clone()
-    }
-
-    fn draw(
-        &mut self, 
-        renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
-        clip: &Clip,
-        style: &dyn PathOpt,
-    ) {
-        self.title.draw(renderer, to_canvas, clip, style);
-        
-        if self.axis.get_show_grid().is_show_major() {
-            let style = self.axis.major().grid_style().push(&self.style_major);
-
-            for grid in &mut self.grid_major {
-                grid.draw(renderer, to_canvas, clip, &style);
-            }
-        }
-
-        if self.axis.get_show_grid().is_show_minor() {
-            for grid in &mut self.grid_minor {
-                grid.draw(renderer, to_canvas, clip, &self.style_minor);
-            }
-        }
-
-        let tick_style = self.axis.major().tick_style().push(style);
-        
-        for tick in &mut self.ticks {
-            tick.draw(renderer, to_canvas, clip, &tick_style);
-        }
-
-        if let Some(patch) = &mut self.spine {
-            patch.draw(renderer, to_canvas, clip, style);
-        }
+    fn axis_mut(&mut self) -> &mut Axis {
+        self.y_axis.axis_mut()
     }
 }
 

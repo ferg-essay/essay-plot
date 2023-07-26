@@ -22,7 +22,6 @@ pub struct Axis {
 impl Axis {
     pub fn new(cfg: &Config, prefix: &str) -> Self {
         Self {
-            //locator: Box::new(LinearLocator::new(None)),
             show_grid: ShowGrid::None,
             major: AxisTicks::new(cfg, &cfg.join(prefix, "major")),
             minor: AxisTicks::new(cfg, &cfg.join(prefix, "minor")),
@@ -31,9 +30,6 @@ impl Axis {
             is_visible: true,
         }
     }
-
-    //pub fn ticks(&self, data: &DataBox) -> Tensor<f32> {
-    //}
 
     pub(crate) fn major(&self) -> &AxisTicks {
         &self.major
@@ -49,54 +45,6 @@ impl Axis {
 
     pub(crate) fn minor_mut(&mut self) -> &mut AxisTicks {
         &mut self.minor
-    }
-
-    pub fn x_ticks(&self, data: &DataBox) -> Vec<(f32, f32)> {
-        let c_width = data.get_pos().width();
-
-        let view = data.get_view_bounds();
-        let v_width = view.width();
-
-        if view.is_none() {
-            Vec::new()
-        } else {
-            let (vmin, vmax) = (view.xmin(), view.xmax());
-            let (min, max) = self.locator.view_limits(vmin, vmax);
-
-            // self.locator.tick_values(min, max)
-
-            let mut x_vec = Vec::<(f32, f32)>::new();
-
-            for x in self.locator.tick_values(min, max).iter() {
-                x_vec.push((*x, ((x - vmin) * c_width / v_width).round()));
-            }
-
-            x_vec
-        }
-    }
-
-    pub fn y_ticks(&self, data: &DataBox) -> Vec<(f32, f32)> {
-        let v_height = data.get_view_bounds().height();
-        let c_height = data.get_pos().height();
-
-        let view = data.get_view_bounds();
-
-        if view.is_none() {
-            Vec::new()
-        } else {
-            let (vmin, vmax) = (view.ymin(), view.ymax());
-            let (min, max) = self.locator.view_limits(vmin, vmax);
-
-            // self.locator.tick_values(min, max)
-
-            let mut y_vec = Vec::<(f32, f32)>::new();
-
-            for y in self.locator.tick_values(min, max).iter() {
-                y_vec.push((*y, ((y - vmin) * c_height / v_height).round()));
-            }
-
-            y_vec
-        }
     }
 
     pub fn value_delta(xvalues: &Vec<f32>) -> f32 {
@@ -147,6 +95,8 @@ pub struct XAxis {
     major_ticks: Vec<f32>,
     major_labels: Vec<String>,
 
+    is_bottom: bool,
+
 }
 
 impl XAxis {
@@ -157,10 +107,17 @@ impl XAxis {
 
             major_ticks: Vec::new(),
             major_labels: Vec::new(),
+
+            is_bottom: false,
         };
 
-        x_axis.axis.major_mut().label_style_mut().valign(VertAlign::Top);
-        x_axis.axis.minor_mut().label_style_mut().valign(VertAlign::Top);
+        if x_axis.is_bottom {
+            x_axis.axis.major_mut().label_style_mut().valign(VertAlign::Top);
+            x_axis.axis.minor_mut().label_style_mut().valign(VertAlign::Top);
+        } else {
+            x_axis.axis.major_mut().label_style_mut().valign(VertAlign::Bottom);
+            x_axis.axis.minor_mut().label_style_mut().valign(VertAlign::Bottom);
+        }
 
         x_axis
     }
@@ -172,7 +129,7 @@ impl XAxis {
         let xmin = data.get_view_bounds().xmin();
         let xmax = data.get_view_bounds().xmax();
 
-        let xvalues : Vec<f32> = self.axis.x_ticks(data).iter().map(|x| x.0).collect();
+        let xvalues : Vec<f32> = self.x_ticks(data).iter().map(|x| x.0).collect();
 
         let delta = Axis::value_delta(&xvalues);
 
@@ -186,18 +143,31 @@ impl XAxis {
         }
     }
 
-    pub(crate) fn draw(
-        &mut self, 
-        renderer: &mut dyn Renderer,
-        data: &DataBox,
-        to_canvas: &Affine2d,
-        clip: &Clip,
-        style: &dyn PathOpt,
-    ) -> f32 {
-        self.draw_bottom(renderer, data, to_canvas, clip, style)
+    pub fn x_ticks(&self, data: &DataBox) -> Vec<(f32, f32)> {
+        let c_width = data.get_pos().width();
+
+        let view = data.get_view_bounds();
+        let v_width = view.width();
+
+        if view.is_none() {
+            Vec::new()
+        } else {
+            let (vmin, vmax) = (view.xmin(), view.xmax());
+            let (min, max) = self.axis.locator.view_limits(vmin, vmax);
+
+            // self.locator.tick_values(min, max)
+
+            let mut x_vec = Vec::<(f32, f32)>::new();
+
+            for x in self.axis.locator.tick_values(min, max).iter() {
+                x_vec.push((*x, ((x - vmin) * c_width / v_width).round()));
+            }
+
+            x_vec
+        }
     }
 
-    fn draw_bottom(
+    pub(crate) fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
         data: &DataBox,
@@ -207,23 +177,28 @@ impl XAxis {
     ) -> f32 {
         let pos = data.get_pos();
 
+        let mut y = if self.is_bottom { pos.ymin() } else { pos.ymax() };
+        let sign = if self.is_bottom { -1.0f32 } else { 1.0f32 };
+
         if let Some(patch) = &mut self.spine {
+            let line_width = 1.;
+
             patch.set_pos([
-                (pos.xmin(), pos.ymin() - 1.),
-                (pos.xmax(), pos.ymin()),
+                (pos.xmin(), y + sign * line_width),
+                (pos.xmax(), y),
             ]);
 
             patch.draw(renderer, to_canvas, clip, style);
         }
 
-        let mut y = data.get_pos().ymin();
+        // let mut y = data.get_pos().ymin();
 
         if self.axis.is_visible() {
             self.draw_ticks(renderer, &data, clip, style);
 
-            y -= renderer.to_px(self.axis.major().get_size());
-            y -= renderer.to_px(self.axis.major().get_pad());
-            y -= self.axis.major().get_label_height();
+            y += sign * renderer.to_px(self.axis.major().get_size());
+            y += sign * renderer.to_px(self.axis.major().get_pad());
+            y += sign * self.axis.major().get_label_height();
         }
         y
     }
@@ -237,14 +212,16 @@ impl XAxis {
     ) {
         let pos = &data.get_pos();
 
-        let yv = data.get_view_bounds().ymin();
+        let yv = if self.is_bottom { pos.ymin() } else { pos.ymax() };
+        let sign = if self.is_bottom { -1.0f32 } else { 1.0f32 };
+
         let to_canvas = data.get_canvas_transform();
 
         for (xv, label) in self.major_ticks.iter().zip(self.major_labels.iter()) {
             let point = to_canvas.transform_point(Point(*xv, yv));
 
             let x = point.x();
-            let mut y = pos.ymin();
+            let mut y = yv;
             let major = self.axis.major();
 
             // Grid
@@ -264,12 +241,12 @@ impl XAxis {
                 let tick_length = renderer.to_px(major.get_size());
 
                 let tick = Path::<Canvas>::move_to(x, y)
-                    .line_to(x, y - tick_length).to_path();
+                    .line_to(x, y + sign * tick_length).to_path();
 
                 renderer.draw_path(&tick, &style, clip).unwrap();
 
-                y -= tick_length;
-                y -= renderer.to_px(major.get_pad());
+                y += sign * tick_length;
+                y += sign * renderer.to_px(major.get_pad());
             }
 
             // Label
@@ -297,6 +274,7 @@ pub struct YAxis {
     major_ticks: Vec<f32>,
     major_labels: Vec<String>,
 
+    is_left: bool,
 }
 
 impl YAxis {
@@ -307,10 +285,16 @@ impl YAxis {
 
             major_ticks: Vec::new(),
             major_labels: Vec::new(),
+
+            is_left: true,
         };
 
         y_axis.axis.major_mut().label_style_mut().valign(VertAlign::Center);
-        y_axis.axis.major_mut().label_style_mut().halign(HorizAlign::Right);
+        if y_axis.is_left {
+            y_axis.axis.major_mut().label_style_mut().halign(HorizAlign::Right);
+        } else {
+            y_axis.axis.major_mut().label_style_mut().halign(HorizAlign::Left);
+        }
 
         y_axis
     }
@@ -322,7 +306,7 @@ impl YAxis {
         let ymin = data.get_view_bounds().ymin();
         let ymax = data.get_view_bounds().ymax();
 
-        let yvalues : Vec<f32> = self.axis.y_ticks(data).iter().map(|y| y.0).collect();
+        let yvalues : Vec<f32> = self.y_ticks(data).iter().map(|y| y.0).collect();
 
         let delta = Axis::value_delta(&yvalues);
 
@@ -336,18 +320,31 @@ impl YAxis {
         }
     }
 
-    pub(crate) fn draw(
-        &mut self, 
-        renderer: &mut dyn Renderer,
-        data: &DataBox,
-        to_canvas: &Affine2d,
-        clip: &Clip,
-        style: &dyn PathOpt,
-    ) -> f32 {
-        self.draw_left(renderer, data, to_canvas, clip, style)
+    pub fn y_ticks(&self, data: &DataBox) -> Vec<(f32, f32)> {
+        let v_height = data.get_view_bounds().height();
+        let c_height = data.get_pos().height();
+
+        let view = data.get_view_bounds();
+
+        if view.is_none() {
+            Vec::new()
+        } else {
+            let (vmin, vmax) = (view.ymin(), view.ymax());
+            let (min, max) = self.axis.locator.view_limits(vmin, vmax);
+
+            // self.locator.tick_values(min, max)
+
+            let mut y_vec = Vec::<(f32, f32)>::new();
+
+            for y in self.axis.locator.tick_values(min, max).iter() {
+                y_vec.push((*y, ((y - vmin) * c_height / v_height).round()));
+            }
+
+            y_vec
+        }
     }
 
-    fn draw_left(
+    pub(crate) fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
         data: &DataBox,
@@ -357,25 +354,30 @@ impl YAxis {
     ) -> f32 {
         let pos = data.get_pos();
 
+        let mut x = if self.is_left { pos.xmin() } else { pos.xmax() };
+        let sign = if self.is_left { -1.0f32 } else { 1.0f32 };
+
         if let Some(patch) = &mut self.spine {
+            let line_width = 1.;
+
             patch.set_pos(Bounds::new(
-                Point(pos.xmin() - 1., pos.ymin()),
-                Point(pos.xmin(), pos.ymax()),
+                Point(x, pos.ymin()),
+                Point(x + sign * line_width, pos.ymax()),
             ));
+
+            x += sign * line_width;
 
             patch.draw(renderer, to_canvas, clip, style);
         }
-
-        let mut x = data.get_pos().xmin();
 
         if self.axis.is_visible() {
             self.draw_ticks(renderer, &data, clip, style);
 
             let width = self.major_labels.iter().map(|s| s.len()).max().unwrap();
         
-            x -= renderer.to_px(self.axis.major().get_size());
-            x -= renderer.to_px(self.axis.major().get_pad());
-            x -= 0.5 * width as f32 * self.axis.major().get_label_height();
+            x += sign * renderer.to_px(self.axis.major().get_size());
+            x += sign * renderer.to_px(self.axis.major().get_pad());
+            x += sign * 0.5 * width as f32 * self.axis.major().get_label_height();
         }
 
         x
@@ -390,14 +392,15 @@ impl YAxis {
     ) {
         let pos = &data.get_pos();
 
-        let xv = data.get_view_bounds().xmin();
+        let xv = if self.is_left { pos.xmin() } else { pos.xmax() };
+        let sign: f32 = if self.is_left { -1. } else { 1. };
         let to_canvas = data.get_canvas_transform();
 
         for (yv, label) in self.major_ticks.iter().zip(self.major_labels.iter()) {
             let point = to_canvas.transform_point(Point(xv, *yv));
 
             let y = point.y();
-            let mut x = pos.xmin();
+            let mut x = xv;
             let major = self.axis.major();
 
             // Grid
@@ -418,14 +421,14 @@ impl YAxis {
                 let tick_length = renderer.to_px(major.get_size());
                 
                 let tick = Path::<Canvas>::new(vec![
-                    PathCode::MoveTo(Point(x - tick_length, y)),
+                    PathCode::MoveTo(Point(x + sign * tick_length, y)),
                     PathCode::LineTo(Point(x, y)),
                 ]);
 
                 renderer.draw_path(&tick, &style, clip).unwrap();
 
-                x -= tick_length;
-                x -= renderer.to_px(major.get_pad());
+                x += sign * tick_length;
+                x += sign * renderer.to_px(major.get_pad());
             }
 
             // Label

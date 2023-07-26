@@ -146,12 +146,6 @@ impl Frame {
 
         let pos_data = self.data.get_pos();
 
-        let pos_left = Bounds::<Canvas>::new(
-            Point(pos_data.xmin(), pos_data.ymin()),
-            Point(pos_data.xmin(), pos_data.ymax()),
-        );
-        self.left.set_pos(pos_left);
-
         let pos_top = Bounds::<Canvas>::new(
             Point(pos_data.xmin(), pos_data.ymax()),
             Point(pos_data.xmax(), pos_data.ymax()),
@@ -289,22 +283,12 @@ pub enum FrameArtist {
 }
 
 pub struct FrameSizes {
-    line_width: f32,
-
-    title_pad: f32,
     label_pad: f32,
 }
 
 impl FrameSizes {
     fn new(cfg: &Config) -> Self {
         Self {
-            line_width: 1.,
-
-            title_pad: match cfg.get_as_type("frame", "title_pad") {
-                Some(pad) => pad,
-                None => 0.,
-            },
-
             label_pad: match cfg.get_as_type("frame", "label_pad") {
                 Some(pad) => pad,
                 None => 0.,
@@ -435,9 +419,6 @@ impl BottomFrame {
 //
 
 pub struct LeftFrame {
-    extent: Bounds<Canvas>,
-    pos: Bounds<Canvas>,
-
     sizes: FrameSizes,
 
     y_axis: YAxis,
@@ -451,9 +432,6 @@ impl LeftFrame {
         label.angle(PI / 2.);
 
         let mut frame = Self {
-            extent: Bounds::new(Point(0., 0.), Point(20., 0.)),
-            pos: Bounds::none(),
-
             sizes: FrameSizes::new(cfg),
 
             y_axis: YAxis::new(cfg, "y_axis"),
@@ -464,25 +442,6 @@ impl LeftFrame {
         frame.title.text_style_mut().valign(VertAlign::BaselineBottom);
 
         frame
-    }
-
-    pub fn set_pos(&mut self, pos: Bounds<Canvas>) {
-        self.pos = pos.clone();
-
-        /*
-        if let Some(spine) = &mut self.spine {
-            spine.set_pos(Bounds::new(
-                Point(pos.xmax() - 1., pos.ymin()),
-                Point(pos.xmax(), pos.ymax()),
-            ))
-        }
-        */
-
-        let x0 = pos.xmax();
-        self.title.set_pos(Bounds::new(
-            Point(x0 - self.title.height(), pos.ymid()),
-            Point(x0, pos.ymid())
-        ));
     }
 
     pub fn update_axis(&mut self, data: &DataBox) {

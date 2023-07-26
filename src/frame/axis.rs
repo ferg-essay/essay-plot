@@ -1,6 +1,6 @@
-use essay_plot_api::{TextStyle, Canvas};
+use essay_plot_api::{TextStyle, Canvas, driver::Renderer, Affine2d, Clip, PathOpt, VertAlign, Point, Path};
 
-use crate::{artist::{PathStyle, Text, Artist}, graph::Config, frame_option_struct, path_style_options};
+use crate::{artist::{PathStyle, Text, Artist, patch::CanvasPatch, paths}, graph::Config, frame_option_struct, path_style_options};
 
 use super::{
     data_box::DataBox,
@@ -133,6 +133,156 @@ impl Axis {
     pub(crate) fn update(&mut self, canvas: &Canvas) {
         self.major.update(canvas);
         self.minor.update(canvas);
+    }
+}
+
+//
+// XAxis
+//
+
+pub struct XAxis {
+    spine: Option<CanvasPatch>,
+
+    axis: Axis,
+    major_ticks: Vec<f32>,
+    major_labels: Vec<String>,
+
+}
+
+impl XAxis {
+    pub(crate) fn new(cfg: &Config, prefix: &str) -> Self {
+        let mut x_axis = Self {
+            spine: Some(CanvasPatch::new(paths::line([0., 0.], [1., 0.]))),
+            axis: Axis::new(cfg, "x_axis"),
+
+            major_ticks: Vec::new(),
+            major_labels: Vec::new(),
+        };
+
+        x_axis.axis.major_mut().label_style_mut().valign(VertAlign::Top);
+        x_axis.axis.minor_mut().label_style_mut().valign(VertAlign::Top);
+
+        x_axis
+    }
+
+    pub fn update_axis(&mut self, data: &DataBox) {
+        self.major_ticks = Vec::new();
+        self.major_labels = Vec::new();
+
+        let xmin = data.get_view_bounds().xmin();
+        let xmax = data.get_view_bounds().xmax();
+
+        let xvalues : Vec<f32> = self.axis.x_ticks(data).iter().map(|x| x.0).collect();
+
+        let delta = Axis::value_delta(&xvalues);
+
+        for xv in xvalues {
+            if xmin <= xv && xv <= xmax {
+                self.major_ticks.push(xv);
+                self.major_labels.push(
+                    self.axis.major().format(&self.axis, xv, delta)
+                );
+            };
+        }
+    }
+
+    pub(crate) fn draw(
+        &mut self, 
+        renderer: &mut dyn Renderer,
+        data: &DataBox,
+        to_canvas: &Affine2d,
+        clip: &Clip,
+        style: &dyn PathOpt,
+    ) -> f32 {
+        self.draw_bottom(renderer, data, to_canvas, clip, style)
+    }
+
+    fn draw_bottom(
+        &mut self, 
+        renderer: &mut dyn Renderer,
+        data: &DataBox,
+        to_canvas: &Affine2d,
+        clip: &Clip,
+        style: &dyn PathOpt,
+    ) -> f32 {
+        let pos = data.get_pos();
+
+        if let Some(patch) = &mut self.spine {
+            patch.set_pos([
+                (pos.xmin(), pos.ymin() - 1.),
+                (pos.xmax(), pos.ymin()),
+            ]);
+
+            patch.draw(renderer, to_canvas, clip, style);
+        }
+
+        let mut y = data.get_pos().ymin();
+
+        if self.axis.is_visible() {
+            self.draw_ticks(renderer, &data, clip, style);
+
+            y -= renderer.to_px(self.axis.major().get_size());
+            y -= renderer.to_px(self.axis.major().get_pad());
+            y -= self.axis.major().get_label_height();
+        }
+        y
+    }
+
+    fn draw_ticks(
+        &mut self, 
+        renderer: &mut dyn Renderer, 
+        data: &DataBox,
+        clip: &Clip,
+        style: &dyn PathOpt,
+    ) {
+        let pos = &data.get_pos();
+
+        let yv = data.get_view_bounds().ymin();
+        let to_canvas = data.get_canvas_transform();
+
+        for (xv, label) in self.major_ticks.iter().zip(self.major_labels.iter()) {
+            let point = to_canvas.transform_point(Point(*xv, yv));
+
+            let x = point.x();
+            let mut y = pos.ymin();
+            let major = self.axis.major();
+
+            // Grid
+            if self.axis.get_show_grid().is_show_major() {
+                let style = major.grid_style().push(style);
+                // grid
+                let grid = Path::<Canvas>::move_to(x, pos.ymin())
+                    .line_to(x, pos.ymax())
+                    .to_path();
+
+                renderer.draw_path(&grid, &style, clip).unwrap();
+            }
+
+            // Tick
+            {
+                let style = major.tick_style().push(style);
+                let tick_length = renderer.to_px(major.get_size());
+
+                let tick = Path::<Canvas>::move_to(x, y)
+                    .line_to(x, y - tick_length).to_path();
+
+                renderer.draw_path(&tick, &style, clip).unwrap();
+
+                y -= tick_length;
+                y -= renderer.to_px(major.get_pad());
+            }
+
+            // Label
+            renderer.draw_text(Point(x, y), label, 0., style, major.label_style(), clip).unwrap();
+        }
+    }
+
+    pub(crate) fn update(&mut self, canvas: &Canvas) {
+        self.axis.update(canvas);
+    }
+
+    pub(crate) fn axis_mut(&mut self) -> &mut Axis {
+        &mut self.axis
     }
 }
 

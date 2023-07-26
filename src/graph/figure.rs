@@ -30,8 +30,8 @@ impl Figure {
         self.inner.new_graph(grid)
     }
 
-    pub fn graph(&mut self, id: GraphId) -> &mut Graph {
-        self.inner.graph_mut(id)
+    pub fn graph(&mut self, id: GraphId) -> Graph {
+        self.inner.get_graph(id)
     }
 
     pub fn poly_graphs<'a, R: PolyRow<'a>>(&'a mut self, layout: R) -> R::Item {
@@ -130,6 +130,10 @@ impl FigureInner {
 
     pub fn graph_mut(&mut self, id: GraphId) -> &mut Graph {
         &mut self.graphs[id.index()]
+    }
+
+    pub fn get_graph(&mut self, id: GraphId) -> Graph {
+        self.graphs[id.index()].clone()
     }
 
     pub fn update_canvas(&mut self, canvas: &Canvas) {

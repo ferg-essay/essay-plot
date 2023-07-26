@@ -7,6 +7,7 @@ use crate::{
 
 use super::{style::{PlotOptArtist, PlotOpt}, GraphId};
 
+#[derive(Clone)]
 pub struct Graph {
     id: GraphId,
     frame_id: FrameId,

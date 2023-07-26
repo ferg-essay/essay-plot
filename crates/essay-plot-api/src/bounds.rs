@@ -274,6 +274,15 @@ impl<M: Coord> From<[f32; 2]> for Bounds<M> {
     }
 }
 
+impl<M: Coord> From<[(f32, f32); 2]> for Bounds<M> {
+    fn from(value: [(f32, f32); 2]) -> Self {
+        Bounds::new(
+            Point(value[0].0, value[0].1),
+            Point(value[1].0, value[1].1),
+        )
+    }
+}
+
 impl<M: Coord> From<[f32; 4]> for Bounds<M> {
     fn from(value: [f32; 4]) -> Self {
         Bounds::new(

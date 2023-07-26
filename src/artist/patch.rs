@@ -34,9 +34,9 @@ impl CanvasPatch {
         }
     }
 
-    pub fn set_pos(&mut self, pos: Bounds<Canvas>) {
-        self.pos = pos.clone();
-        self.to_canvas = self.bounds.affine_to(&pos);
+    pub fn set_pos(&mut self, pos: impl Into<Bounds<Canvas>>) {
+        self.pos = pos.into();
+        self.to_canvas = self.bounds.affine_to(&self.pos);
     }
 }
 

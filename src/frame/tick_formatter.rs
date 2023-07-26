@@ -17,17 +17,18 @@ impl TickFormatter for Formatter {
 }
 
 fn format_tick(value: f32, delta: f32) -> String {
-    /*
-    if values.fract() == 0. {
-        format!("{}", value.round() as u64)
-    } else if value.fract() == 0. {
-        format!("{}", value.round() as u64)
-    } else if (10. * value).fract() < values {
-        format!("{:.1}", value)
-    } else {
-        format!("{:.2}", value)
+    // handle delta = 0.19999 vs delta = 0.2004
+    let delta = delta + delta * 1e-2;
+    let mut precision = (- delta.log10().floor()).max(0.) as usize;
+
+    // handle delta = 0.25
+    let p_digit = 10.0f32.powi(- (precision as i32));
+    let rem = delta % p_digit;
+    let rem = rem.min(p_digit - rem);
+
+    if rem > 0. && rem.log10() > -2. {
+        precision += 1;
     }
-    */
-    let precision = (- delta.log10().floor()).max(0.) as usize;
+
     format!("{:-#.*}", precision, value)
 }

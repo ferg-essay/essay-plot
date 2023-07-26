@@ -11,7 +11,7 @@ fn main() {
     //let x = linspace(0., 2. * PI, 30);
     //let y = x.sin();
 
-    let x = linspace(0., 10., 4);
+    let x = linspace(10., 10.008, 4);
     let y = x.clone();
     // gui.main_loop().unwrap();
     //axes.pcolor();

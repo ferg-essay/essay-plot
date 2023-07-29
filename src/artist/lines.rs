@@ -12,7 +12,7 @@ use crate::{
     data_artist_option_struct, path_style_options, graph::ConfigArc
 };
 
-use super::{Artist, PlotArtist, PlotId};
+use super::{Artist, PlotArtist, PlotId, markers::{MarkerStyle, IntoMarker}, PathCollection};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum DrawStyle {
@@ -28,7 +28,11 @@ pub struct Lines2d {
     style: PathStyle,
     label: Option<String>,
 
+    marker: Option<MarkerStyle>,
+    collection: Option<PathCollection>,
+
     extent: Bounds<Data>,
+    is_stale: bool,
 }
 
 impl Lines2d {
@@ -48,6 +52,9 @@ impl Lines2d {
             style: PathStyle::new(),
 
             label: None,
+            marker: None,
+            collection: None,
+            is_stale: true,
 
             extent: Bounds::<Data>::none(),
         }
@@ -65,6 +72,23 @@ impl Lines2d {
 
         self.xy = xy;
         self.path = path;
+
+        if let Some(marker) = &self.marker {
+            self.collection = Some(PathCollection::new(marker.get_path(), &self.xy));
+        }
+
+        self.is_stale = true;
+
+        self
+    }
+
+    pub fn marker(&mut self, marker: impl IntoMarker) -> &mut Self {
+        let marker = marker.into_marker();
+
+        self.collection = Some(PathCollection::new(marker.get_path(), &self.xy));
+
+        self.marker = Some(marker);
+        self.is_stale = true;
 
         self
     }
@@ -89,8 +113,16 @@ fn build_path(line: &Tensor) -> Path<Data> {
 }
 
 impl Artist<Data> for Lines2d {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, canvas: &Canvas) {
         self.extent = Bounds::from(&self.xy);
+
+        if self.is_stale {
+            self.is_stale = false;
+
+            if let Some(collection) = &mut self.collection {
+                collection.update(canvas);
+            }
+        }
     }
     
     fn get_extent(&mut self) -> Bounds<Data> {
@@ -109,6 +141,14 @@ impl Artist<Data> for Lines2d {
         let style = self.style.push(style);
 
         renderer.draw_path(&path, &style, clip).unwrap();
+
+        if let Some(collection) = &mut self.collection {
+            if let Some(marker) = &self.marker {
+                let style = marker.get_style().push(&style);
+
+                collection.draw(renderer, to_canvas, clip, &style);
+            }
+        }
     }
 }
 
@@ -163,6 +203,14 @@ impl LinesOpt {
     pub fn set_xy(&mut self, x: impl Into<Tensor>, y: impl Into<Tensor>) -> &mut Self {
         self.write(|artist| {
             artist.set_xy(x, y);
+        });
+
+        self
+    }
+
+    pub fn marker(&mut self, marker: impl IntoMarker) -> &mut Self {
+        self.write(|artist| {
+            artist.marker(marker);
         });
 
         self

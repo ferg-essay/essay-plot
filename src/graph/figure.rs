@@ -49,6 +49,10 @@ impl Figure {
 
         todo!();
     }
+
+    pub fn save(&mut self, width: u32, height: u32, path: impl AsRef<std::path::Path>) {
+        crate::wgpu::draw_hardcopy(width, height, &mut self.inner, path);    
+    }
 }
 
 impl ops::Index<GraphId> for Figure {

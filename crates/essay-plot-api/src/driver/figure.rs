@@ -1,4 +1,4 @@
-use super::{Renderer};
+use super::Renderer;
 use crate::{CanvasEvent, Bounds, Canvas};
 
 pub trait FigureApi {

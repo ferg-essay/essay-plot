@@ -207,3 +207,14 @@ pub fn line<C: Coord>(p0: impl Into<Point>, p1: impl Into<Point>) -> Path<C> {
         PathCode::LineTo(p1.into())
     ])
 }
+
+pub fn rect<C: Coord>(p0: impl Into<Point>, p1: impl Into<Point>) -> Path<C> {
+    let p0 = p0.into();
+    let p1 = p1.into();
+    Path::new(vec![
+        PathCode::MoveTo(p0),
+        PathCode::LineTo(Point(p0.0, p1.1)),
+        PathCode::LineTo(Point(p0.1, p1.1)),
+        PathCode::ClosePoly(Point(p0.1, p1.0))
+    ])
+}

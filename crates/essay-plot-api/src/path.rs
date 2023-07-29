@@ -305,6 +305,12 @@ impl<M: Coord> PathBuilder<M> {
         self
     }
 
+    pub fn bezier2_to(mut self, p1: impl Into<Point>, p2: impl Into<Point>) -> Self {
+        self.codes.push(PathCode::Bezier2(p1.into(), p2.into()));
+
+        self
+    }
+
     pub fn close_poly(mut self, x: f32, y: f32) -> Self {
         self.codes.push(PathCode::ClosePoly(Point(x, y)));
 

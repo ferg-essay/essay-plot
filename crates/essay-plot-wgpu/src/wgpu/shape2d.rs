@@ -227,6 +227,9 @@ impl Shape2dRender {
     }
 
     fn vertex(&mut self, x: f32, y: f32) {
+        //let x = x.round();
+        //let y = y.round();
+
         let vertex = Shape2dVertex { position: [x, y] };
 
         let len = self.vertex_vec.len();

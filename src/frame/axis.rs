@@ -108,7 +108,7 @@ impl XAxis {
             major_ticks: Vec::new(),
             major_labels: Vec::new(),
 
-            is_bottom: false,
+            is_bottom: true,
         };
 
         if x_axis.is_bottom {
@@ -184,7 +184,7 @@ impl XAxis {
             let line_width = 1.;
 
             patch.set_pos([
-                (pos.xmin(), y + sign * line_width),
+                (pos.xmin(), y - sign * line_width),
                 (pos.xmax(), y),
             ]);
 
@@ -362,7 +362,7 @@ impl YAxis {
 
             patch.set_pos(Bounds::new(
                 Point(x, pos.ymin()),
-                Point(x + sign * line_width, pos.ymax()),
+                Point(x - sign * line_width, pos.ymax()),
             ));
 
             x += sign * line_width;

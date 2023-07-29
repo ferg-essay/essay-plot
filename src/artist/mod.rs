@@ -81,20 +81,16 @@ pub use lines::{
 };
 
 pub use markers::{
-    Markers,
+    Markers, MarkerStyle, IntoMarker,
 };
 
-pub use patch::{
-    PatchTrait,
-};
+pub use patch::PatchTrait;
 
 pub use stem::{
     Stem, StemOpt,
 };
 
-pub use style::{
-    PathStyle, 
-};
+pub use style::PathStyle;
 
 pub use text::{
     Text, // TextStyle,

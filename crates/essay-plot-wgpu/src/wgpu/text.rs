@@ -136,11 +136,11 @@ impl TextRender {
             }
 
             let y_ch = y - r.py_max() as f32;
-
             let x_ch = x;
 
             let w = r.px_w() as f32;
             let h = r.px_h() as f32;
+
             self.vertex(x_ch, y_ch, r.tx_min(), r.ty_min());
             self.vertex(x_ch + w, y_ch, r.tx_max(), r.ty_min());
             self.vertex(x_ch + w, y_ch + h, r.tx_max(), r.ty_max());

@@ -51,13 +51,13 @@ impl Norm {
         }
     }
 
-    pub fn vmin(&mut self, min: f32) -> &mut Self {
+    pub fn vmin(mut self, min: f32) -> Self {
         self.vmin = Some(min);
 
         self
     }
 
-    pub fn vmax(&mut self, max: f32) -> &mut Self {
+    pub fn vmax(mut self, max: f32) -> Self {
         self.vmax = Some(max);
 
         self
@@ -73,6 +73,16 @@ impl Norm {
 
 pub enum Norms {
     Linear,
+}
+
+impl Norms {
+    pub fn vmin(self, value: f32) -> Norm {
+        Norm::from(self).vmin(value)
+    }
+
+    pub fn vmax(self, value: f32) -> Norm {
+        Norm::from(self).vmax(value)
+    }
 }
 
 impl From<Norms> for Norm {

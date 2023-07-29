@@ -1,3 +1,5 @@
+use std::f32::consts::TAU;
+
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Point(pub f32, pub f32);
@@ -46,6 +48,13 @@ impl From<[f32; 2]> for Point {
     }
 }
 
+impl From<(f32, f32)> for Point {
+    #[inline]
+    fn from(value: (f32, f32)) -> Self {
+        Point(value.0, value.1)
+    }
+}
+
 impl From<&[f32; 2]> for Point {
     #[inline]
     fn from(value: &[f32; 2]) -> Self {
@@ -64,25 +73,25 @@ pub enum Angle {
 impl Angle {
     pub fn to_radians(&self) -> f32 {
         match self {
-            Angle::Rad(rad) => *rad,
-            Angle::Deg(deg) => deg.to_radians(),
-            Angle::Unit(unit) => (unit * 360.).to_radians(),
+            Angle::Rad(rad) => *rad % TAU,
+            Angle::Deg(deg) => deg.to_radians() % TAU,
+            Angle::Unit(unit) => (unit * 360.).to_radians() % TAU,
         }
     }
 
     pub fn to_degrees(&self) -> f32 {
         match self {
-            Angle::Rad(rad) => rad.to_degrees(),
-            Angle::Deg(deg) => *deg,
-            Angle::Unit(unit) => unit * 360.,
+            Angle::Rad(rad) => rad.to_degrees() % 360.,
+            Angle::Deg(deg) => *deg % 360.,
+            Angle::Unit(unit) => unit * 360. % 360.,
         }
     }
 
     pub fn to_unit(&self) -> f32 {
         match self {
-            Angle::Rad(rad) => rad.to_degrees() / 360.,
-            Angle::Deg(deg) => deg / 360.,
-            Angle::Unit(unit) => *unit,
+            Angle::Rad(rad) => rad.to_degrees() / 360. % 1.,
+            Angle::Deg(deg) => deg / 360. % 1.,
+            Angle::Unit(unit) => *unit % 1.,
         }
     }
 }

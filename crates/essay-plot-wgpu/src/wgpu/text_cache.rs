@@ -97,7 +97,8 @@ impl TextCache {
                 let yc = self.y; //  + dy as u32;
 
                 og.draw(|x, y, v| {
-                    let v = (v * 255.).round().clamp(0., 255.) as u8;
+                    //let v = (v * 255.).round().clamp(0., 255.) as u8;
+                    let v = ((v * 17.).round() * 16.).clamp(0., 255.) as u8;
                     data[(xc + x + w * (yc + dy as u32 - y - 1)) as usize] = v;
                 });
 

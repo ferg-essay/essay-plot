@@ -1,9 +1,127 @@
 use std::str::FromStr;
 
-use essay_plot_api::{Path, Angle, PathCode, Point, Canvas, path_opt::StyleErr};
+use essay_plot_api::{Path, Angle, PathCode, Point, Canvas, path_opt::StyleErr, Color, JoinStyle, CapStyle};
 use essay_tensor::tf32;
 
-use super::paths::{Unit, self};
+use super::{paths::{Unit, self}, PathStyle};
+
+pub struct MarkerStyle {
+    path: Path<Unit>,
+    size: f32,
+    style: PathStyle,
+}
+
+impl MarkerStyle {
+    pub fn new(path: Path<Unit>) -> Self {
+        let mut style = PathStyle::new();
+        style.join_style(JoinStyle::Miter);
+
+        Self {
+            path,
+            size: 10.,
+            style,
+        }
+    }
+
+    pub fn get_path(&self) -> Path<Canvas> {
+        self.path.scale(self.size, self.size)
+    }
+
+    pub fn get_style(&self) -> &PathStyle {
+        &self.style
+    }
+
+    pub fn color(mut self, color: impl Into<Color>) -> Self {
+        self.style.color(color);
+
+        self
+    }
+
+    pub fn edge_color(mut self, color: impl Into<Color>) -> Self {
+        self.style.edge_color(color);
+
+        self
+    }
+
+    pub fn face_color(mut self, color: impl Into<Color>) -> Self {
+        self.style.face_color(color);
+
+        self
+    }
+
+    pub fn join_style(mut self, style: impl Into<JoinStyle>) -> Self {
+        self.style.join_style(style);
+
+        self
+    }
+
+    pub fn cap_style(mut self, style: impl Into<CapStyle>) -> Self {
+        self.style.cap_style(style);
+
+        self
+    }
+
+    pub fn line_width(mut self, value: f32) -> Self {
+        self.style.line_width(value);
+
+        self
+    }
+
+    pub fn size(mut self, size: f32) -> Self {
+        self.size = size;
+
+        self
+    }
+}
+
+pub trait IntoMarker : Sized {
+    fn into_marker(self) -> MarkerStyle;
+
+    fn color(self, color: impl Into<Color>) -> MarkerStyle {
+        self.into_marker().color(color)
+    }
+}
+
+impl IntoMarker for MarkerStyle {
+    fn into_marker(self) -> MarkerStyle {
+        self
+    }
+}
+
+impl IntoMarker for Markers {
+    fn into_marker(self) -> MarkerStyle {
+        MarkerStyle::from(self)
+    }
+}
+
+impl IntoMarker for &str {
+    fn into_marker(self) -> MarkerStyle {
+        MarkerStyle::from(self)
+    }
+}
+
+impl From<Markers> for MarkerStyle {
+    fn from(value: Markers) -> Self {
+        MarkerStyle::new(value.get_path())
+    }
+}
+
+impl From<&str> for MarkerStyle {
+    fn from(value: &str) -> Self {
+        Self::from_str(value).unwrap()
+    }
+}
+
+impl FromStr for MarkerStyle {
+    type Err = StyleErr;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match Markers::from_str(s) {
+            Ok(marker) => Ok(MarkerStyle::from(marker)),
+            Err(err) => Err(err),
+        }
+    }
+}
 
 #[derive(Clone, Debug)]
 pub enum Markers {

@@ -130,8 +130,8 @@ impl PlotCanvas {
             Some(capstyle) => capstyle.clone(),
             None => CapStyle::Butt,
         };
-        
         let lw2 = self.to_px(0.5 * linewidth); // / self.canvas.width();
+        let lw2 = lw2.max(0.5);
         
         self.shape2d_render.start_shape();
         self.bezier_render.start_shape();
@@ -921,8 +921,9 @@ impl<'a> PlotRenderer<'a> {
 
                 self.figure.image_render.flush(queue, view, &mut encoder);
                 self.figure.triangle_render.flush(self.device, queue, view, &mut encoder);
-                self.figure.bezier_render.flush(self.device, queue, view, &mut encoder);
+                // TODO: order issues with bezier and shape2d
                 self.figure.shape2d_render.flush(self.device, queue, view, &mut encoder);
+                self.figure.bezier_render.flush(self.device, queue, view, &mut encoder);
                 self.figure.text_render.flush(queue, view, &mut encoder);
         
                 queue.submit(Some(encoder.finish()));

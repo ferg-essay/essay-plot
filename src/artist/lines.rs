@@ -16,9 +16,10 @@ use super::{Artist, PlotArtist, PlotId, markers::{MarkerStyle, IntoMarker}, Path
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum DrawStyle {
+    Default,
     StepsPre,
     StepsMid,
-    StepsPost
+    StepsPost,
 }
 
 pub struct Lines2d {
@@ -30,6 +31,8 @@ pub struct Lines2d {
 
     marker: Option<MarkerStyle>,
     collection: Option<PathCollection>,
+
+    draw_style: DrawStyle,
 
     extent: Bounds<Data>,
     is_stale: bool,
@@ -44,7 +47,7 @@ impl Lines2d {
 
         let lines = x.stack([y], -1);
 
-        let path = build_path(&lines);
+        let path = build_path(&lines, &DrawStyle::Default);
 
         Self {
             xy: lines,
@@ -54,6 +57,9 @@ impl Lines2d {
             label: None,
             marker: None,
             collection: None,
+
+            draw_style: DrawStyle::Default,
+
             is_stale: true,
 
             extent: Bounds::<Data>::none(),
@@ -68,7 +74,7 @@ impl Lines2d {
 
         let xy = x.stack([y], -1);
 
-        let path = build_path(&xy);
+        let path = build_path(&xy, &self.draw_style);
 
         self.xy = xy;
         self.path = path;
@@ -92,19 +98,48 @@ impl Lines2d {
 
         self
     }
+
+    pub fn draw_style(&mut self, draw_style: DrawStyle) -> &mut Self {
+        self.draw_style = draw_style;
+        self.path = build_path(&self.xy, &self.draw_style);
+        self.is_stale = true;
+
+        self
+    }
 }
 
-fn build_path(line: &Tensor) -> Path<Data> {
+fn build_path(line: &Tensor, draw_style: &DrawStyle) -> Path<Data> {
     let mut codes = Vec::<PathCode>::new();
     
     let mut is_active = false;
+    let (mut prev_x, mut prev_y) = (0.0f32, 0.0f32);
+
     for xy in line.iter_row() {
         if ! is_active {
             codes.push(PathCode::MoveTo(Point(xy[0], xy[1])));
             is_active = true;
         } else {
-            codes.push(PathCode::LineTo(Point(xy[0], xy[1])));
+            match draw_style {
+                DrawStyle::Default => {
+                    codes.push(PathCode::LineTo(Point(xy[0], xy[1])));
+                }
+                DrawStyle::StepsPre => {
+                    codes.push(PathCode::LineTo(Point(prev_x, xy[1])));
+                    codes.push(PathCode::LineTo(Point(xy[0], xy[1])));
+                }
+                DrawStyle::StepsMid => {
+                    codes.push(PathCode::LineTo(Point((prev_x + xy[0]) * 0.5, prev_y)));
+                    codes.push(PathCode::LineTo(Point((prev_x + xy[0]) * 0.5, xy[1])));
+                    codes.push(PathCode::LineTo(Point(xy[0], xy[1])));
+                }
+                DrawStyle::StepsPost => {
+                    codes.push(PathCode::LineTo(Point(xy[0], prev_y)));
+                    codes.push(PathCode::LineTo(Point(xy[0], xy[1])));
+                }
+            }
         }
+
+        (prev_x, prev_y) = (xy[0], xy[1]);
 
         // TODO: build new tensor
     }
@@ -211,6 +246,14 @@ impl LinesOpt {
     pub fn marker(&mut self, marker: impl IntoMarker) -> &mut Self {
         self.write(|artist| {
             artist.marker(marker);
+        });
+
+        self
+    }
+
+    pub fn draw_style(&mut self, draw_style: impl Into<DrawStyle>) -> &mut Self {
+        self.write(|artist| {
+            artist.draw_style(draw_style.into());
         });
 
         self

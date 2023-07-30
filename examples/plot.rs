@@ -1,4 +1,4 @@
-use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers, IntoMarker}, plot::{bar_y, grid_color, contour, triplot, tricontour, matshow, stem, fill_between, plot}, graph::{Graph, PlotOpt}};
+use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers, IntoMarker, DrawStyle}, plot::{bar_y, grid_color, contour, triplot, tricontour, matshow, stem, fill_between, plot}, graph::{Graph, PlotOpt}};
 use essay_plot_api::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
 use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::TensorVec};
 
@@ -11,8 +11,8 @@ fn main() {
     //let x = linspace(0., 2. * PI, 30);
     //let y = x.sin();
 
-    let x = linspace(10., 10.008, 4);
-    let y = x.clone();
+    let x = linspace(0., 6.28, 20);
+    let y = x.sin();
     // gui.main_loop().unwrap();
     //axes.pcolor();
 
@@ -23,7 +23,7 @@ fn main() {
     graph.title("My Title"); // .color(0x008033).size(18.);
     //graph.x_label("My X-Label"); // .color("brown");
     //graph.y_label("Y-Label"); // .color("teal").size(8.);
-    graph.plot(&x, &y).marker("o".color("red").join_style(JoinStyle::Round).line_width(2.).edge_color("orange").face_color("white").size(10.));
+    graph.plot(&x, &y).draw_style(DrawStyle::StepsPost);
 /*
     graph.scatter(&x, &y).color("blue").marker("X")
         .line_color(0xff8000)

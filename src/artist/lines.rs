@@ -34,6 +34,9 @@ pub struct Lines2d {
 
     draw_style: DrawStyle,
 
+    is_visible: bool,
+    z_order: f32,
+
     extent: Bounds<Data>,
     is_stale: bool,
 }
@@ -59,6 +62,9 @@ impl Lines2d {
             collection: None,
 
             draw_style: DrawStyle::Default,
+
+            is_visible: true,
+            z_order: 0.,
 
             is_stale: true,
 
@@ -171,6 +177,10 @@ impl Artist<Data> for Lines2d {
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
+        if ! self.is_visible {
+            return;
+        }
+
         let path = self.path.transform(&to_canvas);
 
         let style = self.style.push(style);
@@ -254,6 +264,24 @@ impl LinesOpt {
     pub fn draw_style(&mut self, draw_style: impl Into<DrawStyle>) -> &mut Self {
         self.write(|artist| {
             artist.draw_style(draw_style.into());
+        });
+
+        self
+    }
+
+    pub fn visible(&mut self, visible: bool) -> &mut Self {
+        self.write(|artist| {
+            artist.is_visible = visible;
+            artist.is_stale = true;
+        });
+
+        self
+    }
+
+    pub fn z_order(&mut self, order: f32) -> &mut Self {
+        self.write(|artist| {
+            artist.z_order = order;
+            artist.is_stale = true;
         });
 
         self

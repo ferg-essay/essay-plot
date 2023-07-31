@@ -17,7 +17,7 @@ pub fn scatter(
 
     let plot = ScatterPlot::new(x.stack([y], -1));
 
-    graph.add_plot_artist(plot)
+    graph.artist(plot)
 }
 
 pub struct ScatterPlot {

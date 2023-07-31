@@ -86,5 +86,62 @@ macro_rules! path_style_options {
             self.write(|ticks| { ticks.$field.line_style(style); });
             self
         }
+    
+        pub fn join_style(&mut self, style: impl Into<essay_plot_api::JoinStyle>) -> &mut Self {
+            self.write(|ticks| { ticks.$field.join_style(style); });
+            self
+        }
+    
+        pub fn cap_style(&mut self, style: impl Into<essay_plot_api::CapStyle>) -> &mut Self {
+            self.write(|ticks| { ticks.$field.cap_style(style); });
+            self
+        }
     }
 }
+
+
+#[macro_export]
+macro_rules! transform_options {
+    ($field: ident) => {
+
+    pub fn rotate(&mut self, angle: impl Into<Angle>) -> &mut Self {
+        self.write(|artist| {
+            artist.$field = artist.$field.rotate(angle.into().to_radians());
+            artist.stale();
+        });
+        self
+    }
+
+    pub fn scale(&mut self, scale: f32) -> &mut Self {
+        self.write(|artist| {
+            artist.$field = artist.$field.scale(scale, scale);
+            artist.stale();
+        });
+        self
+    }
+
+    pub fn scale_xy(&mut self, sx: f32, sy: f32) -> &mut Self {
+        self.write(|artist| {
+            artist.$field = artist.$field.scale(sx, sy);
+            artist.stale();
+        });
+        self
+    }
+
+    pub fn translate(&mut self, dx: f32, dy: f32) -> &mut Self {
+        self.write(|artist| {
+            artist.$field = artist.$field.translate(dx, dy);
+            artist.stale();
+        });
+        self
+    }
+
+    pub fn transform(&mut self, transform: impl Into<Affine2d>) -> &mut Self {
+        self.write(|artist| {
+            artist.$field = transform.into();
+            artist.stale();
+        });
+        self
+    }
+}}
+

@@ -31,6 +31,20 @@ pub trait PlotArtist<M: Coord> : Artist<M> {
     fn get_legend(&self) -> Option<LegendHandler>;
 }
 
+pub trait IntoArtist<M: Coord> {
+    type Artist : PlotArtist<M>;
+
+    fn into_artist(self) -> Self::Artist;
+}
+
+impl<M: Coord, A: PlotArtist<M>> IntoArtist<M> for A {
+    type Artist = Self;
+
+    fn into_artist(self) -> Self::Artist {
+        self
+    }
+}
+
 pub trait SimpleArtist<M: Coord> : Artist<M> {
 }
 

@@ -65,8 +65,8 @@ impl<M: Coord> Bounds<M> {
 
     #[inline]
     pub fn is_none(&self) -> bool {
-        self.p0 == Point(f32::MIN, f32::MIN) &&
-            self.p1 == Point(f32::MAX, f32::MAX)
+        self.p0 == Point(f32::MIN, f32::MIN)
+        && self.p1 == Point(f32::MAX, f32::MAX)
     }
 
     #[inline]

@@ -15,6 +15,9 @@ pub struct DataBox {
     data_bounds: Bounds<Data>,
     view_bounds: Bounds<Data>,
 
+    x_lim: Option<(f32, f32)>,
+    y_lim: Option<(f32, f32)>,
+
     x_margin: Option<f32>,
     y_margin: Option<f32>,
 
@@ -38,6 +41,8 @@ impl DataBox {
             data_bounds: Bounds::<Data>::unit(),
             view_bounds: Bounds::<Data>::unit(),
 
+            x_lim: None,
+            y_lim: None,
             x_margin: cfg.get_as_type("frame", "x_margin"),
             y_margin: cfg.get_as_type("frame", "y_margin"),
             aspect: None,
@@ -67,6 +72,22 @@ impl DataBox {
 
     pub fn flip_y(&mut self, is_flip_y: bool) -> &mut Self {
         self.is_flip_y = is_flip_y;
+
+        self
+    }
+
+    pub fn xlim(&mut self, x_min: f32, x_max: f32) -> &mut Self {
+        assert!(x_min < x_max);
+
+        self.x_lim = Some((x_min, x_max));
+
+        self
+    }
+
+    pub fn ylim(&mut self, y_min: f32, y_max: f32) -> &mut Self {
+        assert!(y_min < y_max);
+
+        self.y_lim = Some((y_min, y_max));
 
         self
     }
@@ -135,6 +156,16 @@ impl DataBox {
         if ymin == ymax {
             ymin = ymin - 1.;
             ymax = ymax + 1.;
+        }
+
+        if let Some(xlim) = self.x_lim {
+            xmin = xlim.0;
+            xmax = xlim.1;
+        }
+
+        if let Some(ylim) = self.y_lim {
+            ymin = ylim.0;
+            ymax = ylim.1;
         }
 
         self.view_bounds = Bounds::new(Point(xmin, ymin), Point(xmax, ymax));

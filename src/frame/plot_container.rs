@@ -1,6 +1,6 @@
 use std::{alloc, any::TypeId, marker::PhantomData, ptr::{NonNull, self}, mem::{ManuallyDrop, self}};
 
-use essay_plot_api::{Coord, Bounds, driver::Renderer, Affine2d, Canvas, PathOpt, Clip};
+use essay_plot_api::{Coord, Bounds, driver::Renderer, Affine2d, Canvas, PathOpt, Clip, Point};
 
 use crate::{artist::{Artist, StyleCycle, PlotArtist}, graph::Config};
 
@@ -105,7 +105,11 @@ impl<M: Coord> Artist<M> for PlotContainer<M> {
             }
         }
 
-        bounds
+        if bounds.is_none() {
+            Bounds::new(Point(0., 0.), Point(1., 1.))
+        } else {
+            bounds
+        }
     }
 
     fn draw(

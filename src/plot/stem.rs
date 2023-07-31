@@ -10,6 +10,6 @@ pub fn stem(
     let stem = Stem::from_xy(x, y);
 
     //self.artist(lines)
-    graph.add_plot_artist(stem)
+    graph.artist(stem)
 }
 

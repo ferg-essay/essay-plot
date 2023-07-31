@@ -1,7 +1,7 @@
 use core::fmt;
 
 use crate::{
-    artist::{Artist, PlotArtist, PlotId},
+    artist::{Artist, PlotArtist, PlotId, IntoArtist},
     frame::{Data, LayoutArc, FrameId, FrameArtist, FrameTextOpt, AxisOpt, AspectMode}
 };
 
@@ -103,6 +103,26 @@ impl Graph {
         self
     }
 
+    pub fn xlim(&mut self, x_min: f32, x_max: f32) -> &mut Self {
+        self.layout.write(|l| {
+            l.frame_mut(self.frame_id)
+            .data_mut()
+            .xlim(x_min, x_max);
+        });
+
+        self
+    }
+
+    pub fn ylim(&mut self, y_min: f32, y_max: f32) -> &mut Self {
+        self.layout.write(|l| {
+            l.frame_mut(self.frame_id)
+            .data_mut()
+            .ylim(y_min, y_max);
+        });
+
+        self
+    }
+
     pub fn colorbar(&mut self) -> &mut Self {
         let _id = self.layout.write(|l|
             l.frame_mut(self.frame_id)
@@ -125,16 +145,27 @@ impl Graph {
     where
         A: Artist<Data> + 'static
     {
-        self.add_plot_artist(PlotOptArtist::new(artist))
+        self.artist(PlotOptArtist::new(artist))
     }
 
-    pub fn add_plot_artist<'a, A>(
+    /*
+    pub fn artist<'a, A>(
         &mut self, 
         artist: A,
     ) -> A::Opt 
     where
         A: PlotArtist<Data> + 'static
+    */
+
+    pub fn artist<'a, A>(
+        &mut self, 
+        artist: A,
+    ) -> <A::Artist as PlotArtist<Data>>::Opt 
+    where
+        A: IntoArtist<Data> + 'static
     {
+        let artist = artist.into_artist();
+
         let id = self.layout.write(|l|
             l.frame_mut(self.frame_id)
             .data_mut()
@@ -152,7 +183,7 @@ impl Graph {
             layout
                 .frame_mut(id.frame())
                 .data_mut()
-                .artist_mut::<A>(id)
+                .artist_mut::<A::Artist>(id)
                 .config(&config, plot_id)
         })
     }

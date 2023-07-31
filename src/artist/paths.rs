@@ -209,12 +209,44 @@ pub fn line<C: Coord>(p0: impl Into<Point>, p1: impl Into<Point>) -> Path<C> {
 }
 
 pub fn rect<C: Coord>(p0: impl Into<Point>, p1: impl Into<Point>) -> Path<C> {
-    let p0 = p0.into();
-    let p1 = p1.into();
+    let p0: Point = p0.into();
+    let p1: Point = p1.into();
+
     Path::new(vec![
         PathCode::MoveTo(p0),
-        PathCode::LineTo(Point(p0.0, p1.1)),
-        PathCode::LineTo(Point(p0.1, p1.1)),
-        PathCode::ClosePoly(Point(p0.1, p1.0))
+        PathCode::LineTo(Point(p1.0, p0.1)),
+        PathCode::LineTo(Point(p1.0, p1.1)),
+        PathCode::ClosePoly(Point(p0.0, p1.1))
     ])
+}
+
+pub fn arrow<C: Coord>(point: impl Into<Point>, dxdy: impl Into<Point>, size: f32) -> Path<C> {
+    let Point(x, y) = point.into();
+    let Point(dx, dy) = dxdy.into();
+
+    let s_tail = 0.1 * size;
+    let s_head = 0.3 * size;
+
+    let hypot = dx.hypot(dy);
+    let (tx, ty) = (dy / hypot, - dx / hypot);
+    
+    let x_tail = tx * s_tail;
+    let y_tail = ty * s_tail;
+
+    let xt_head = tx * s_head;
+    let yt_head = ty * s_head;
+
+    let dx_head = 0.8 * dx;
+    let dy_head = 0.8 * dy;
+
+    Path::move_to(x - x_tail, y - y_tail)
+    .line_to(x + x_tail, y + y_tail)
+    .line_to(x + x_tail + dx_head, y + y_tail + dy_head)
+
+    .line_to(x + xt_head + dx_head, y + yt_head + dy_head)
+    .line_to(x + dx, y + dy)
+    .line_to(x - xt_head + dx_head, y - yt_head + dy_head)
+
+    .close_poly(x - x_tail + dx_head, y - y_tail + dy_head)
+    .to_path()
 }

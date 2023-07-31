@@ -21,7 +21,7 @@ mod collection;
 mod lines;
 
 pub use artist::{
-    Artist, PlotArtist, PlotId,
+    Artist, IntoArtist, PlotArtist, PlotId,
 };
 
 pub use collection::{
@@ -84,7 +84,11 @@ pub use markers::{
     Markers, MarkerStyle, IntoMarker,
 };
 
-pub use patch::PatchTrait;
+pub use patch::{
+    Patch,
+    PatchTrait,
+    arrow, Arrow,
+};
 
 pub use stem::{
     Stem, StemOpt,

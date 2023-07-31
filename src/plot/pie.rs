@@ -37,5 +37,5 @@ pub fn pie(
         theta1 = theta2;
     }
 
-    graph.add_plot_artist(container)
+    graph.artist(container)
 }

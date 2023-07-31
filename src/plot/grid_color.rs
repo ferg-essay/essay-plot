@@ -8,7 +8,7 @@ pub fn grid_color(
 ) -> GridColorOpt {
     let colormesh = GridColor::new(data);
     
-    graph.add_plot_artist(colormesh)
+    graph.artist(colormesh)
 }
 
 impl Graph {

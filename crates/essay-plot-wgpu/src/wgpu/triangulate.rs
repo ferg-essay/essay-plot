@@ -92,7 +92,7 @@ impl Tri {
         if x == trap_x[1] {
             return id;
         } else {
-            self.add_trap(id, x, trap_x[1]);
+            let rid = self.add_trap(id, x, trap_x[1]);
             self[id].x[1] = x;
 
             id
@@ -125,7 +125,7 @@ impl Tri {
 
         self.traps.push(trap);
 
-        id
+        id_right
     }
 
     fn trap_up(&mut self, id: TrapId) -> TrapId {
@@ -169,7 +169,9 @@ impl Tri {
         let result = if x[0] <= x_min {
             None
         } else if l0.is_none() {
+            assert!(self[id].is_up);
             // TODO: shouldn't be possible?
+            //panic!("Unexpected null l0 for {:?}", x);
             None
         } else {
             Some(l0)
@@ -221,7 +223,7 @@ impl Tri {
 
             let Edge(t0, t1) = self[new_top];
 
-            return self.add_edge_to_trap(up, new_top, t0, t1);
+            self.add_edge_to_trap(up, new_top, t0, t1);
         } else if ! bot.is_none() {
             let Edge(q0, q1) = self[bot];
 
@@ -249,11 +251,16 @@ impl Tri {
                 self.add_edge(q0, mp);
                 self.add_edge(q1, mp);
 
+                /*
                 return if x[0] <= x_min {
                     None
+                } else if l0.is_none() {
+                    // TODO: shouldn't be possible?
+                    panic!("Unexpected null l0 for {:?}", x);
                 } else {
                     Some(self[id].l0)
                 };
+                */
             }
         } else {
             self[id].bot = edge_id;
@@ -588,6 +595,28 @@ mod test {
                 Triangle(Point(10.0, 0.0), Point(10.0, 10.0), Point(6.0, 6.0)),
                 Triangle(Point(5.0, 5.0), Point(5.0, 1.0), Point(6.0, 2.0)),
                 Triangle(Point(6.0, 2.0), Point(6.0, 6.0), Point(5.0, 5.0)),
+        ]);
+    }
+
+    #[test]
+    fn test_arrow() {
+        let path = Path::<Canvas>::new(vec![
+            PathCode::MoveTo(Point(1., 1.)),
+            PathCode::LineTo(Point(11., 11.)),
+            PathCode::LineTo(Point(6., 11.)),
+            PathCode::LineTo(Point(7.7, 10.)),
+            PathCode::ClosePoly(Point(0., 2.)),
+        ]);
+
+        assert_eq!(
+            triangulate2(&path), vec![
+                Triangle(Point(1.0, 3.038961), Point(1.0, 1.0), Point(6.0, 6.0)), 
+                Triangle(Point(6.0, 6.0), Point(6.0, 8.233767), Point(1.0, 3.038961)), 
+                Triangle(Point(6.0, 8.233767), Point(6.0, 6.0), Point(7.7, 7.6999993)), 
+                Triangle(Point(7.7, 7.6999993), Point(7.7, 10.0), Point(6.0, 8.233767)), 
+                Triangle(Point(7.7, 11.0), Point(7.7, 7.6999993), Point(11.0, 11.0)), 
+                Triangle(Point(6.0, 11.0), Point(7.7, 10.0), Point(7.7, 11.0)), 
+                Triangle(Point(0.0, 2.0), Point(1.0, 1.0), Point(1.0, 3.038961))
         ]);
     }
 }

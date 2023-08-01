@@ -23,12 +23,15 @@ fn main() {
     let patch = patch::arrow((4., 1.), (0.707, 0.707));
     graph.artist(patch).color("teal").edge_color("black");
 
-    let patch = patch::arrow((5., 1.), (0.707, 0.707)).tail_width(0.6).head_width(1.).head_length(0.8);
+    let patch = patch::arrow((6., 1.), (0.707, 0.707))
+        .tail_width(0.6)
+        .head_width(1.)
+        .head_length(0.8);
     graph.artist(patch).color("teal").edge_color("black");
 
     // TODO: triangulation bug
-    let patch = patch::arrow((6., 1.), (-0.707, 0.707));
-    //graph.artist(patch).color("black");
+    let patch = patch::arrow((8., 1.), (-0.707, 0.707));
+    graph.artist(patch).color("amber").edge_color("black");
 
     graph.aspect(1.);
     graph.xlim(0., 10.);

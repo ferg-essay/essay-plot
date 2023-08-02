@@ -4,7 +4,7 @@ use essay_plot_wgpu::WgpuBackend;
 
 use essay_plot_api::{
     driver::{Renderer, Backend, FigureApi},
-    Coord, Bounds, Point, CanvasEvent, Canvas,
+    Bounds, Point, CanvasEvent, Canvas,
 };
 
 use crate::{graph::Graph, frame::{Layout, LayoutArc}};

@@ -92,7 +92,7 @@ impl Tri {
         if x == trap_x[1] {
             return id;
         } else {
-            let rid = self.add_trap(id, x, trap_x[1]);
+            let _rid = self.add_trap(id, x, trap_x[1]);
             self[id].x[1] = x;
 
             id

@@ -1,15 +1,16 @@
 use essay_tensor::Tensor;
 use crate::{graph::Graph, artist::{LinesOpt, ContainerOpt}};
 
-mod grid_color;
-mod contour;
 mod bar;
+mod contour;
+mod fill_between;
+mod grid_color;
+mod histogram;
 mod matshow;
 mod pie;
+mod plot;
 mod scatter;
 mod stem;
-mod plot;
-mod fill_between;
 mod triplot;
 mod tricontour;
 
@@ -24,6 +25,8 @@ pub use contour::contour;
 pub use tricontour::tricontour;
 
 pub use fill_between::fill_between;
+
+pub use histogram::hist;
 
 pub use plot::plot;
 

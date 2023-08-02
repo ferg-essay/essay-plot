@@ -17,10 +17,10 @@ pub struct Bounds<M: Coord> {
 }
 
 impl<M: Coord> Bounds<M> {
-    pub fn new(p0: Point, p1: Point) -> Self {
+    pub fn new(p0: impl Into<Point>, p1: impl Into<Point>) -> Self {
         Self {
-            p0,
-            p1,
+            p0: p0.into(),
+            p1: p1.into(),
             marker: PhantomData,
         }
     }

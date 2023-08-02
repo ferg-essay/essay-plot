@@ -10,7 +10,8 @@ path = "src/lib.rs"
 [dependencies]
 env_logger = { version = "0.10.0" }
 log = { version = "0.4.17" }
-essay-tensor = { git = "https://github.com/ferg-essay/essay-tensor", version="0.1.13" }
+essay-tensor = { path = "../essay-tensor" }
+#essay-tensor = { git = "https://github.com/ferg-essay/essay-tensor", version="0.1.13"  }
 essay-plot-api = { path = "crates/essay-plot-api" }
 #essay-plot = { path = "crates/essay-plot" }
 essay-plot-wgpu = { path = "crates/essay-plot-wgpu" }

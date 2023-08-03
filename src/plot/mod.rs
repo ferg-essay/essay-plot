@@ -14,9 +14,7 @@ mod stem;
 mod triplot;
 mod tricontour;
 
-pub use bar::{
-    bar_y, BarOpt,
-};
+pub use bar::bar;
 
 pub use grid_color::grid_color;
 

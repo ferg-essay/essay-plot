@@ -43,7 +43,7 @@ figure.subplot.hspace: 0.2
 
 #cycle.colors: xkcd:azure, xkcd:red, xkcd:amber, xkcd:blue, xkcd:magenta, xkcd:teal
 #cycle.colors: xkcd:azure, xkcd:red, xkcd:amber, xkcd:orange, xkcd:pink
-cycle.colors: azure, red, amber, green, purple, orange, blue, pink, grey
+cycle.colors: azure, red, amber, purple, olive, pink, blue, orange, grey
 # matlibplot colors
 # cycle.colors: tab:blue, tab:orange, tab:green, tab:red, tab:purple, tab:pink, tab:grey, tab:olive, tab:cyan
 

@@ -1,4 +1,4 @@
-mod norm;
+mod bar;
 mod collection;
 mod colorbar;
 mod colormaps;
@@ -10,6 +10,7 @@ mod color;
 mod grid_color;
 mod histogram;
 mod image;
+mod norm;
 mod style;
 mod triplot;
 pub mod paths;
@@ -23,6 +24,10 @@ mod lines;
 
 pub use artist::{
     Artist, IntoArtist, PlotArtist, PlotId,
+};
+
+pub use bar::{
+    Bar, BarOpt
 };
 
 pub use collection::PathCollection;

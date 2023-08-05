@@ -15,6 +15,7 @@ mod style;
 mod triplot;
 pub mod paths;
 mod text;
+mod quiver;
 mod stem;
 mod tricontour;
 mod markers;
@@ -78,6 +79,11 @@ pub use patch::{
     Patch,
     PatchTrait,
     arrow, Arrow,
+};
+
+pub use quiver::{
+    Quiver,
+    QuiverOpt,
 };
 
 pub use stem::{

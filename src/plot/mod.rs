@@ -9,6 +9,7 @@ mod histogram;
 mod matshow;
 mod pie;
 mod plot;
+mod quiver;
 mod scatter;
 mod stem;
 mod triplot;
@@ -27,6 +28,8 @@ pub use fill_between::fill_between;
 pub use histogram::hist;
 
 pub use plot::plot;
+
+pub use quiver::quiver;
 
 pub use matshow::matshow;
 

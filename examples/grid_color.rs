@@ -1,4 +1,4 @@
-use essay_plot::{prelude::*, plot::grid_color, artist::Shading};
+use essay_plot::{prelude::*, plot::grid_color, artist::{Shading, ColorMaps}};
 use essay_tensor::init::{linspace, meshgrid};
 
 fn main() { 
@@ -10,9 +10,12 @@ fn main() {
 
     let mut figure = Figure::new();
     let mut graph1 = figure.new_graph(());
+    graph1.colorbar();
     let mut graph2 = figure.new_graph(());
 
-    grid_color(&mut graph1, &z).shading(Shading::Flat);
+    grid_color(&mut graph1, &z)
+        .shading(Shading::Flat)
+        .color_map(ColorMaps::RedYellow);
     grid_color(&mut graph2, &z).shading(Shading::Gouraud);
 
     figure.show();

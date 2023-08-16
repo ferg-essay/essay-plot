@@ -10,6 +10,9 @@ pub enum ColorMaps {
     BlueYellow,
     BlackWhite,
     WhiteBlack,
+
+    RedYellow,
+    BlueWhite,
 }
 
 impl From<ColorMaps> for ColorMap {
@@ -51,6 +54,19 @@ impl From<ColorMaps> for ColorMap {
                 ])
             }
 
+            ColorMaps::RedYellow => {
+                ColorMap::from([
+                    (0.0, Hsv(0.95, 1., 0.05)),
+                    (0.1, Hsv(0.95, 1., 0.2)),
+                    (0.2, Hsv(0.95, 1., 0.4)),
+                    (0.4, Hsv(0.02, 1., 0.85)),
+                    (0.6, Hsv(0.05, 0.9, 0.9)),
+                    (0.8, Hsv(0.10, 0.5, 0.97)),
+                    (0.9, Hsv(0.13, 0.3, 0.97)),
+                    (1.0, Hsv(0.15, 0.1, 0.97)),
+                ])
+            }
+
             ColorMaps::BlueYellow => {
                 // Top 1% options: vermillion, red, bright red, tomato red
                 // Bottom 1% options: navy, dark navy, ultramarine blue, night blue
@@ -64,6 +80,20 @@ impl From<ColorMaps> for ColorMap {
                     (0.5, "#a8a8a8"),
                     // cool, unsaturated orange to warm, saturated orange
                     (0.8, "amber"), (1., "yellow"), 
+                ])
+            }
+            ColorMaps::BlueWhite => {
+                // use color temperature (hue) to reinforce transition from
+                // unsaturated/bright to saturated/dark, which distinguishes
+                // quartiles
+                ColorMap::from([
+                    // cool, saturated blue to warm, unsaturated blue
+                    (0., Hsv(0.69, 0.92, 0.45)), // "css:midnightblue" bottom 1% distinct
+                    (0.02, Hsv(0.66, 0.98, 0.65)), // "cobalt blue" 
+                    (0.2, Hsv(0.61, 0.99, 0.87)), // "blue",
+                    (0.5, Hsv(0.56, 0.80, 0.95)), // "css:dodgerblue",
+
+                    (1.0, Hsv(0.25, 0.10, 0.97)), // "css:beige // touch of color between amber and azure
                 ])
             }
 

@@ -1,14 +1,9 @@
-use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Path, driver::Renderer, Affine2d, JoinStyle, CapStyle};
-use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
+use essay_plot_api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer, Affine2d};
+use essay_tensor::Tensor;
 
-use crate::{frame::{Data, LegendHandler}, artist::{Norm, Norms}, graph::ConfigArc, data_artist_option_struct, path_style_options};
+use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options};
 
-use super::{Artist, ColorMap, ColorMaps, PathStyle, PlotArtist, PlotId, Patch, paths};
-
-pub enum Shading {
-    Flat,
-    Gouraud,
-}
+use super::{Artist, PathStyle, PlotArtist, PlotId, paths};
 
 pub struct Quiver {
     x: Tensor,
@@ -17,8 +12,6 @@ pub struct Quiver {
     v: Tensor,
     style: PathStyle,
 
-    bins: Tensor,
-    count: Tensor,
     extent: Bounds<Data>,
     paths: Vec<Path<Data>>,
 
@@ -50,8 +43,6 @@ impl Quiver {
             u,
             v,
             style: PathStyle::new(),
-            bins: Tensor::zeros([1]),
-            count: Tensor::zeros([1]),
             extent: Bounds::<Data>::none(),
             paths: Vec::new(),
             is_stale: true,
@@ -154,6 +145,11 @@ impl PlotArtist<Data> for Quiver {
 
     fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "quiver");
+
+        // TODO: when Cycle is changed, this shouldn't be necessary
+        if self.style.get_face_color().is_none() {
+            self.style.color("k");
+        }
 
         unsafe { QuiverOpt::new(id) }
     }

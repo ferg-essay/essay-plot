@@ -3,7 +3,7 @@ use essay_tensor::{Tensor, init::linspace};
 
 use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options};
 
-use super::{Artist, PathStyle, PlotArtist, PlotId, paths};
+use super::{Artist, PathStyle, PlotArtist, PlotId, paths, ToCanvas};
 
 pub struct Bar {
     height: Tensor,
@@ -141,7 +141,7 @@ impl Artist<Data> for Bar {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

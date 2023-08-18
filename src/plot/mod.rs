@@ -1,5 +1,6 @@
+use essay_plot_api::Point;
 use essay_tensor::Tensor;
-use crate::{graph::Graph, artist::{LinesOpt, ContainerOpt}};
+use crate::{graph::Graph, artist::{LinesOpt, ContainerOpt, TextOpt}};
 
 mod bar;
 mod contour;
@@ -12,6 +13,7 @@ mod plot;
 mod quiver;
 mod scatter;
 mod stem;
+mod text;
 mod triplot;
 mod tricontour;
 
@@ -27,13 +29,15 @@ pub use fill_between::fill_between;
 
 pub use histogram::hist;
 
+pub use matshow::matshow;
+
 pub use plot::plot;
 
 pub use quiver::quiver;
 
-pub use matshow::matshow;
-
 pub use stem::stem;
+
+pub use text::text;
 
 pub use pie::pie;
 
@@ -41,11 +45,16 @@ pub use scatter::{
     scatter, ScatterOpt,
 };
 
-pub use triplot::{
-    triplot,
-};
+pub use triplot::triplot;
 
 impl Graph {
+    pub fn pie(
+        &mut self,
+        x: impl Into<Tensor>, 
+    ) -> ContainerOpt {
+        pie::pie(self, x)
+    }
+
     pub fn plot(
         &mut self, 
         x: impl Into<Tensor>,
@@ -62,12 +71,14 @@ impl Graph {
         scatter::scatter(self, x, y)
     }
 
-    pub fn pie(
+    pub fn text(
         &mut self,
-        x: impl Into<Tensor>, 
-    ) -> ContainerOpt {
-        pie::pie(self, x)
+        pos: impl Into<Point>, 
+        text: impl AsRef<str>,
+    ) -> TextOpt {
+        text::text(self, pos, text)
     }
+
     /*
     pub fn bar_y(
         &mut self, 

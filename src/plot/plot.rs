@@ -1,6 +1,6 @@
 use essay_tensor::Tensor;
 
-use crate::{artist::{Lines2d, LinesOpt}, graph::{Graph}};
+use crate::{artist::{Lines2d, LinesOpt}, graph::Graph};
 
 pub fn plot(
     graph: &mut Graph, 
@@ -12,4 +12,3 @@ pub fn plot(
     //self.artist(lines)
     graph.artist(lines)
 }
-

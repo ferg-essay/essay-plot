@@ -24,7 +24,7 @@ mod artist;
 mod lines;
 
 pub use artist::{
-    Artist, IntoArtist, PlotArtist, PlotId,
+    Artist, IntoArtist, PlotArtist, PlotId, ToCanvas,
 };
 
 pub use bar::{
@@ -93,5 +93,5 @@ pub use stem::{
 pub use style::PathStyle;
 
 pub use text::{
-    Text, // TextStyle,
+    Text, TextOpt, TextCoords, TextCanvas, // TextStyle,
 };

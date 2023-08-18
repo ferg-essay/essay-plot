@@ -1,11 +1,11 @@
 use essay_plot_api::{
-    Bounds, Affine2d, Coord, Canvas, PathOpt,
+    Bounds, Coord, Canvas, PathOpt,
     driver::Renderer, Clip
 };
 
 use crate::{graph::ConfigArc, frame::{Data, LegendHandler}, data_artist_option_struct};
 
-use super::{Artist, PathStyle, StyleCycle, PlotArtist, PlotId};
+use super::{Artist, PathStyle, StyleCycle, PlotArtist, PlotId, ToCanvas};
 
 pub struct Container<M: Coord> {
     artists: Vec<Box<dyn Artist<M>>>,
@@ -55,7 +55,7 @@ impl<M: Coord> Artist<M> for Container<M> {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_device: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -64,7 +64,7 @@ impl<M: Coord> Artist<M> for Container<M> {
         for (i, artist) in self.artists.iter_mut().enumerate() {
             let style = self.cycle.push(&style, i);
 
-            artist.draw(renderer, to_device, clip, &style);
+            artist.draw(renderer, to_canvas, clip, &style);
         }
     }
 }

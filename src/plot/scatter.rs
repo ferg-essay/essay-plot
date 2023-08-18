@@ -1,8 +1,8 @@
-use essay_plot_api::{Affine2d, Path, Bounds, Canvas, PathOpt, driver::Renderer, JoinStyle, affine, Clip};
+use essay_plot_api::{Path, Bounds, Canvas, PathOpt, driver::Renderer, JoinStyle, affine, Clip};
 use essay_tensor::Tensor;
 
 use crate::{
-    artist::{paths::{self}, Artist, PathCollection, Markers, PathStyle, PlotId, PlotArtist}, 
+    artist::{paths::{self}, Artist, PathCollection, Markers, PathStyle, PlotId, PlotArtist, ToCanvas}, 
     graph::{Graph, ConfigArc}, frame::{Data, LegendHandler}, 
     data_artist_option_struct, path_style_options
 };
@@ -96,7 +96,7 @@ impl Artist<Data> for ScatterPlot {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

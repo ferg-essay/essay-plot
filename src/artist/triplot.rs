@@ -3,7 +3,7 @@ use essay_tensor::{Tensor};
 
 use crate::{frame::Data, tri::{Triangulation, triangulate}};
 
-use super::{Artist, PathStyle, colormap::ColorMap};
+use super::{Artist, PathStyle, colormap::ColorMap, ToCanvas};
 
 pub struct TriPlot {
     data: Tensor,
@@ -41,7 +41,7 @@ impl Artist<Data> for TriPlot {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

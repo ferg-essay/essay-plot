@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use essay_plot_api::{
     Coord, Bounds, Affine2d, Canvas, PathOpt,
     driver::Renderer, Clip,
@@ -13,7 +15,7 @@ pub trait Artist<M: Coord> : Send {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     );
@@ -70,5 +72,35 @@ impl PlotId {
 
     pub fn id(&self) -> &ArtistId {
         &self.artist_id
+    }
+}
+
+pub struct ToCanvas {
+    pos_frame: Bounds<Canvas>,
+    to_canvas: Affine2d,
+}
+
+impl ToCanvas {
+    pub fn new(pos_frame: Bounds<Canvas>, to_canvas: Affine2d) -> Self {
+        Self {
+            pos_frame,
+            to_canvas
+        }
+    }
+
+    pub fn pos(&self) -> &Bounds<Canvas> {
+        &self.pos_frame
+    }
+
+    pub fn to_canvas(&self) -> &Affine2d {
+        &self.to_canvas
+    }
+}
+
+impl Deref for ToCanvas {
+    type Target = Affine2d;
+
+    fn deref(&self) -> &Self::Target {
+        self.to_canvas()
     }
 }

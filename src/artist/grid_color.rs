@@ -3,7 +3,7 @@ use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{frame::{Data, LegendHandler}, artist::{Norm, Norms}, graph::ConfigArc, data_artist_option_struct};
 
-use super::{Artist, ColorMap, ColorMaps, PathStyle, PlotArtist, PlotId};
+use super::{Artist, ColorMap, ColorMaps, PathStyle, PlotArtist, PlotId, ToCanvas};
 
 pub enum Shading {
     Flat,
@@ -161,7 +161,7 @@ impl Artist<Data> for GridColor {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

@@ -1,9 +1,9 @@
-use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Path, driver::Renderer, Affine2d, JoinStyle, CapStyle};
-use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
+use essay_plot_api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer, Affine2d};
+use essay_tensor::Tensor;
 
-use crate::{frame::{Data, LegendHandler}, artist::{Norm, Norms}, graph::ConfigArc, data_artist_option_struct, path_style_options};
+use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options};
 
-use super::{Artist, ColorMap, ColorMaps, PathStyle, PlotArtist, PlotId, Patch, paths};
+use super::{Artist, PathStyle, PlotArtist, PlotId, paths, ToCanvas};
 
 pub enum Shading {
     Flat,
@@ -82,7 +82,7 @@ impl Artist<Data> for Histogram {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

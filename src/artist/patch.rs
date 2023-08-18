@@ -7,7 +7,7 @@ use essay_plot_api::{
 
 use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options, transform_options};
 
-use super::{Artist, paths, PathStyle, PlotArtist, PlotId, IntoArtist};
+use super::{Artist, paths, PathStyle, PlotArtist, PlotId, IntoArtist, ToCanvas};
 
 pub trait PatchTrait<M: Coord> : Send {
     fn get_path(&mut self) -> &Path<M>;
@@ -57,7 +57,7 @@ impl Artist<Data> for Patch {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -263,7 +263,7 @@ impl Artist<Canvas> for CanvasPatch {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -302,7 +302,7 @@ impl Artist<Canvas> for PathPatch<Canvas> {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -327,7 +327,7 @@ impl Artist<Data> for PathPatch<Data> {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -393,7 +393,7 @@ impl Artist<Canvas> for Line {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -471,7 +471,7 @@ impl Artist<Data> for Wedge {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

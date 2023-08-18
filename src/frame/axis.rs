@@ -1,6 +1,6 @@
 use essay_plot_api::{TextStyle, Canvas, driver::Renderer, Affine2d, Clip, PathOpt, VertAlign, Point, Path, HorizAlign, Bounds, PathCode};
 
-use crate::{artist::{PathStyle, Text, Artist, patch::CanvasPatch, paths}, graph::Config, frame_option_struct, path_style_options};
+use crate::{artist::{PathStyle, TextCanvas, Artist, patch::CanvasPatch, paths, ToCanvas}, graph::Config, frame_option_struct, path_style_options};
 
 use super::{
     data_box::DataBox,
@@ -171,7 +171,7 @@ impl XAxis {
         &mut self, 
         renderer: &mut dyn Renderer,
         data: &DataBox,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) -> f32 {
@@ -348,7 +348,7 @@ impl YAxis {
         &mut self, 
         renderer: &mut dyn Renderer,
         data: &DataBox,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) -> f32 {
@@ -448,7 +448,7 @@ impl YAxis {
 pub struct AxisTicks {
     grid_style: PathStyle,
     ticks_style: PathStyle,
-    label_text: Text,
+    label_text: TextCanvas,
     size: f32,
     pad: f32,
     locator: Option<Box<dyn TickLocator>>,
@@ -468,7 +468,7 @@ impl AxisTicks {
                 Some(size) => size,
                 None => 0.,
             },
-            label_text: Text::new(),
+            label_text: TextCanvas::new(),
             locator: None,
             formatter: None,
         };

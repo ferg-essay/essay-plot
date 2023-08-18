@@ -5,7 +5,7 @@ use essay_plot_api::{Affine2d, Bounds, Path, PathOpt, Canvas, driver::Renderer, 
 
 use crate::{frame::Data, artist::PathStyle};
 
-use super::Artist;
+use super::{Artist, ToCanvas};
 
 ///
 /// Collection of a single path displayed at multiple locations with optional
@@ -49,7 +49,7 @@ impl Artist<Data> for PathCollection {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

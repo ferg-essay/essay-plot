@@ -1,13 +1,13 @@
-use std::f32::consts::PI;
+use std::{f32::consts::PI, ops::Deref};
 
 use essay_plot_api::{
-    PathCode, Path, PathOpt,
+    Path, PathOpt,
     driver::Renderer, Bounds, Canvas, Affine2d, Point, CanvasEvent, HorizAlign, VertAlign, Color, Clip, 
 };
 
 use crate::{
     artist::{
-        patch::CanvasPatch, Text, Artist, PathStyle, Colorbar, paths
+        patch::CanvasPatch, TextCanvas, Artist, PathStyle, Colorbar, paths, ToCanvas
     }, 
     graph::Config
 };
@@ -29,7 +29,7 @@ pub struct Frame {
 
     data: DataBox,
 
-    title: Text,
+    title: TextCanvas,
 
     bottom: BottomFrame,
     left: LeftFrame,
@@ -72,7 +72,7 @@ impl Frame {
 
             data: DataBox::new(id, cfg),
 
-            title: Text::new(),
+            title: TextCanvas::new(),
 
             bottom: BottomFrame::new(cfg),
             left: LeftFrame::new(cfg),
@@ -185,7 +185,7 @@ impl Frame {
         }
     }
 
-    pub(crate) fn get_text_mut(&mut self, artist: FrameArtist) -> &mut Text {
+    pub(crate) fn get_text_mut(&mut self, artist: FrameArtist) -> &mut TextCanvas {
         match artist {
             FrameArtist::Title => &mut self.title,
             FrameArtist::XLabel => &mut self.bottom.title,
@@ -240,34 +240,46 @@ impl Frame {
     pub(crate) fn draw(&mut self, renderer: &mut dyn Renderer) {
         let clip = Clip::from(&self.pos);
 
-        self.title.draw(renderer, &self.to_canvas, &clip, &self.path_style);
+        let frame_to_canvas = ToCanvas::new(
+            self.pos.clone(), 
+            self.to_canvas.clone()
+        );
 
-        self.bottom.draw(renderer, &self.data, &self.to_canvas, &clip, &self.path_style);
-        self.left.draw(renderer, &self.data, &self.to_canvas, &clip, &self.path_style);
+        let to_canvas = ToCanvas::new(
+            self.pos.clone(), 
+            self.data.get_canvas_transform().clone()
+        );
 
-        self.top.draw(renderer, &self.to_canvas, &clip, &self.path_style);
-        self.right.draw(renderer,  &self.to_canvas, &clip, &self.path_style);
+        self.title.draw(renderer, &to_canvas, &clip, &self.path_style);
+
+        self.bottom.draw(renderer, &self.data, &frame_to_canvas, &clip, &self.path_style);
+        self.left.draw(renderer, &self.data, &frame_to_canvas, &clip, &self.path_style);
+
+        self.top.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
+        self.right.draw(renderer,  &frame_to_canvas, &clip, &self.path_style);
 
         // TODO: grid order
-        self.data.draw(renderer, &self.to_canvas, &clip, &self.path_style);
+        self.data.draw(renderer, &to_canvas, &clip, &self.path_style);
 
-        self.legend.draw(renderer, &self.to_canvas, &clip, &self.path_style);
+        self.legend.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
     }
 
-    pub fn title(&mut self, text: &str) -> &mut Text {
+    pub fn title(&mut self, text: &str) -> &mut TextCanvas {
         self.title.label(text);
 
         &mut self.title
     }
 
-    pub fn xlabel(&mut self, text: &str) -> &mut Text {
+    pub fn xlabel(&mut self, text: &str) -> &mut TextCanvas {
         self.bottom.title(text)
     }
 
-    pub fn ylabel(&mut self, text: &str) -> &mut Text {
+    pub fn ylabel(&mut self, text: &str) -> &mut TextCanvas {
         self.left.label(text)
     }
 }
+
+
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum FrameArtist {
@@ -339,7 +351,7 @@ impl Artist<Canvas> for TopFrame {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -359,7 +371,7 @@ pub struct BottomFrame {
 
     x_axis: XAxis,
 
-    title: Text,
+    title: TextCanvas,
 }
 
 impl BottomFrame {
@@ -369,7 +381,7 @@ impl BottomFrame {
 
             x_axis: XAxis::new(cfg, "x_axis"),
 
-            title: Text::new(),
+            title: TextCanvas::new(),
         };
 
         frame.title.text_style_mut().valign(VertAlign::Top);
@@ -385,7 +397,7 @@ impl BottomFrame {
         &mut self, 
         renderer: &mut dyn Renderer,
         data: &DataBox,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -400,7 +412,7 @@ impl BottomFrame {
         self.title.draw(renderer, to_canvas, clip, style);
     }
 
-    fn title(&mut self, text: &str) -> &mut Text {
+    fn title(&mut self, text: &str) -> &mut TextCanvas {
         self.title.label(text)
     }
 
@@ -423,12 +435,12 @@ pub struct LeftFrame {
 
     y_axis: YAxis,
 
-    title: Text,
+    title: TextCanvas,
 }
 
 impl LeftFrame {
     pub fn new(cfg: &Config) -> Self {
-        let mut label = Text::new();
+        let mut label = TextCanvas::new();
         label.angle(PI / 2.);
 
         let mut frame = Self {
@@ -452,7 +464,7 @@ impl LeftFrame {
         &mut self, 
         renderer: &mut dyn Renderer,
         data: &DataBox,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -467,7 +479,7 @@ impl LeftFrame {
         self.title.draw(renderer, to_canvas, clip, style);
     }
 
-    fn label(&mut self, text: &str) -> &mut Text {
+    fn label(&mut self, text: &str) -> &mut TextCanvas {
         self.title.label(text)
     }
 
@@ -539,7 +551,7 @@ impl Artist<Canvas> for RightFrame {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -568,7 +580,7 @@ impl FrameTextOpt {
         }
     }
 
-    fn write(&mut self, fun: impl FnOnce(&mut Text)) {
+    fn write(&mut self, fun: impl FnOnce(&mut TextCanvas)) {
         self.layout.write(|l| {
             fun(l.frame_mut(self.id).get_text_mut(self.artist))
         })

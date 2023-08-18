@@ -85,7 +85,7 @@ impl PlotCanvas {
         path: &Path<Canvas>, 
         _clip: &Clip,
     ) {
-        self.shape2d_render.start_shape();
+        self.shape2d_render.start_shape(None);
         self.bezier_render.start_shape();
 
         let mut points = Vec::<Point>::new();
@@ -133,7 +133,7 @@ impl PlotCanvas {
         let lw2 = self.to_px(0.5 * linewidth); // / self.canvas.width();
         let lw2 = lw2.max(0.5);
         
-        self.shape2d_render.start_shape();
+        self.shape2d_render.start_shape(None);
         self.bezier_render.start_shape();
 
         let mut p0 = Point(0.0f32, 0.0f32);

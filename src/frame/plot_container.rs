@@ -2,7 +2,7 @@ use std::{alloc, any::TypeId, marker::PhantomData, ptr::{NonNull, self}, mem::{M
 
 use essay_plot_api::{Coord, Bounds, driver::Renderer, Affine2d, Canvas, PathOpt, Clip, Point};
 
-use crate::{artist::{Artist, StyleCycle, PlotArtist}, graph::Config};
+use crate::{artist::{Artist, StyleCycle, PlotArtist, ToCanvas}, graph::Config};
 
 use super::{ArtistId, FrameId, legend::LegendHandler};
 
@@ -101,7 +101,8 @@ impl<M: Coord> Artist<M> for PlotContainer<M> {
             bounds = if bounds.is_none() {
                 artist.get_extent(self)
             } else {
-                bounds.union(&artist.get_extent(self))
+                let extent = artist.get_extent(self);
+                if extent.is_none() { bounds } else { bounds.union(&extent) }
             }
         }
 
@@ -115,7 +116,7 @@ impl<M: Coord> Artist<M> for PlotContainer<M> {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -140,7 +141,7 @@ trait ArtistHandleTrait<M: Coord> : Send {
         &self, 
         container: &PlotContainer<M>,
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     );
@@ -185,7 +186,7 @@ where
         &self, 
         container: &PlotContainer<M>,
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

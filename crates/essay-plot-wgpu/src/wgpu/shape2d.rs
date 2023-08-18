@@ -1,4 +1,4 @@
-use essay_plot_api::{Point, Color, Affine2d};
+use essay_plot_api::{Point, Color, Affine2d, Clip};
 use wgpu::util::DeviceExt;
 
 use super::render::line_normal;
@@ -84,7 +84,7 @@ impl Shape2dRender {
         self.style_offset = 0;
     }
 
-    pub fn start_shape(&mut self) {
+    pub fn start_shape(&mut self, clip: Option<[f32; 4]>) {
         let start = self.vertex_offset;
 
         self.shape_items.push(Shape2dItem {
@@ -92,6 +92,7 @@ impl Shape2dRender {
             v_end: usize::MAX,
             s_start: self.style_offset,
             s_end: usize::MAX,
+            clip,
         });
     }
 
@@ -206,6 +207,10 @@ impl Shape2dRender {
 
         for item in self.shape_items.drain(..) {
             if item.v_start < item.v_end && item.s_start < item.s_end {
+                if let Some([x, y, w, h]) = item.clip {
+                    rpass.set_viewport(x, y, w, h, f32::MIN, f32::MAX);
+                }
+
                 let stride = self.vertex_stride;
                 rpass.set_vertex_buffer(0, self.vertex_buffer.slice(
                     (stride * item.v_start) as u64..(stride * item.v_end) as u64
@@ -252,6 +257,8 @@ pub struct Shape2dItem {
 
     s_start: usize,
     s_end: usize,
+
+    clip: Option<[f32; 4]>,
 }
 
 #[repr(C)]

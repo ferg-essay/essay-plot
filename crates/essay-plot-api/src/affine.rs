@@ -4,6 +4,7 @@ use essay_tensor::{prelude::*, tensor::TensorUninit};
 
 use crate::Point;
 
+#[derive(Clone)]
 pub struct Affine2d {
     mat: Tensor,
 }

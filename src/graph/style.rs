@@ -1,7 +1,7 @@
 use essay_plot_api::{Coord, Canvas, Bounds, driver::Renderer, Affine2d, Clip, PathOpt};
 
 use crate::{
-    artist::{Artist, PathStyle, PlotId, PlotArtist},
+    artist::{Artist, PathStyle, PlotId, PlotArtist, ToCanvas},
     frame::{Data, LegendHandler}, 
     data_artist_option_struct, path_style_options,
 };
@@ -41,7 +41,7 @@ impl<M: Coord> Artist<M> for PlotOptArtist<M> {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

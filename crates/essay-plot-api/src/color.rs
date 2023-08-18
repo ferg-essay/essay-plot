@@ -254,6 +254,15 @@ impl Color {
     pub fn nearest_name(&self) -> String {
         lookup_color_name(self)
     }
+
+    pub fn set_alpha(self, arg: f32) -> Color {
+        Color::from_rgba(
+            self.red(), 
+            self.green(), 
+            self.blue(),
+            arg
+        )
+    }
 }
 
 // msh in Morland, Diverging Color Maps for Scientific Visualization

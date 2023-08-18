@@ -14,7 +14,7 @@ use crate::{
     data_artist_option_struct, path_style_options
 };
 
-use super::{Artist, PlotArtist, PlotId, PathCollection};
+use super::{Artist, PlotArtist, PlotId, PathCollection, ToCanvas};
 
 pub struct Stem {
     xy: Tensor,
@@ -92,7 +92,7 @@ impl Artist<Data> for Stem {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

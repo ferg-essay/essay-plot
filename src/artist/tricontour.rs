@@ -3,7 +3,7 @@ use essay_tensor::{Tensor, math::normalize_unit};
 
 use crate::{frame::Data, contour::TriContourGenerator, tri::Triangulation};
 
-use super::{Artist, ColorMap, ColorMaps, PathStyle};
+use super::{Artist, ColorMap, ColorMaps, PathStyle, ToCanvas};
 
 pub struct Level {
     value: f32,
@@ -100,7 +100,7 @@ impl Artist<Data> for TriContour {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         _style: &dyn PathOpt,
     ) {

@@ -3,7 +3,7 @@ use essay_tensor::{Tensor, init::linspace, tf32};
 
 use crate::frame::Data;
 
-use super::{Artist, grid_color::GridColor, paths, PathStyle};
+use super::{Artist, grid_color::GridColor, paths, PathStyle, ToCanvas};
 
 pub struct Colorbar {
     bounds: Bounds<Data>,
@@ -48,11 +48,14 @@ impl Artist<Data> for Colorbar {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        _to_canvas: &Affine2d,
+        _to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
-        let to_canvas = self.bounds.affine_to(&self.pos);
+        let to_canvas = ToCanvas::new(
+            self.pos.clone(), 
+            self.bounds.affine_to(&self.pos)
+        );
         // self.mesh.draw(renderer, &to_canvas, clip, style);
 
         let path = paths::bounds(&self.pos);

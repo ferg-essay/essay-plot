@@ -3,7 +3,7 @@ use essay_plot_api::{
     PathCode, Path, Point, TextStyle, VertAlign, HorizAlign
 };
 
-use crate::{artist::{Artist, PathStyle, ColorCycle, StyleCycle}, graph::Config};
+use crate::{artist::{Artist, PathStyle, ColorCycle, StyleCycle, ToCanvas}, graph::Config};
 
 use super::data_box::DataBox;
 
@@ -69,7 +69,7 @@ impl Artist<Canvas> for Legend {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        _to_canvas: &Affine2d,
+        _to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

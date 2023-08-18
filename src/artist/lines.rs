@@ -12,7 +12,7 @@ use crate::{
     data_artist_option_struct, path_style_options, graph::ConfigArc
 };
 
-use super::{Artist, PlotArtist, PlotId, markers::{MarkerStyle, IntoMarker}, PathCollection};
+use super::{Artist, PlotArtist, PlotId, markers::{MarkerStyle, IntoMarker}, PathCollection, ToCanvas};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum DrawStyle {
@@ -173,7 +173,7 @@ impl Artist<Data> for Lines2d {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

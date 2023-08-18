@@ -4,7 +4,7 @@ use essay_tensor::Tensor;
 
 use crate::{frame::Data, artist::{Norms, Norm}};
 
-use super::{Artist, ColorMap, ColorMaps};
+use super::{Artist, ColorMap, ColorMaps, ToCanvas};
 
 pub struct Image {
     data: Tensor,
@@ -63,7 +63,7 @@ impl Artist<Data> for Image {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         clip: &Clip,
         _style: &dyn PathOpt,
     ) {

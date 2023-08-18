@@ -3,12 +3,14 @@ use essay_plot_api::{
     Bounds, Point, Canvas,
     PathOpt,
     driver::Renderer, 
-    TextStyle, Clip,
+    TextStyle, Clip, Angle,
 };
 
-use super::{Artist, PathStyle};
+use crate::{frame::Data, graph::ConfigArc, data_artist_option_struct, path_style_options};
 
-pub struct Text {
+use super::{Artist, PathStyle, PlotArtist, PlotId, artist::ToCanvas};
+
+pub struct TextCanvas {
     pos: Bounds<Canvas>,
     extent: Bounds<Canvas>,
 
@@ -20,7 +22,7 @@ pub struct Text {
     angle: f32,
 }
 
-impl Text {
+impl TextCanvas {
     pub const DESC : f32 = 0.3;
 
     pub fn new() -> Self {
@@ -77,7 +79,7 @@ impl Text {
     }
 }
 
-impl Artist<Canvas> for Text {
+impl Artist<Canvas> for TextCanvas {
     fn get_extent(&mut self) -> Bounds<Canvas> {
         self.extent.clone()
     }
@@ -104,7 +106,7 @@ impl Artist<Canvas> for Text {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        _to_canvas: &Affine2d,
+        _to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -122,6 +124,168 @@ impl Artist<Canvas> for Text {
                     &self.text_style,
                     clip
                 ).unwrap();
+            }
+        }
+    }
+}
+
+pub struct Text {
+    pos: Point,
+    coords: TextCoords,
+
+    text: String,
+
+    path_style: PathStyle,
+    text_style: TextStyle,
+
+    angle: f32,
+}
+
+impl Text {
+    pub const DESC : f32 = 0.3;
+
+    pub fn new(pos: impl Into<Point>, text: impl AsRef<str>) -> Self {
+        Self {
+            pos: pos.into(),
+            coords: TextCoords::Data,
+            text: text.as_ref().to_string(),
+
+            path_style: PathStyle::new(),
+            text_style: TextStyle::new(),
+
+            angle: 0.
+        }
+    }
+
+    pub(crate) fn pos(&mut self, pos: impl Into<Point>) {
+        self.pos = pos.into();
+    }
+
+    pub fn text(&mut self, text: impl AsRef<str>) -> &mut Self {
+        self.text = text.as_ref().to_string();
+
+        self
+    }
+
+    pub fn height(&self) -> f32 {
+        //self.extent.height()
+        0.
+    }
+
+    pub fn text_style(&self) -> &TextStyle {
+        &self.text_style
+    }
+
+    pub fn text_style_mut(&mut self) -> &mut TextStyle {
+        &mut self.text_style
+    }
+
+    pub fn path_style_mut(&mut self) -> &mut PathStyle {
+        &mut self.path_style
+    }
+
+    pub fn angle(&mut self, angle: f32) -> &mut Self {
+        self.angle = angle;
+
+        self
+    }
+
+    pub fn get_angle(&self) -> f32 {
+        self.angle
+    }
+}
+
+impl Artist<Data> for Text {
+    fn update(&mut self, _canvas: &Canvas) {
+    }
+    
+    fn get_extent(&mut self) -> Bounds<Data> {
+        Bounds::none()
+    }
+
+    fn draw(
+        &mut self, 
+        renderer: &mut dyn Renderer,
+        to_canvas: &ToCanvas,
+        clip: &Clip,
+        style: &dyn PathOpt,
+    ) {
+        let pos = self.coords.to_canvas(self.pos, &to_canvas);
+        let style = self.path_style.push(style);
+
+        if self.text.len() > 0 {
+            renderer.draw_text(
+                pos,
+                &self.text,
+                0.,
+                &style,
+                &self.text_style,
+                clip
+            ).unwrap();
+        }
+    }
+}
+
+impl PlotArtist<Data> for Text {
+    type Opt = TextOpt;
+
+    fn config(&mut self, _cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+        // self.style = PathStyle::from_config(cfg, "text");
+
+        unsafe { TextOpt::new(id) }
+    }
+
+    fn get_legend(&self) -> Option<crate::frame::LegendHandler> {
+        None
+    }
+}
+
+data_artist_option_struct!(TextOpt, Text);
+
+impl TextOpt {
+    path_style_options!(path_style);
+
+    pub fn text(&mut self, label: impl AsRef<str>) -> &mut Self {
+        self.write(|artist| {
+            artist.text = label.as_ref().to_string();
+        });
+
+        self
+    }
+
+    pub fn pos(&mut self, pos: impl Into<Point>) -> &mut Self {
+        self.write(|artist| {
+            artist.pos = pos.into();
+        });
+
+        self
+    }
+
+    pub fn coord(&mut self, coord: impl Into<TextCoords>) -> &mut Self {
+        self.write(|artist| {
+            artist.coords = coord.into();
+        });
+
+        self
+    }
+}
+
+pub enum TextCoords {
+    Data,
+    FrameFraction,
+}
+
+impl TextCoords {
+    fn to_canvas(&self, pos: Point, to_canvas: &ToCanvas) -> Point {
+        match self {
+            TextCoords::Data => to_canvas.transform_point(pos),
+            TextCoords::FrameFraction => {
+                let bounds = to_canvas.pos();
+
+                Point(
+                    bounds.xmin() + pos.x() * bounds.width(),
+                    bounds.ymin() + pos.y() * bounds.height(),
+                )
             }
         }
     }

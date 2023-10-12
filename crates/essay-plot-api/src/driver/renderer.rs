@@ -66,6 +66,11 @@ pub trait Renderer {
         clip: &Clip
     ) -> Result<(), RenderErr>;
 
+    fn flush(
+        &mut self,
+        clip: &Clip
+    );
+
     fn request_redraw(
         &mut self,
         bounds: &Bounds<Canvas>

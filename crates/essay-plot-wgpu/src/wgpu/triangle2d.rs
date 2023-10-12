@@ -1,4 +1,4 @@
-use essay_plot_api::Affine2d;
+use essay_plot_api::{Affine2d, Clip};
 use wgpu::util::DeviceExt;
 
 pub struct GridMesh2dRender {
@@ -181,6 +181,7 @@ impl GridMesh2dRender {
         queue: &wgpu::Queue, 
         view: &wgpu::TextureView,
         encoder: &mut wgpu::CommandEncoder,
+        clip: &Clip,
     ) {
         if self.mesh_items.len() == 0 {
             return;
@@ -246,6 +247,10 @@ impl GridMesh2dRender {
         );
 
         rpass.set_pipeline(&self.pipeline);
+
+        if let Clip::Bounds(p0, p1) = clip {
+            rpass.set_scissor_rect(p0.0 as u32, p0.1 as u32, (p1.0 - p0.0) as u32, (p1.1 - p0.1) as u32);
+        }
 
         for item in self.mesh_items.drain(..) {
             if item.v_start < item.v_end && item.i_start < item.i_end {

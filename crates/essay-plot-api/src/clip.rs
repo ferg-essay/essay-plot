@@ -1,5 +1,6 @@
 use crate::{Point, Bounds, Canvas};
 
+#[derive(Clone, Debug, Copy)]
 pub enum Clip {
     None,
     Bounds(Point, Point),

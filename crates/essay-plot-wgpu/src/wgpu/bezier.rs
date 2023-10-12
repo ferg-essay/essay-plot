@@ -1,4 +1,4 @@
-use essay_plot_api::{Point, Color, Affine2d};
+use essay_plot_api::{Point, Color, Affine2d, Clip};
 use wgpu::util::DeviceExt;
 
 pub struct BezierRender {
@@ -303,6 +303,7 @@ impl BezierRender {
         queue: &wgpu::Queue, 
         view: &wgpu::TextureView,
         encoder: &mut wgpu::CommandEncoder,
+        clip: &Clip,
     ) {
         if self.shape_items.len() == 0 {
             return;
@@ -354,6 +355,10 @@ impl BezierRender {
         );
 
         rpass.set_pipeline(&self.pipeline);
+
+        if let Clip::Bounds(p0, p1) = clip {
+            rpass.set_scissor_rect(p0.0 as u32, p0.1 as u32, (p1.0 - p0.0) as u32, (p1.1 - p0.1) as u32);
+        }
 
         for item in self.shape_items.drain(..) {
             if item.v_start < item.v_end && item.s_start < item.s_end {

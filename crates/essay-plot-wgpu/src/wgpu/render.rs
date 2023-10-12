@@ -870,13 +870,7 @@ impl PlotCanvas {
 
         figure.draw(&mut renderer, &draw_bounds);
 
-        renderer.flush();
-
-        //self.image_render.flush(queue, view, encoder);
-        //self.triangle_render.flush(device, queue, view, encoder);
-        //self.bezier_render.flush(queue, view, encoder);
-        //self.shape2d_render.flush(device, queue, view, encoder);
-        //self.text_render.flush(queue, view, encoder);
+        renderer.flush_inner(&Clip::None);
     }
 
     pub fn renderer<'a>(
@@ -913,17 +907,17 @@ impl<'a> PlotRenderer<'a> {
         }
     }
 
-    pub fn flush(&mut self) {
+    pub fn flush_inner(&mut self, clip: &Clip) {
         if let Some(queue) = self.queue {
             if let Some(view) = self.view {
                 let mut encoder =
                     self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
                 self.figure.image_render.flush(queue, view, &mut encoder);
-                self.figure.triangle_render.flush(self.device, queue, view, &mut encoder);
+                self.figure.triangle_render.flush(self.device, queue, view, &mut encoder, clip);
                 // TODO: order issues with bezier and shape2d
-                self.figure.shape2d_render.flush(self.device, queue, view, &mut encoder);
-                self.figure.bezier_render.flush(self.device, queue, view, &mut encoder);
+                self.figure.shape2d_render.flush(self.device, queue, view, &mut encoder, clip);
+                self.figure.bezier_render.flush(self.device, queue, view, &mut encoder, clip);
                 self.figure.text_render.flush(queue, view, &mut encoder);
         
                 queue.submit(Some(encoder.finish()));
@@ -1017,5 +1011,12 @@ impl Renderer for PlotRenderer<'_> {
         clip: &Clip
     ) -> Result<(), RenderErr> {
         self.figure.draw_image_ref(self.device, bounds, image, clip)
+    }
+
+    fn flush(
+        &mut self,
+        clip: &Clip
+    ) {
+        self.flush_inner(clip);
     }
 }

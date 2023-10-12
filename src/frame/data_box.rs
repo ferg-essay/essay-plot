@@ -338,12 +338,15 @@ impl Artist<Canvas> for DataBox {
         _clip: &Clip,
         style: &dyn PathOpt,
     ) {
+        renderer.flush(&Clip::None);
         //let to_canvas = to_canvas.matmul(&self.to_canvas);
         // let to_canvas = &self.to_canvas;
         let style = self.style.push(style);
         let clip = Clip::Bounds(self.pos_canvas.p0(), self.pos_canvas.p1());
 
         self.artists.draw(renderer, to_canvas, &clip, &style);
+
+        renderer.flush(&clip);
 
         // TODO: intersect clip
         //for artist in &mut self.artists {

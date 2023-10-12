@@ -1,4 +1,4 @@
-use essay_plot_api::{Canvas, driver::FigureApi, Bounds};
+use essay_plot_api::{Canvas, driver::FigureApi, Bounds, Clip};
 use wgpu::{SurfaceTexture, TextureView};
 use image::{ImageBuffer, Rgba};
 
@@ -40,7 +40,7 @@ pub fn draw_hardcopy(
     figure.draw(&mut plot_renderer, &bounds);
         //plot_renderer.draw_path(path, style, &Clip::None).unwrap();
 
-    plot_renderer.flush();
+    plot_renderer.flush_inner(&Clip::None);
     view.flush();
 
     wgpu.save(path);

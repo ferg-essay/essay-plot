@@ -303,7 +303,7 @@ impl BezierRender {
         queue: &wgpu::Queue, 
         view: &wgpu::TextureView,
         encoder: &mut wgpu::CommandEncoder,
-        clip: &Clip,
+        scissor: Option<(u32, u32, u32, u32)>,
     ) {
         if self.shape_items.len() == 0 {
             return;
@@ -356,8 +356,8 @@ impl BezierRender {
 
         rpass.set_pipeline(&self.pipeline);
 
-        if let Clip::Bounds(p0, p1) = clip {
-            rpass.set_scissor_rect(p0.0 as u32, p0.1 as u32, (p1.0 - p0.0) as u32, (p1.1 - p0.1) as u32);
+        if let Some((x, y, w, h)) = scissor {
+            rpass.set_scissor_rect(x, y, w, h);
         }
 
         for item in self.shape_items.drain(..) {

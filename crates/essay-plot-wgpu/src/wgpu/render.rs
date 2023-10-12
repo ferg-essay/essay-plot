@@ -73,6 +73,20 @@ impl PlotCanvas {
         self.to_gpu = self.canvas.bounds().affine_to(&pos_gpu);
     }
 
+    pub fn to_scissor(&self, clip: &Clip) -> Option<(u32, u32, u32, u32)> {
+        match clip {
+            Clip::None => None,
+            Clip::Bounds(p0, p1) => {
+                Some((
+                    p0.0 as u32, 
+                    (self.canvas.height() - p1.1) as u32, 
+                    (p1.0 - p0.0) as u32, 
+                    (p1.1 - p0.1) as u32
+                ))
+            }
+        }
+    }
+
     pub fn set_scale_factor(&mut self, scale_factor: f32) {
         // traditional pt to px
         let pt_to_px = 4. / 3.;
@@ -913,11 +927,13 @@ impl<'a> PlotRenderer<'a> {
                 let mut encoder =
                     self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
+                let scissor = self.figure.to_scissor(clip);
+
                 self.figure.image_render.flush(queue, view, &mut encoder);
                 self.figure.triangle_render.flush(self.device, queue, view, &mut encoder, clip);
                 // TODO: order issues with bezier and shape2d
-                self.figure.shape2d_render.flush(self.device, queue, view, &mut encoder, clip);
-                self.figure.bezier_render.flush(self.device, queue, view, &mut encoder, clip);
+                self.figure.shape2d_render.flush(self.device, queue, view, &mut encoder, scissor);
+                self.figure.bezier_render.flush(self.device, queue, view, &mut encoder, scissor);
                 self.figure.text_render.flush(queue, view, &mut encoder);
         
                 queue.submit(Some(encoder.finish()));

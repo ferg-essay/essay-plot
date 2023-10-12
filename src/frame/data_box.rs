@@ -346,7 +346,8 @@ impl Artist<Canvas> for DataBox {
 
         self.artists.draw(renderer, to_canvas, &clip, &style);
 
-        renderer.flush(&clip);
+        //renderer.flush(&clip);
+        renderer.flush(&Clip::None);
 
         // TODO: intersect clip
         //for artist in &mut self.artists {

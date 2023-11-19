@@ -121,14 +121,19 @@ impl TextRender {
         let start = self.vertex_offset;
 
         // TODO: proper spacing and kerning
+        let text_size = (size + 0.5) as u16;
+
+        let s = self.text_cache.glyph(font_name, text_size, ' ');
+        let w_space = s.w + s.dx.max(0.);
+        // let w_inside = w_space * 0.3;
+
         let w_inside = size * 0.07;
         let w_space = size * 0.25;
         
         let mut x = x0;
         let y = y0.round();
         for ch in text.chars() {
-            let size = (size + 0.5) as u16;
-            let r = self.text_cache.glyph(font_name, size, ch);
+            let r = self.text_cache.glyph(font_name, text_size, ch);
             
             x = x.round();
 
@@ -137,11 +142,11 @@ impl TextRender {
                 continue;
             }
 
-            let y_ch = y;// - r.h as f32;
-            let x_ch = x;
+            let y_ch = y + r.dy;// - r.h as f32;
+            let x_ch = x; //  + r.dx;
 
-            let w = r.w as f32;
-            let h = r.h as f32;
+            let w = r.w;
+            let h = r.h;
 
             self.vertex(x_ch, y_ch, r.tx_min, r.ty_min);
             self.vertex(x_ch + w, y_ch, r.tx_max, r.ty_min);

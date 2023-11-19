@@ -60,7 +60,7 @@ impl TextCache {
             return TextRect::new(&rect, self.store.width, self.store.height)
         }
 
-        let rect = self.add_glyph(font_id, size, glyph);
+        let rect = self.add_glyph(font_id, size as f32, glyph);
 
         self.glyph_map.insert(glyph_id, rect.clone()); 
 
@@ -74,14 +74,14 @@ impl TextCache {
         }
     }
 
-    fn add_glyph(&mut self, font_id: FontId, size: u16, ch: char) -> GlyphRect {
+    fn add_glyph(&mut self, font_id: FontId, size: f32, ch: char) -> GlyphRect {
         let font = &self.fonts[font_id.0];
 
         let glyph = font.charmap().map(ch);
 
         let mut scaler = self.context
             .builder(font.as_ref())
-            .size(size as f32)
+            .size(size)
             .build();
 
         let image = Render::new(&[
@@ -101,7 +101,8 @@ impl TextCache {
             &image.data
         );
 
-        // cursor.write(p_w, p_h, &image.data, &self.store.data);
+        let metrics = font.as_ref().metrics(&[]).scale(size);
+        let descent = (metrics.descent) as i32;
 
         self.is_modified = true;
 
@@ -110,6 +111,8 @@ impl TextCache {
             y,
             w: p_w,
             h: p_h,
+            left: placement.left as i32,
+            top: placement.top as i32 + descent,
         }
     }
 
@@ -316,8 +319,11 @@ pub struct TextRect {
     pub tx_max: f32,
     pub ty_max: f32,
 
-    pub w: usize,
-    pub h: usize,
+    pub w: f32,
+    pub h: f32,
+
+    pub dx: f32,
+    pub dy: f32,
 }
 
 
@@ -330,13 +336,16 @@ impl TextRect {
             ty_max: glyph.y as f32 / height as f32,
             ty_min: (glyph.y + glyph.h) as f32 / height as f32,
 
-            w: glyph.w,
-            h: glyph.h,
+            w: glyph.w as f32,
+            h: glyph.h as f32,
+
+            dx: glyph.left as f32,
+            dy: glyph.top as f32 - glyph.h as f32,
         }
     }
 
     pub(crate) fn is_none(&self) -> bool {
-        self.w == 0
+        self.w == 0.
     }
 }
 
@@ -346,4 +355,7 @@ struct GlyphRect {
     y: usize,
     w: usize,
     h: usize,
+
+    left: i32,
+    top: i32,
 }

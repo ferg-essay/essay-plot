@@ -3,8 +3,8 @@ use std::time::Instant;
 use essay_plot_api::{driver::FigureApi, Point, CanvasEvent};
 use winit::{
     event::{Event, WindowEvent, ElementState, MouseButton },    
-    event_loop::{EventLoop, ControlFlow}, 
-    window::{Window, CursorIcon},
+    event_loop::{EventLoop, ControlFlow, EventLoopWindowTarget}, 
+    window::{Window, CursorIcon}, raw_window_handle::{HasRawWindowHandle, HasWindowHandle},
 };
 
 use super::{render::{PlotCanvas, PlotRenderer}};
@@ -18,7 +18,6 @@ async fn init_wgpu_args(window: &Window) -> EventLoopArgs {
     let instance = wgpu::Instance::default();
 
     let surface = unsafe { instance.create_surface(&window) }.unwrap();
-
 
     let adapter = instance
         .request_adapter(&wgpu::RequestAdapterOptions {
@@ -148,7 +147,7 @@ fn run_event_loop(
     let mut cursor = CursorState::new();
     let mut mouse = MouseState::new();
 
-    event_loop.run(move |event, _, control_flow| {
+    event_loop.run(move |event, window_target| {
         let _ = (&instance, &adapter, &figure);
 
         let mut main_renderer = MainRenderer::new(
@@ -161,7 +160,7 @@ fn run_event_loop(
 
         let mut is_draw = false;
     
-        *control_flow = ControlFlow::Wait;
+        window_target.set_control_flow(ControlFlow::Wait);
         match event {
             Event::WindowEvent {
                 event: WindowEvent::Resized(size),
@@ -273,15 +272,18 @@ fn run_event_loop(
                     );
                 }
             }
-            Event::RedrawRequested(_) => {
+            Event::WindowEvent {
+                event: WindowEvent::RedrawRequested,
+                ..
+            } => {
                 //figure_renderer.clear();
                 //figure.draw(&mut figure_renderer);
                 is_draw = true;
-            }
+            },
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 ..
-            } => *control_flow = ControlFlow::Exit,
+            } => window_target.exit(),
             _ => {}
         }
 
@@ -295,20 +297,8 @@ fn run_event_loop(
                     queue, 
                     view);
             });
-            /*
-            main_renderer.render(|device, queue, view, encoder| {
-                figure_renderer.draw(
-                    &mut figure,
-                    (config.width, config.height),
-                    window.scale_factor() as f32,
-                    device, 
-                    queue, 
-                    view, 
-                    encoder);
-            });
-            */
         }
-});
+}).unwrap();
 }
 
 struct MainRenderer<'a> {
@@ -369,10 +359,12 @@ impl<'a> MainRenderer<'a> {
                             b: 1.0,
                             a: 1.0,
                         }),
-                        store: true,
+                        store: wgpu::StoreOp::Store,
                     }
                 })],
                 depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
             });
         }
 
@@ -399,7 +391,9 @@ pub trait ViewRenderer {
 }
 
 pub(crate) fn main_loop(figure: Box<dyn FigureApi>) {
-    let event_loop = EventLoop::new();
+    let event_loop = EventLoop::new().unwrap();
+    
+    //EventLoopWindowTarget::from(&event_loop);
     let window = winit::window::Window::new(&event_loop).unwrap();
 
     env_logger::init();

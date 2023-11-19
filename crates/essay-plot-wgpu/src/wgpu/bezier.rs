@@ -1,4 +1,5 @@
-use essay_plot_api::{Point, Color, Affine2d, Clip};
+use bytemuck_derive::{Pod, Zeroable};
+use essay_plot_api::{Point, Color, Affine2d};
 use wgpu::util::DeviceExt;
 
 pub struct BezierRender {
@@ -316,10 +317,12 @@ impl BezierRender {
                 resolve_target: None,
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Load,
-                    store: true,
+                    store: wgpu::StoreOp::Store,
                 }
             })],
             depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
         });
 
         if self.is_stale {
@@ -442,7 +445,7 @@ pub struct BezierItem {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct BezierVertex {
     position: [f32; 2],
     uv: [f32; 3],
@@ -469,7 +472,7 @@ impl BezierVertex {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct BezierStyle {
     affine_0: [f32; 4],
     affine_1: [f32; 4],

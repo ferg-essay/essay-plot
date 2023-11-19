@@ -9,12 +9,16 @@ log = { version = "0.4.17" }
 #essay-tensor = { git = "git://github.com/ferg-essay/essay-tensor", version="0.1.13" }
 essay-tensor = { path = "../../../essay-tensor" }
 essay-plot-api = { path = "../essay-plot-api" }
-wgpu = "0.17"
-wgpu_glyph = "0.20"
-winit = "0.28"
+wgpu = "0.18"
+#wgpu = { git = "git://github.com/gfx-rs/wgpu", version="0.18" }
+#wgpu_glyph = "0.21"
+#glyphon = "0.3"
+swash = "0.1"
+winit = { version = "0.29", features = ["rwh_05"] }
 pollster = "0.3"
 futures-intrusive = "0.5"
-bytemuck = "1.13"
+bytemuck = "1.14"
+bytemuck_derive = "1.5"
 image = "0.24"
 
 [lib]

@@ -1,3 +1,4 @@
+use bytemuck_derive::{Zeroable, Pod};
 use essay_plot_api::{Point, Color, Affine2d, Clip};
 use wgpu::util::DeviceExt;
 
@@ -159,19 +160,6 @@ impl Shape2dRender {
             return;
         }
 
-        let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: None,
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: &view,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Load,
-                    store: true,
-                }
-            })],
-            depth_stencil_attachment: None,
-        });
-
         if self.is_stale {
             self.is_stale = false;
  
@@ -203,6 +191,21 @@ impl Shape2dRender {
             0,
             bytemuck::cast_slice(self.style_vec.as_slice())
         );
+
+        let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: None,
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view: &view,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Load,
+                    store: wgpu::StoreOp::Store,
+                }
+            })],
+            depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
+        });
 
         rpass.set_pipeline(&self.pipeline);
 
@@ -267,7 +270,7 @@ pub struct Shape2dItem {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct Shape2dVertex {
     position: [f32; 2],
 }
@@ -292,7 +295,7 @@ impl Shape2dVertex {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct Shape2dStyle {
     affine_0: [f32; 4],
     affine_1: [f32; 4],

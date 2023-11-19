@@ -1,3 +1,4 @@
+use bytemuck_derive::{Pod, Zeroable};
 use essay_plot_api::{Bounds, Canvas, Affine2d, ImageId};
 use essay_tensor::Tensor;
 use wgpu::util::DeviceExt;
@@ -257,10 +258,12 @@ impl ImageRender {
                 resolve_target: None,
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Load,
-                    store: true,
+                    store: wgpu::StoreOp::Store,
                 }
             })],
             depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
         });
 
         queue.write_buffer(
@@ -330,7 +333,7 @@ impl ImageRender {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct ImageVertex {
     position: [f32; 2],
     tex_coord: [f32; 2],
@@ -366,7 +369,7 @@ pub struct ImageItem {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct ImageStyle {
     affine_0: [f32; 4],
     affine_1: [f32; 4],

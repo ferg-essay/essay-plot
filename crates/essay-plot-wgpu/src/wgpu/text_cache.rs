@@ -1,135 +1,116 @@
-use core::fmt;
 use std::collections::HashMap;
 
-use wgpu_glyph::ab_glyph::{self, Font, PxScale};
+use swash::{FontRef, scale::{ScaleContext, StrikeWith, Source, Render}, CacheKey, Charmap, zeno::Format};
 
 use super::text_texture::TextTexture;
 
 pub struct TextCache {
-    width: u32,
-    height: u32,
+    context: ScaleContext,
+    font_map: HashMap<String, FontId>,
+    fonts: Vec<Font>,
+    glyph_map: HashMap<GlyphId, GlyphRect>,
 
-    data: Vec<u8>,
+    store: TextStore,
 
-    x: u32,
-    y: u32,
-
-    font_map: HashMap<String, FontItem>,
-    glyph_map: HashMap<GlyphId, TextRect>,
     is_modified: bool,
+
 }
 
 impl TextCache {
     pub fn new(width: u32, height: u32) -> Self {
         assert!(width % 256 == 0);
 
-        let mut data = Vec::new();
-        data.resize((width * height) as usize, 0);
-
         Self {
-            width,
-            height,
-            data,
-            x: 0,
-            y: 0,
+            context: ScaleContext::new(),
             font_map: HashMap::default(),
+            fonts: Vec::new(),
             glyph_map: HashMap::default(),
+
+            store: TextStore::new(width as usize, height as usize),
+
             is_modified: true,
         }
     }
 
-    pub fn font(&mut self, name: &str, size: u16) -> ScaledFont {
+    pub fn font(&mut self, name: &str) -> &Font {
         let len = self.font_map.len();
 
-        let entry = self.font_map.entry(name.to_string())
+        let id = self.font_map.entry(name.to_string())
             .or_insert_with(|| {
-                let font = ab_glyph::FontArc::try_from_slice(include_bytes!(
-                    "../../assets/fonts/DejaVuSans.ttf"
-                )).unwrap();
-
-                FontItem {
-                    id: FontId(len),
-                    font,
-                }
+                FontId(len)
             }
         );
 
-        ScaledFont::new(entry.id, entry.font.clone(), size)
-    }
+        if self.fonts.len() <= id.0 {
+            let font_data = include_bytes!(
+                "../../assets/fonts/DejaVuSans.ttf"
+            );
 
-    pub fn glyph(&mut self, font: &ScaledFont, glyph: char) -> TextRect {
-        let glyph_id = GlyphId::new(font.id, font.size, glyph);
-
-        if let Some(rect) = self.find_glyph(&glyph_id) {
-            return rect;
+            self.fonts.push(Font::from_data(*id, font_data).unwrap());
         }
 
-        let rect = self.add_glyph(&font.font, font.size, glyph);
+        &self.fonts[id.0]
+    }
+
+    pub fn glyph(&mut self, font_name: &str, size: u16, glyph: char) -> TextRect {
+        let font_id = self.font(font_name).id;
+        let glyph_id = GlyphId::new(font_id, size, glyph);
+
+        if let Some(rect) = self.find_glyph(&glyph_id) {
+            return TextRect::new(&rect, self.store.width, self.store.height)
+        }
+
+        let rect = self.add_glyph(font_id, size, glyph);
 
         self.glyph_map.insert(glyph_id, rect.clone()); 
 
-        rect
+        TextRect::new(&rect, self.store.width, self.store.height)
     }
 
-    fn find_glyph(&mut self, glyph_id: &GlyphId) -> Option<TextRect> {
+    fn find_glyph(&mut self, glyph_id: &GlyphId) -> Option<GlyphRect> {
         match self.glyph_map.get(glyph_id) {
             Some(rect) => Some(rect.clone()),
             None => None,
         }
     }
 
-    fn add_glyph(&mut self, font: &ab_glyph::FontArc, size: u16, ch: char) -> TextRect {
-        //let scale = font.pt_to_px_scale(size as f32).unwrap();
-        let scale = PxScale::from(size as f32);
-        let glyph = font.glyph_id(ch).with_scale(scale);
+    fn add_glyph(&mut self, font_id: FontId, size: u16, ch: char) -> GlyphRect {
+        let font = &self.fonts[font_id.0];
 
-        let data = self.data.as_mut_slice();
-        let w = self.width as u32;
+        let glyph = font.charmap().map(ch);
 
-        let rect = match font.outline_glyph(glyph) {
-            Some(og) => {
-                let bounds = og.px_bounds();
+        let mut scaler = self.context
+            .builder(font.as_ref())
+            .size(size as f32)
+            .build();
 
-                let dx = bounds.max.x - bounds.min.x;
-                let dy = bounds.max.y - bounds.min.y;
+        let image = Render::new(&[
+            Source::Outline,
+        ]).format(Format::Alpha)
+        .render(&mut scaler, glyph)
+        .unwrap();
 
-                let xc = self.x;
-                let yc = self.y; //  + dy as u32;
+        let placement = image.placement;
 
-                og.draw(|x, y, v| {
-                    //let v = (v * 255.).round().clamp(0., 255.) as u8;
-                    let v = ((v * 17.).round() * 16.).clamp(0., 255.) as u8;
-                    data[(xc + x + w * (yc + dy as u32 - y - 1)) as usize] = v;
-                });
+        let p_w = placement.width as usize;
+        let p_h = placement.height as usize;
 
-                let rect = TextRect::new(
-                    bounds.min.x as i16,
-                    bounds.min.y as i16,
-                    bounds.max.x as i16,
-                    bounds.max.y as i16,
-                    og.glyph().position.y as i16,
-                    xc as f32 / self.width as f32,
-                    yc as f32 / self.height as f32,
-                    (xc as f32 + dx) / self.width as f32,
-                    (yc as f32 + dy) / self.height as f32,
-                );
+        let (x, y) = self.store.add_glyph(
+            p_w, 
+            p_h,
+            &image.data
+        );
 
-                let mut xc = xc + dx as u32 + 1;
-                xc += (4 - xc % 4) % 4;
-
-                self.x = xc;
-                self.y = yc;
-
-                rect
-            },
-            None => {
-                TextRect::none()
-            }
-        };
+        // cursor.write(p_w, p_h, &image.data, &self.store.data);
 
         self.is_modified = true;
 
-        rect
+        GlyphRect {
+            x,
+            y,
+            w: p_w,
+            h: p_h,
+        }
     }
 
     pub(crate) fn flush(
@@ -140,56 +121,170 @@ impl TextCache {
         if self.is_modified {
             self.is_modified = false;
 
-            texture.write_data(queue, &self.data);
+            texture.write_data(queue, &self.store.data);
         }
     }
 }
 
-struct FontItem {
+pub struct Font {
     id: FontId,
-    font: ab_glyph::FontArc,
+
+    data: Vec<u8>,
+    offset: u32,
+    key: CacheKey,
 }
 
-pub struct ScaledFont {
-    id: FontId,
-    font: ab_glyph::FontArc,
-    size: u16,
-    descent: f32,
+impl Font {
+    fn from_data(id: FontId, data: &[u8]) -> Option<Self> {
+        let index = 0;
+
+        let font = FontRef::from_index(data, index)?;
+        let (offset, key) = (font.offset, font.key);
+
+        Some(Self { id, data: data.to_vec(), offset, key })
+    }
+
+    fn charmap(&self) -> Charmap {
+        self.as_ref().charmap()
+    }
+
+    fn as_ref(&self) -> FontRef {
+        FontRef {
+            data: &self.data,
+            offset: self.offset,
+            key: self.key
+        }
+    }
 }
 
-impl ScaledFont {
-    fn new(
-        id: FontId,
-        font: ab_glyph::FontArc,
-        size: u16
-    ) -> Self {
-        let height = font.ascent_unscaled() + font.descent_unscaled();
-        let descent = size as f32 * font.descent_unscaled() / height;
-        
+struct TextStore {
+    width: usize,
+    height: usize,
+
+    data: Vec<u8>,
+
+    tail: usize,
+    cursors: Vec<TextCursor>,
+}
+
+impl TextStore {
+    fn new(width: usize, height: usize) -> Self {
+        assert!(width > 0 && width % 256 == 0);
+        assert!(height > 0);
+
+        let mut data = Vec::new();
+        data.resize(width * height, 0);
+
         Self {
-            id,
-            font,
-            size,
-            descent,
+            width,
+            height,
+            data,
+            tail: 0,
+            cursors: Vec::new(),
         }
     }
 
-    pub(crate) fn _height(&self) -> f32 {
-        self.size as f32
+    fn add_glyph(&mut self, width: usize, height: usize, data: &Vec<u8>) -> (usize, usize) {
+        let cursor = self.cursor(width, height);
+
+        let (x, y) = (cursor.x(), cursor.y());
+        let c_w = cursor.width;
+
+        let offset = cursor.offset;
+
+        for j in 0..height {
+            for i in 0..width {
+                self.data[offset + x + i + (j + y) * c_w] = data[i + j * width];
+            }
+        }
+
+        (x, y)
     }
 
-    pub(crate) fn descent(&self) -> f32 {
-        self.descent
+    fn cursor(&mut self, width: usize, height: usize) -> TextCursor {
+        let height = height.max(1);
+
+        let height_chunk = height + 31;
+        let height_chunk = height_chunk - height_chunk % 32;
+
+        let len = self.cursors.len();
+        for i in (0..len).rev() {
+            if self.cursors[i].height == height_chunk {
+                if width <= self.cursors[i].width - self.cursors[i].x {
+                    return self.cursors[i].add_x(width);
+                }
+
+                self.cursors.remove(i);
+            }
+        }
+
+        return self.add_cursor(height_chunk).add_x(width);
+    }
+
+    fn add_cursor(&mut self, height: usize) -> &mut TextCursor {
+        assert!(height > 0 && height % 32 == 0);
+
+        let len = self.cursors.len();
+        self.cursors.push(TextCursor::new(self.width, height, self.tail));
+
+        self.tail += self.width * height;
+
+        if self.data.len() < self.tail {
+            self.height = 2 * self.height;
+
+            self.data.resize(self.width * self.height, 0);
+        }
+
+        let cursor = &mut self.cursors[len];
+
+        let n_x = cursor.x + 1;
+        if n_x % 4 > 0 {
+            cursor.x += 4 - cursor.x % 4;
+        }
+
+        cursor
     }
 }
 
-impl fmt::Debug for ScaledFont {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("ScaledFont")
-            .field("id", &self.id)
-            .field("font", &self.font)
-            .field("size", &self.size)
-            .finish()
+#[derive(Clone)]
+struct TextCursor {
+    width: usize,
+    height: usize,
+
+    offset: usize,
+
+    x: usize,
+}
+
+impl TextCursor {
+    fn new(width: usize, height: usize, offset: usize) -> Self {
+        TextCursor {
+            width,
+            height,
+            offset,
+            x: 0,
+        }
+    }
+
+    fn x(&self) -> usize {
+        self.x
+    }
+
+    fn y(&self) -> usize {
+        self.offset / self.width
+    }
+
+    fn add_x(&mut self, width: usize) -> TextCursor {
+        let cursor = self.clone();
+
+        let mut n_x = self.x + width + 1;
+        if n_x % 4 > 0 {
+            n_x += 4 - n_x % 4;
+        }
+
+        self.x = n_x;
+
+        cursor
     }
 }
 
@@ -215,121 +310,40 @@ impl GlyphId {
 
 #[derive(Clone, Debug)]
 pub struct TextRect {
-    px_min: i16,
-    py_min: i16,
-    px_max: i16,
-    py_max: i16,
+    pub tx_min: f32,
+    pub ty_min: f32,
 
-    _desc: i16,
+    pub tx_max: f32,
+    pub ty_max: f32,
 
-    tx_min: f32,
-    ty_min: f32,
-    tx_max: f32,
-    ty_max: f32,
+    pub w: usize,
+    pub h: usize,
 }
 
+
 impl TextRect {
-    fn new(
-        px_min: i16,
-        py_min: i16,
-        px_max: i16,
-        py_max: i16,
-
-        desc: i16,
-
-        tx_min: f32,
-        ty_min: f32,
-        tx_max: f32,
-        ty_max: f32,
-    ) -> Self {
+    fn new(glyph: &GlyphRect, width: usize, height: usize) -> Self {
         Self {
-            px_min,
-            py_min,
-            px_max,
-            py_max,
+            tx_min: glyph.x as f32 / width as f32,
+            tx_max: (glyph.x + glyph.w) as f32 / width as f32,
 
-            _desc: desc,
-    
-            tx_min,
-            ty_min,
-            tx_max,
-            ty_max,
+            ty_max: glyph.y as f32 / height as f32,
+            ty_min: (glyph.y + glyph.h) as f32 / height as f32,
+
+            w: glyph.w,
+            h: glyph.h,
         }
     }
 
-    fn none() -> Self {
-        Self {
-            px_min: 0,
-            py_min: 0,
-            px_max: 0,
-            py_max: 0,
-
-            _desc: 0,
-    
-            tx_min: 0.,
-            ty_min: 0.,
-            tx_max: 0.,
-            ty_max: 0.,
-        }
-    }
-
-    #[inline]
     pub(crate) fn is_none(&self) -> bool {
-        self.px_min == self.px_max
+        self.w == 0
     }
+}
 
-    #[inline]
-    pub(crate) fn _px_min(&self) -> i16 {
-        self.px_min
-    }
-
-    #[inline]
-    pub(crate) fn _py_min(&self) -> i16 {
-        self.py_min
-    }
-
-    #[inline]
-    pub(crate) fn _px_max(&self) -> i16 {
-        self.px_max
-    }
-
-    #[inline]
-    pub(crate) fn py_max(&self) -> i16 {
-        self.py_max
-    }
-
-    #[inline]
-    pub(crate) fn px_w(&self) -> u16 {
-        (self.px_max - self.px_min) as u16
-    }
-
-    #[inline]
-    pub(crate) fn px_h(&self) -> u16 {
-        (self.py_max - self.py_min) as u16
-    }
-
-    #[inline]
-    pub(crate) fn _desc(&self) -> u16 {
-        self._desc as u16
-    }
-
-    #[inline]
-    pub(crate) fn tx_min(&self) -> f32 {
-        self.tx_min
-    }
-
-    #[inline]
-    pub(crate) fn ty_min(&self) -> f32 {
-        self.ty_min
-    }
-
-    #[inline]
-    pub(crate) fn tx_max(&self) -> f32 {
-        self.tx_max
-    }
-
-    #[inline]
-    pub(crate) fn ty_max(&self) -> f32 {
-        self.ty_max
-    }
+#[derive(Clone, Debug)]
+struct GlyphRect {
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
 }

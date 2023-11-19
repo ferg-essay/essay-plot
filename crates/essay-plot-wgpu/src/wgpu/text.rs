@@ -1,3 +1,4 @@
+use bytemuck_derive::{Zeroable, Pod};
 use essay_plot_api::{Point, Color, Affine2d, HorizAlign, VertAlign};
 use wgpu::util::DeviceExt;
 
@@ -113,7 +114,7 @@ impl TextRender {
         halign: HorizAlign,
         valign: VertAlign,
     ) {
-        let font = self.text_cache.font(font_name, size as u16);
+        // let font = self.text_cache.font(font_name);
         let x0 = pos.x();
         let y0 = pos.y();
 
@@ -126,7 +127,8 @@ impl TextRender {
         let mut x = x0;
         let y = y0.round();
         for ch in text.chars() {
-            let r = self.text_cache.glyph(&font, ch);
+            let size = (size + 0.5) as u16;
+            let r = self.text_cache.glyph(font_name, size, ch);
             
             x = x.round();
 
@@ -135,19 +137,19 @@ impl TextRender {
                 continue;
             }
 
-            let y_ch = y - r.py_max() as f32;
+            let y_ch = y;// - r.h as f32;
             let x_ch = x;
 
-            let w = r.px_w() as f32;
-            let h = r.px_h() as f32;
+            let w = r.w as f32;
+            let h = r.h as f32;
 
-            self.vertex(x_ch, y_ch, r.tx_min(), r.ty_min());
-            self.vertex(x_ch + w, y_ch, r.tx_max(), r.ty_min());
-            self.vertex(x_ch + w, y_ch + h, r.tx_max(), r.ty_max());
+            self.vertex(x_ch, y_ch, r.tx_min, r.ty_min);
+            self.vertex(x_ch + w, y_ch, r.tx_max, r.ty_min);
+            self.vertex(x_ch + w, y_ch + h, r.tx_max, r.ty_max);
 
-            self.vertex(x_ch + w, y_ch + h, r.tx_max(), r.ty_max());
-            self.vertex(x_ch, y_ch + h, r.tx_min(), r.ty_max());
-            self.vertex(x_ch, y_ch, r.tx_min(), r.ty_min());
+            self.vertex(x_ch + w, y_ch + h, r.tx_max, r.ty_max);
+            self.vertex(x_ch, y_ch + h, r.tx_min, r.ty_max);
+            self.vertex(x_ch, y_ch, r.tx_min, r.ty_min);
 
             x += w + w_inside;
         }
@@ -158,11 +160,13 @@ impl TextRender {
             HorizAlign::Right => - (x - x0),
         };
 
+        let descent = 0.;
+
         let dy = match valign {
-            VertAlign::Top => - size - font.descent(),
-            VertAlign::Center => - 0.5 * (size + font.descent()),
+            VertAlign::Top => - size - descent,
+            VertAlign::Center => - 0.5 * (size + descent),
             VertAlign::BaselineBottom => 0.,
-            VertAlign::Bottom => - font.descent(),
+            VertAlign::Bottom => - descent,
         };
 
         let end = self.vertex_offset;
@@ -202,10 +206,12 @@ impl TextRender {
                 resolve_target: None,
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Load,
-                    store: true,
+                    store: wgpu::StoreOp::Store,
                 }
             })],
             depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
         });
 
         queue.write_buffer(
@@ -258,7 +264,7 @@ impl TextRender {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct TextVertex {
     position: [f32; 2],
     tex_coord: [f32; 2],
@@ -292,7 +298,7 @@ pub struct TextItem {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct GpuTextStyle {
     affine_0: [f32; 4],
     affine_1: [f32; 4],

@@ -1,3 +1,4 @@
+use bytemuck_derive::{Pod, Zeroable};
 use essay_plot_api::{Affine2d, Clip};
 use wgpu::util::DeviceExt;
 
@@ -194,10 +195,12 @@ impl GridMesh2dRender {
                 resolve_target: None,
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Load,
-                    store: true,
+                    store: wgpu::StoreOp::Store,
                 }
             })],
             depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
         });
 
         if self.is_stale {
@@ -290,7 +293,7 @@ pub struct GridMesh2dItem {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct GridMesh2dVertex {
     position: [f32; 2],
     color: u32,
@@ -317,7 +320,7 @@ impl GridMesh2dVertex {
 
 }
 #[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct GridMesh2dStyle {
     affine_0: [f32; 4],
     affine_1: [f32; 4],

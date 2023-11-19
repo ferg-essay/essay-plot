@@ -1,5 +1,5 @@
 use essay_plot_api::{Canvas, driver::FigureApi, Bounds, Clip};
-use wgpu::{SurfaceTexture, TextureView};
+use wgpu::TextureView;
 use image::{ImageBuffer, Rgba};
 
 use crate::{PlotCanvas, PlotRenderer};
@@ -190,10 +190,12 @@ impl WgpuHardcopy {
                             b: 1.0,
                             a: 1.0,
                         }),
-                        store: true,
+                        store: wgpu::StoreOp::Store,
                     }
                 })],
                 depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
             });
         }
 

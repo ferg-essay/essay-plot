@@ -359,6 +359,34 @@ impl FromStr for Color {
     }
 }
 
+pub struct Colors {
+    pub colors: Vec<Color>,
+}
+
+impl Colors {
+    fn new(colors: Vec<Color>) -> Self {
+        Self {
+            colors
+        }
+    }
+
+    pub fn into(self) -> Vec<Color> {
+        self.colors
+    }
+}
+
+impl<const N: usize> From<[&str; N]> for Colors {
+    fn from(value: [&str; N]) -> Self {
+        let mut vec = Vec::new();
+
+        for name in value {
+            vec.push(Color::from(name));
+        }
+
+        Colors::new(vec)
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct ColorErr(String);
 

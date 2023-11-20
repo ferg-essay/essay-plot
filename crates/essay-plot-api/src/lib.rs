@@ -22,7 +22,7 @@ pub use canvas::Canvas;
 
 pub use clip::Clip;
 
-pub use color::Color;
+pub use color::{Color, Colors};
 
 pub use coord::Coord;
 

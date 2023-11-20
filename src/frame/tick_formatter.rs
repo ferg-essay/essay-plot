@@ -26,7 +26,7 @@ fn format_tick(value: f32, delta: f32) -> String {
     let rem = delta % p_digit;
     let rem = rem.min(p_digit - rem);
 
-    if rem > 0. && rem.log10() > -2. {
+    if rem > 0. && -2. < rem.log10() && rem.log10() < -1. {
         precision += 1;
     }
 

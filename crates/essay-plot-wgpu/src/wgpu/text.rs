@@ -125,9 +125,9 @@ impl TextRender {
 
         let s = self.text_cache.glyph(font_name, text_size, ' ');
         let w_space = s.w + s.dx.max(0.);
-        // let w_inside = w_space * 0.3;
+        let w_inside = w_space * 0.3;
 
-        let w_inside = size * 0.07;
+        // let w_inside = size * 0.07;
         let w_space = size * 0.25;
         
         let mut x = x0;

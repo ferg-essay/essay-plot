@@ -71,6 +71,7 @@ pub enum Angle {
 }
 
 impl Angle {
+    #[inline]
     pub fn to_radians(&self) -> f32 {
         match self {
             Angle::Rad(rad) => (*rad + TAU) % TAU,
@@ -79,6 +80,7 @@ impl Angle {
         }
     }
 
+    #[inline]
     pub fn to_degrees(&self) -> f32 {
         match self {
             Angle::Rad(rad) => (rad.to_degrees() + 360.) % 360.,
@@ -87,12 +89,23 @@ impl Angle {
         }
     }
 
+    #[inline]
     pub fn to_unit(&self) -> f32 {
         match self {
             Angle::Rad(rad) => (rad.to_degrees() / 360. + 1.) % 1.,
             Angle::Deg(deg) => (deg / 360. + 1.) % 1.,
             Angle::Unit(unit) => (*unit + 1.) % 1.,
         }
+    }
+
+    #[inline]
+    pub fn cos(&self) -> f32 {
+        self.to_radians().cos()
+    }
+
+    #[inline]
+    pub fn sin(&self) -> f32 {
+        self.to_radians().sin()
     }
 }
 

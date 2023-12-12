@@ -116,6 +116,7 @@ impl Lines2d {
 
 fn build_path(line: &Tensor, draw_style: &DrawStyle) -> Path<Data> {
     let mut codes = Vec::<PathCode>::new();
+    codes.reserve(line.rows());
     
     let mut is_active = false;
     let (mut prev_x, mut prev_y) = (0.0f32, 0.0f32);

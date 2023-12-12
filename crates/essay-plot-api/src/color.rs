@@ -359,6 +359,7 @@ impl FromStr for Color {
     }
 }
 
+#[derive(Clone)]
 pub struct Colors {
     pub colors: Vec<Color>,
 }

@@ -47,7 +47,8 @@ pub use path_opt::{
 };
 
 pub use text::{
-    TextStyle, VertAlign, HorizAlign,
+    TextStyle, VertAlign, HorizAlign, 
+    FontFamily, FontTypeId, FontStyle,
 };
 
 

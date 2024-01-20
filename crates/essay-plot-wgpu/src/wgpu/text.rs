@@ -2,7 +2,7 @@ use bytemuck_derive::{Zeroable, Pod};
 use essay_plot_api::{Point, Color, Affine2d, HorizAlign, VertAlign};
 use wgpu::util::DeviceExt;
 
-use super::{text_texture::TextTexture, text_cache::TextCache};
+use super::{text_texture::TextTexture, text_cache::{TextCache, FontId}};
 
 pub struct TextRender {
     texture: TextTexture,
@@ -102,10 +102,20 @@ impl TextRender {
         self.style_offset = 0;
     }
 
+    ///
+    /// load a font
+    ///
+    pub fn font(&mut self, font_name: &str) -> FontId {
+        self.text_cache.font_id(font_name)
+    }
+
+    ///
+    /// draw a text item
+    /// 
     pub fn draw(
         &mut self, 
         text: &str, 
-        font_name: &str, 
+        font_id: FontId, 
         size: f32,
         pos: Point, 
         bounds: Point,
@@ -115,6 +125,8 @@ impl TextRender {
         valign: VertAlign,
     ) {
         // let font = self.text_cache.font(font_name);
+        // let font_id = self.text_cache.font_id(font_name);
+
         let x0 = pos.x();
         let y0 = pos.y();
 
@@ -123,7 +135,7 @@ impl TextRender {
         // TODO: proper spacing and kerning
         let text_size = (size + 0.5) as u16;
 
-        let s = self.text_cache.glyph(font_name, text_size, ' ');
+        let s = self.text_cache.glyph(font_id, text_size, ' ');
         let w_space = s.w + s.dx.max(0.);
         let w_inside = w_space * 0.3;
 
@@ -133,7 +145,7 @@ impl TextRender {
         let mut x = x0;
         let y = y0.round();
         for ch in text.chars() {
-            let r = self.text_cache.glyph(font_name, text_size, ch);
+            let r = self.text_cache.glyph(font_id, text_size, ch);
             
             x = x.round();
 

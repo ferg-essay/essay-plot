@@ -3,7 +3,7 @@ use essay_plot_api::{
     Bounds, Point, Canvas,
     PathOpt,
     driver::Renderer, 
-    TextStyle, Clip, Angle,
+    TextStyle, Clip, Angle, FontFamily, FontStyle,
 };
 
 use crate::{frame::Data, graph::ConfigArc, data_artist_option_struct, path_style_options};
@@ -138,6 +138,8 @@ pub struct Text {
     path_style: PathStyle,
     text_style: TextStyle,
 
+    family: Option<FontFamily>,
+
     angle: f32,
 }
 
@@ -152,6 +154,8 @@ impl Text {
 
             path_style: PathStyle::new(),
             text_style: TextStyle::new(),
+
+            family: None,
 
             angle: 0.
         }
@@ -214,6 +218,15 @@ impl Artist<Data> for Text {
         let style = self.path_style.push(style);
 
         if self.text.len() > 0 {
+            if let Some(family) = &self.family {
+                let mut font_style = FontStyle::new();
+                font_style.family(family.get_path());
+
+                let font_id = renderer.font(&font_style).unwrap();
+                println!("FontId {:?} {:?}", font_id, family.get_path());
+                self.text_style.font(font_id);
+            }
+
             renderer.draw_text(
                 pos,
                 &self.text,
@@ -264,6 +277,22 @@ impl TextOpt {
     pub fn coord(&mut self, coord: impl Into<TextCoords>) -> &mut Self {
         self.write(|artist| {
             artist.coords = coord.into();
+        });
+
+        self
+    }
+
+    pub fn family(&mut self, family: impl Into<FontFamily>) -> &mut Self {
+        self.write(|artist| {
+            artist.family = Some(family.into());
+        });
+
+        self
+    }
+
+    pub fn size(&mut self, size: f32) -> &mut Self {
+        self.write(|artist| {
+            artist.text_style.size(size);
         });
 
         self

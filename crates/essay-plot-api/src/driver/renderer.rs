@@ -1,6 +1,6 @@
 use essay_tensor::Tensor;
 
-use crate::{Path, PathOpt, TextStyle, Bounds, Point, Canvas, Clip, ImageId};
+use crate::{Path, PathOpt, TextStyle, Bounds, Point, Canvas, Clip, ImageId, FontStyle, FontTypeId};
 
 pub trait Renderer {
     ///
@@ -28,6 +28,11 @@ pub trait Renderer {
         style: &dyn PathOpt, 
         clip: &Clip,
     ) -> Result<(), RenderErr>;
+
+    fn font(
+        &mut self,
+        font_style: &FontStyle
+    ) -> Result<FontTypeId, RenderErr>;
 
     fn draw_text(
         &mut self, 

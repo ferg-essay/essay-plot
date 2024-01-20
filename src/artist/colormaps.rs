@@ -1,11 +1,12 @@
-use crate::artist::color::{Hsv};
+use crate::artist::color::Hsv;
 
-use super::{ColorMap};
+use super::ColorMap;
 
 pub enum ColorMaps {
     Default,
     BlueOrange,
     WhiteRed,
+    WhiteBlue,
 
     BlueYellow,
     BlackWhite,
@@ -51,6 +52,20 @@ impl From<ColorMaps> for ColorMap {
                     (0.80, Hsv(0.06, 0.95, 0.97)), // "bright orange"
                     (0.99, Hsv(0.02, 1.0, 0.94)), // "tomato red"
                     (1.0, Hsv(0.99, 1., 0.90)), // "red" // top 1% distinct
+                ])
+            }
+
+            ColorMaps::WhiteBlue => {
+                // use color temperature (hue) to reinforce transition from
+                // unsaturated/bright to saturated/dark, which distinguishes
+                // quartiles
+                ColorMap::from([
+                    (0.0, Hsv(0.25, 0.10, 0.97)), // "css:beige // touch of color between amber and azure
+
+                    (0.25, Hsv(0.56, 0.80, 0.95)), // "css:dodgerblue",
+                    (0.80, Hsv(0.61, 0.99, 0.87)), // "blue",
+                    (0.99, Hsv(0.66, 0.98, 0.65)), // "cobalt blue" 
+                    (1., Hsv(0.69, 0.92, 0.45)), // "css:midnightblue" bottom 1% distinct
                 ])
             }
 

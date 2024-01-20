@@ -1,11 +1,11 @@
 use essay_plot_api::{
     Canvas, Affine2d, Point, Bounds, Path, PathOpt, Color, PathCode, 
     driver::{RenderErr, Renderer, FigureApi}, 
-    TextStyle, Coord, HorizAlign, VertAlign, JoinStyle, CapStyle, LineStyle, Clip, ImageId
+    TextStyle, Coord, HorizAlign, VertAlign, JoinStyle, CapStyle, LineStyle, Clip, ImageId, FontStyle, FontTypeId
 };
 use essay_tensor::Tensor;
 
-use super::{text::TextRender, shape2d::Shape2dRender, triangulate::triangulate2, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender};
+use super::{text::TextRender, shape2d::Shape2dRender, triangulate::triangulate2, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender, text_cache::FontId};
 
 pub struct PlotCanvas {
     canvas: Canvas,
@@ -15,6 +15,8 @@ pub struct PlotCanvas {
     shape2d_render: Shape2dRender,
     bezier_render: BezierRender,
     text_render: TextRender,
+
+    font_id_default: FontId,
 
     to_gpu: Affine2d,
 
@@ -31,7 +33,9 @@ impl PlotCanvas {
         let triangle_render = GridMesh2dRender::new(device, format);
         let shape2d_render = Shape2dRender::new(device, format);
         let bezier_render = BezierRender::new(device, format);
-        let text_render = TextRender::new(device, format, 512, 512);
+        let mut text_render = TextRender::new(device, format, 512, 512);
+
+        let font_id_default = text_render.font("default");
         
         Self {
             canvas: Canvas::new((), 1.),
@@ -41,6 +45,8 @@ impl PlotCanvas {
             text_render,
             triangle_render,
             bezier_render,
+
+            font_id_default,
 
             to_gpu: Affine2d::eye(),
 
@@ -486,6 +492,19 @@ impl PlotCanvas {
         Ok(())
     }
 
+    fn font(
+        &mut self,
+        style: &FontStyle,
+    ) -> Result<FontTypeId, RenderErr> {
+        if let Some(family) = style.get_family() {
+            let font_id = self.text_render.font(family);
+
+            Ok(FontTypeId(font_id.0)) // i()))
+        } else {
+            Err(RenderErr::NotImplemented)            
+        }
+    }
+
     fn draw_text(
         &mut self,
         xy: Point, // location in Canvas coordinates
@@ -518,9 +537,15 @@ impl PlotCanvas {
             None => VertAlign::Bottom,
         };
 
+        let font_id = match text_style.get_font() {
+            Some(type_id) => FontId(type_id.0),
+            None => self.font_id_default,
+        };
+        // let font_id = self.text_render.font("sans-serif");
+
         self.text_render.draw(
             text,
-            "sans-serif", 
+            font_id,
             size,
             xy, 
             Point(self.canvas.width(), self.canvas.height()),
@@ -971,6 +996,13 @@ impl Renderer for PlotRenderer<'_> {
         clip: &Clip,
     ) -> Result<(), RenderErr> {
         self.figure.draw_markers(marker, xy, scale, color, style, clip)
+    }
+
+    fn font(
+        &mut self,
+        style: &FontStyle
+    ) -> Result<FontTypeId, RenderErr> {
+        self.figure.font(style)
     }
 
     fn draw_text(

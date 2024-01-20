@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fs, ops::Index};
 
-use swash::{FontRef, scale::{ScaleContext, StrikeWith, Source, Render}, CacheKey, Charmap, zeno::Format};
+use swash::{FontRef, scale::{ScaleContext, Source, Render}, CacheKey, Charmap, zeno::Format};
 
 use super::text_texture::TextTexture;
 
@@ -13,7 +13,6 @@ pub struct TextCache {
     store: TextStore,
 
     is_modified: bool,
-
 }
 
 impl TextCache {
@@ -32,7 +31,7 @@ impl TextCache {
         }
     }
 
-    pub fn font(&mut self, name: &str) -> &Font {
+    pub fn font_id(&mut self, name: &str) -> FontId {
         let len = self.font_map.len();
 
         let id = self.font_map.entry(name.to_string())
@@ -42,18 +41,35 @@ impl TextCache {
         );
 
         if self.fonts.len() <= id.0 {
-            let font_data = include_bytes!(
-                "../../assets/fonts/DejaVuSans.ttf"
-            );
+            self.fonts.push(load_font(*id, name));
+        }
 
-            self.fonts.push(Font::from_data(*id, font_data).unwrap());
+        *id
+    }
+
+    #[inline]
+    pub fn font(&mut self, id: FontId) -> &Font {
+        &self.fonts[id.0]
+    }
+
+    pub fn _font(&mut self, name: &str) -> &Font {
+        let len = self.font_map.len();
+
+        let id = self.font_map.entry(name.to_string())
+            .or_insert_with(|| {
+                FontId(len)
+            }
+        );
+
+        if self.fonts.len() <= id.0 {
+            self.fonts.push(load_font(*id, name));
         }
 
         &self.fonts[id.0]
     }
 
-    pub fn glyph(&mut self, font_name: &str, size: u16, glyph: char) -> TextRect {
-        let font_id = self.font(font_name).id;
+    pub fn glyph(&mut self, font_id: FontId, size: u16, glyph: char) -> TextRect {
+        // let font_id = self.font(font_name).id;
         let glyph_id = GlyphId::new(font_id, size, glyph);
 
         if let Some(rect) = self.find_glyph(&glyph_id) {
@@ -129,6 +145,27 @@ impl TextCache {
     }
 }
 
+impl Index<FontId> for TextCache {
+    type Output = Font;
+
+    #[inline]
+    fn index(&self, id: FontId) -> &Self::Output {
+        &self.fonts[id.0]
+    }
+}
+
+fn load_font(id: FontId, path: &str) -> Font {
+    if let Ok(font_data) = fs::read(path) {
+        Font::from_data(id, font_data.as_slice()).unwrap()
+    } else {
+        let font_data = include_bytes!(
+            "../../assets/fonts/DejaVuSans.ttf"
+        );
+
+        Font::from_data(id, font_data).unwrap()
+    }
+}
+
 pub struct Font {
     id: FontId,
 
@@ -193,11 +230,11 @@ impl TextStore {
         let (x, y) = (cursor.x(), cursor.y());
         let c_w = cursor.width;
 
-        let offset = cursor.offset;
+        // let offset = 0;//cursor.offset;
 
         for j in 0..height {
             for i in 0..width {
-                self.data[offset + x + i + (j + y) * c_w] = data[i + j * width];
+                self.data[x + i + (j + y) * c_w] = data[i + j * width];
             }
         }
 
@@ -292,7 +329,7 @@ impl TextCursor {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub struct FontId(usize);
+pub struct FontId(pub usize);
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct GlyphId {

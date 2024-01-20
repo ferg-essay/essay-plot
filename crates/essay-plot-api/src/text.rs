@@ -1,24 +1,11 @@
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone)]
 pub struct TextStyle {
+    font: Option<FontTypeId>,
     size: Option<f32>,
+
     vert_align: Option<VertAlign>,
     horiz_align: Option<HorizAlign>,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum VertAlign {
-    Bottom,
-    BaselineBottom,
-    Center,
-    Top,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum HorizAlign {
-    Left,
-    Center,
-    Right,
 }
 
 impl TextStyle {
@@ -28,10 +15,23 @@ impl TextStyle {
 
     pub fn new() -> Self {
         Self {
+            font: None,
             size: None,
+
             vert_align: None,
             horiz_align: None,
         }
+    }
+
+    #[inline]
+    pub fn get_font(&self) -> &Option<FontTypeId> {
+        &self.font
+    }
+
+    pub fn font(&mut self, id: FontTypeId) -> &mut Self {
+        self.font = Some(id);
+
+        self
     }
 
     #[inline]
@@ -63,4 +63,75 @@ impl TextStyle {
         self.horiz_align = Some(align);
     }
 
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum VertAlign {
+    Bottom,
+    BaselineBottom,
+    Center,
+    Top,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum HorizAlign {
+    Left,
+    Center,
+    Right,
+}
+
+pub struct FontStyle {
+    family: Option<String>,
+}
+
+impl FontStyle {
+    pub fn new() -> Self {
+        FontStyle {
+            family: None,
+        }
+    }
+
+    pub fn family(&mut self, family: &str) -> &mut Self {
+        self.family = Some(family.to_string());
+
+        self
+    }
+
+    pub fn get_family(&self) -> &Option<String> {
+        &self.family
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct FontTypeId(pub usize);
+
+impl FontTypeId {
+    #[inline]
+    pub fn i(&self) -> usize {
+        self.0
+    }
+}
+
+#[derive(Clone)]
+pub struct FontFamily {
+    path: String,
+}
+
+impl FontFamily {
+    pub fn new(family: &str) -> Self {
+        Self {
+            path: family.to_string(),
+        }
+    }
+
+    #[inline]
+    pub fn get_path(&self) -> &str {
+        &self.path
+    }
+}
+
+impl Into<FontFamily> for &str {
+    fn into(self) -> FontFamily {
+        FontFamily::new(self)
+    }
 }

@@ -2,6 +2,7 @@ use essay_plot_api::Color;
 
 use super::color::Hsv;
 
+#[derive(Clone)]
 pub struct ColorMap {
     colors: Vec<[f32; 4]>,
     factor: f32,

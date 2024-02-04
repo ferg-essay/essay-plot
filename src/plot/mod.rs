@@ -12,6 +12,7 @@ mod pie;
 mod plot;
 mod quiver;
 mod scatter;
+mod specgram;
 mod stem;
 mod text;
 mod triplot;
@@ -31,7 +32,7 @@ pub use histogram::hist;
 
 pub use matshow::matshow;
 
-pub use plot::plot;
+pub use plot::{plot, plot_y};
 
 pub use quiver::quiver;
 
@@ -63,12 +64,26 @@ impl Graph {
         plot::plot(self, x, y)
     }
 
+    pub fn plot_y(
+        &mut self, 
+        y: impl Into<Tensor>,
+    ) -> LinesOpt {
+        plot::plot_y(self, y)
+    }
+
     pub fn scatter(
         &mut self, 
         x: impl Into<Tensor>,
         y: impl Into<Tensor>,
     ) -> ScatterOpt {
         scatter::scatter(self, x, y)
+    }
+
+    pub fn specgram(
+        &mut self, 
+        y: impl Into<Tensor>,
+    ) {
+        specgram::specgram(self, y)
     }
 
     pub fn text(

@@ -19,7 +19,7 @@ pub enum ColorMaps {
 impl From<ColorMaps> for ColorMap {
     fn from(value: ColorMaps) -> Self {
         match value {
-            ColorMaps::BlueOrange | ColorMaps::Default => {
+            ColorMaps::BlueOrange => {
                 // use color temperature (hue) to reinforce transition from
                 // unsaturated/bright to saturated/dark, which distinguishes
                 // quartiles
@@ -97,7 +97,7 @@ impl From<ColorMaps> for ColorMap {
                     (0.8, "amber"), (1., "yellow"), 
                 ])
             }
-            ColorMaps::BlueWhite => {
+            ColorMaps::BlueWhite | ColorMaps::Default => {
                 // use color temperature (hue) to reinforce transition from
                 // unsaturated/bright to saturated/dark, which distinguishes
                 // quartiles

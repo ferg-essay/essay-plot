@@ -258,14 +258,14 @@ impl DataBox {
                 true
             }
             CanvasEvent::Pan(_p_start, p_last, p_now) => {
-                let to_data = self.pos_canvas.affine_to(&self.view_bounds);
+                let to_data = self.pos_canvas.affine_to(&self.get_view_bounds());
                 let p0 = to_data.transform_point(*p_last);
                 let p1 = to_data.transform_point(*p_now);
 
                 let dx = p0.x() - p1.x();
                 let dy = p0.y() - p1.y();
 
-                let view = &self.view_bounds;
+                let view = &self.get_view_bounds();
                 self.pan_zoom_bounds = Some(Bounds::new(
                     Point(
                         view.x0() + dx,
@@ -281,7 +281,7 @@ impl DataBox {
             },
             CanvasEvent::ZoomBounds(p_start, p_now) => {
                 if self.pos_canvas.contains(*p_now) {
-                    let to_data = self.pos_canvas.affine_to(&self.view_bounds);
+                    let to_data = self.pos_canvas.affine_to(&self.get_view_bounds());
                     let p0 = to_data.transform_point(*p_start);
                     let p1 = to_data.transform_point(*p_now);
 

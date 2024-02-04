@@ -18,7 +18,7 @@ fn main() {
     graph.title("My Title"); // .color(0x008033).size(18.);
     //graph.x_label("My X-Label"); // .color("brown");
     //graph.y_label("Y-Label"); // .color("teal").size(8.);
-    graph.specgram(&y);
+    graph.specgram(&y).nfft(256).overlap(128);
 
     figure.show();
 }

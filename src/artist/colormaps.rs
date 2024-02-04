@@ -14,6 +14,7 @@ pub enum ColorMaps {
 
     RedYellow,
     BlueWhite,
+    BlueWhite2,
 }
 
 impl From<ColorMaps> for ColorMap {
@@ -105,6 +106,20 @@ impl From<ColorMaps> for ColorMap {
                     // cool, saturated blue to warm, unsaturated blue
                     (0., Hsv(0.69, 0.92, 0.45)), // "css:midnightblue" bottom 1% distinct
                     (0.02, Hsv(0.66, 0.98, 0.65)), // "cobalt blue" 
+                    (0.2, Hsv(0.61, 0.99, 0.87)), // "blue",
+                    (0.5, Hsv(0.56, 0.80, 0.95)), // "css:dodgerblue",
+
+                    (1.0, Hsv(0.25, 0.10, 0.97)), // "css:beige // touch of color between amber and azure
+                ])
+            }
+            ColorMaps::BlueWhite2 => {
+                // use color temperature (hue) to reinforce transition from
+                // unsaturated/bright to saturated/dark, which distinguishes
+                // quartiles
+                ColorMap::from([
+                    // cool, saturated blue to warm, unsaturated blue
+                    (0., Hsv(0.69, 0.92, 0.45)), // "css:midnightblue" bottom 1% distinct
+                    (0.02, Hsv(0.69, 0.92, 0.45)), // "cobalt blue" 
                     (0.2, Hsv(0.61, 0.99, 0.87)), // "blue",
                     (0.5, Hsv(0.56, 0.80, 0.95)), // "css:dodgerblue",
 

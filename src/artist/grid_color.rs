@@ -42,6 +42,18 @@ impl GridColor {
         self.data = data;
     }
 
+    pub(crate) fn norm(&mut self, norm: impl Into<Norm>) {
+        self.norm = norm.into();
+    }
+
+    pub(crate) fn color_map(&mut self, color_map: impl Into<ColorMap>) {
+        self.color_map = color_map.into();
+    }
+
+    pub(crate) fn shading(&mut self, shading: impl Into<Shading>) {
+        self.shading = shading.into();
+    }
+
     fn draw_solid_shading(
         &mut self, 
         renderer: &mut dyn Renderer,
@@ -133,17 +145,21 @@ impl GridColor {
 
 impl Artist<Data> for GridColor {
     fn update(&mut self, _canvas: &Canvas) {
-        let mut xy = TensorVec::<[f32; 2]>::new();
-        let (rows, cols) = (self.data.rows(), self.data.cols());
+        if self.is_stale {
+            self.is_stale = false;
 
-        for j in 0..rows {
-            for i in 0..cols {
-                xy.push([i as f32, j as f32]);
+            let mut xy = TensorVec::<[f32; 2]>::new();
+            let (rows, cols) = (self.data.rows(), self.data.cols());
+
+            for j in 0..rows {
+                for i in 0..cols {
+                    xy.push([i as f32, j as f32]);
+                }
             }
-        }
 
-        self.xy = xy.into_tensor();
-        self.norm.set_bounds(&self.data);
+            self.xy = xy.into_tensor();
+            self.norm.set_bounds(&self.data);
+        }
     }
     
     fn get_extent(&mut self) -> Bounds<Data> {
@@ -193,8 +209,6 @@ impl PlotArtist<Data> for GridColor {
 data_artist_option_struct!(GridColorOpt, GridColor);
 
 impl GridColorOpt {
-    // path_style_options!(style);
-
     pub fn data(&mut self, data: impl Into<Tensor>) -> &mut Self {
         let data = data.into();
         assert!(data.rank() == 2, "ColorGrid data must be rank-2. Shape={:?}", data.shape().as_slice());

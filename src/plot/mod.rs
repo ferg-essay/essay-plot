@@ -1,6 +1,6 @@
 use essay_plot_api::Point;
 use essay_tensor::Tensor;
-use crate::{graph::Graph, artist::{LinesOpt, ContainerOpt, TextOpt}};
+use crate::{graph::Graph, artist::{ContainerOpt, GridColorOpt, LinesOpt, TextOpt}};
 
 mod bar;
 mod contour;
@@ -48,6 +48,8 @@ pub use scatter::{
 
 pub use triplot::triplot;
 
+use self::specgram::SpecGramOpt;
+
 impl Graph {
     pub fn pie(
         &mut self,
@@ -82,7 +84,7 @@ impl Graph {
     pub fn specgram(
         &mut self, 
         y: impl Into<Tensor>,
-    ) {
+    ) -> SpecGramOpt {
         specgram::specgram(self, y)
     }
 

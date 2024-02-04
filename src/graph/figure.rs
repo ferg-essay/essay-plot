@@ -46,8 +46,6 @@ impl Figure {
         let mut device = self.device;
 
         device.main_loop(Box::new(inner)).unwrap();
-
-        todo!();
     }
 
     pub fn save(&mut self, width: u32, height: u32, path: impl AsRef<std::path::Path>) {

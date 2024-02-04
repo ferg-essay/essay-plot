@@ -1,4 +1,4 @@
-use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Path, driver::Renderer, Affine2d, JoinStyle, CapStyle};
+use essay_plot_api::{driver::Renderer, Affine2d, Bounds, Canvas, CapStyle, Clip, Color, JoinStyle, Path, PathOpt, Point};
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{frame::{Data, LegendHandler}, artist::{Norm, Norms}, graph::ConfigArc, data_artist_option_struct};
@@ -40,6 +40,7 @@ impl GridColor {
         assert!(data.rank() == 2, "colormesh requires 2d value {:?}", data.shape().as_slice());
 
         self.data = data;
+        self.is_stale = true;
     }
 
     pub(crate) fn norm(&mut self, norm: impl Into<Norm>) {
@@ -70,7 +71,7 @@ impl GridColor {
         let path: Path<Canvas> = path.transform(&scale_canvas);
         let xy = to_canvas.transform(&self.xy);
 
-        //let norm = normalize_unit(&self.data);
+        // let norm = normalize_unit(&self.data);
 
         let colormap = &self.color_map;
 
@@ -83,6 +84,8 @@ impl GridColor {
         let colors = colors.into_tensor();
 
         let mut style = PathStyle::new();
+        style.edge_color(Color(0));
+        style.line_width(0.);
 
         // style.edge_color("k");
         style.join_style(JoinStyle::Bevel);
@@ -141,6 +144,11 @@ impl GridColor {
 
         renderer.draw_triangles(vertices, colors, triangles, clip).unwrap();
     }
+
+    pub(crate) fn set_norm(&mut self, min: f32, max: f32) {
+        self.norm.set_vmin(min);
+        self.norm.set_vmax(max);
+    }
 }
 
 impl Artist<Data> for GridColor {
@@ -159,6 +167,7 @@ impl Artist<Data> for GridColor {
 
             self.xy = xy.into_tensor();
             self.norm.set_bounds(&self.data);
+            println!("Bounds: {:?} {:?}", self.norm.min(), self.norm.max());
         }
     }
     

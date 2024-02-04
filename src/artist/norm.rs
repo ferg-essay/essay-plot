@@ -7,7 +7,11 @@ pub struct Norm {
     min: f32,
     max: f32,
 
-    scale: Box<dyn Fn(f32) -> f32 + Send>,
+    scale: Box<dyn Fn(f32) -> f32 + Send + 'static>,
+}
+
+pub trait NormScale : Send + 'static {
+    fn scale(&self, v: f32) -> f32;
 }
 
 impl Norm {
@@ -30,8 +34,9 @@ impl Norm {
         let (mut min, mut max) = (f32::MAX, f32::MIN);
 
         for value in values.iter() {
-            min = min.min(*value);
-            max = max.max(*value);
+            let value = self.scale(*value);
+            min = min.min(value);
+            max = max.max(value);
         }
 
         if min == max {
@@ -57,10 +62,30 @@ impl Norm {
         self
     }
 
+    pub fn set_vmin(&mut self, min: f32) -> &mut Self {
+        self.vmin = Some(min);
+
+        self
+    }
+
     pub fn vmax(mut self, max: f32) -> Self {
         self.vmax = Some(max);
 
         self
+    }
+
+    pub fn set_vmax(&mut self, max: f32) -> &mut Self {
+        self.vmax = Some(max);
+
+        self
+    }
+
+    pub fn min(&self) -> f32 {
+        self.min
+    }
+
+    pub fn max(&self) -> f32 {
+        self.max
     }
 
     #[inline]
@@ -71,8 +96,12 @@ impl Norm {
     }
 }
 
+#[derive(Clone, Debug)]
 pub enum Norms {
     Linear,
+    Log10,
+    Log2,
+    Ln,    
 }
 
 impl Norms {
@@ -89,10 +118,29 @@ impl From<Norms> for Norm {
     fn from(value: Norms) -> Self {
         match value {
             Norms::Linear => Norm::new(scale_linear),
+            Norms::Log10 => Norm::new(scale_log10),
+            Norms::Log2 => Norm::new(scale_log2),
+            Norms::Ln => Norm::new(scale_ln),
         }
     }
 }
 
+#[inline]
 fn scale_linear(value: f32) -> f32 {
     value
+}
+
+#[inline]
+fn scale_log10(value: f32) -> f32 {
+    value.log10()
+}
+
+#[inline]
+fn scale_log2(value: f32) -> f32 {
+    value.log2()
+}
+
+#[inline]
+fn scale_ln(value: f32) -> f32 {
+    value.ln()
 }

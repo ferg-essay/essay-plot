@@ -51,7 +51,7 @@ impl ColorMap {
     pub fn map(&self, v: f32) -> Color {
         let offset = v * self.factor;
         let i = (offset as usize).min(self.colors.len() - 2);
-        let offset = offset - i as f32;
+        let offset = (offset - i as f32).clamp(0., 1.);
 
         let c0 = self.colors[i];
         let c1 = self.colors[i + 1];

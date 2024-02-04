@@ -141,6 +141,10 @@ impl PlotCanvas {
             None => 0.5,
         };
 
+        if linewidth <= 0. {
+            return;
+        }
+
         let joinstyle  = match style.get_join_style() {
             Some(joinstyle) => joinstyle.clone(),
             None => JoinStyle::Bevel,

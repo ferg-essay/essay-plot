@@ -76,7 +76,7 @@ impl PathStyle {
     }
 
     pub fn line_width(&mut self, linewidth: f32) -> &mut Self {
-        assert!(linewidth > 0.);
+        // assert!(linewidth > 0.);
 
         self.line_width = Some(linewidth);
 

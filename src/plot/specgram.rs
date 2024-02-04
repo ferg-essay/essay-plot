@@ -1,9 +1,7 @@
 use essay_plot_api::{driver::Renderer, Bounds, Canvas, Clip, PathOpt};
-use essay_tensor::{array::stack, init::linspace, signal::rfft_norm, Tensor};
+use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 
-use crate::{artist::{Artist, ColorMap, ColorMaps, GridColor, GridColorOpt, Lines2d, LinesOpt, Norm, PlotArtist, PlotId, Shading, ToCanvas}, data_artist_option_struct, frame::{Data, LegendHandler}, graph::{ConfigArc, Graph}};
-
-use super::{grid_color, matshow};
+use crate::{artist::{Artist, ColorMap, ColorMaps, GridColor, Norm, Norms, PlotArtist, PlotId, Shading, ToCanvas}, data_artist_option_struct, frame::{Data, LegendHandler}, graph::{ConfigArc, Graph}};
 
 pub fn specgram(
     graph: &mut Graph, 
@@ -21,6 +19,7 @@ pub struct SpecGram {
     data: Tensor,
     nfft: usize,
     overlap: usize,
+    norm: Norm,
 
     is_stale: bool,
 }
@@ -30,34 +29,34 @@ impl SpecGram {
         let data : Tensor = data.into();
         assert!(data.rank() == 1, "specgram requires 1d value {:?}", data.shape().as_slice());
 
-        let nfft = 512;
+        let nfft = 256;
         let overlap = 128;
 
         let spectrum = calculate_spectrum(&data, nfft, overlap);
 
+        let norms = Norms::Ln;
+
         let mut grid_color = GridColor::new(spectrum);
-        grid_color.color_map(ColorMaps::BlueWhite2);
+        //grid_color.color_map(ColorMaps::BlueWhite2);
+        grid_color.color_map(ColorMaps::BlueOrange);
+        grid_color.norm(Norm::from(norms.clone()));
 
         Self {
             data: data,
             nfft,
             overlap,
             grid_color,
-
-            is_stale: false,
+            norm: Norm::from(norms),
+            
+            is_stale: true,
         }
     }
 
     pub(crate) fn set_data(&mut self, data: Tensor) {
-        assert!(data.rank() == 2, "specgram requires 2d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 1, "specgram requires 2d value {:?}", data.shape().as_slice());
 
         self.data = data;
-        let spectrum = calculate_spectrum(
-            &self.data, 
-            self.nfft, 
-            self.overlap
-        );
-        self.grid_color.set_data(spectrum);
+        self.is_stale = true;
     }
 }
 
@@ -77,7 +76,7 @@ fn calculate_spectrum(data: &Tensor, nfft: usize, overlap: usize) -> Tensor {
         }
 
         let value = rfft_norm(slice, ());
-        let value = value.subslice(1, value.len() - 1);
+        let value = value.subslice(0, value.len() - 1);
 
         values.push(value);
 
@@ -96,7 +95,13 @@ impl Artist<Data> for SpecGram {
                 self.nfft, 
                 self.overlap
             );
+
+            self.norm.set_bounds(&spectrum);
+
+            let max = self.norm.max();
+            let min = self.norm.min().max(max - 4.);
             self.grid_color.set_data(spectrum);
+            self.grid_color.set_norm(min, max);
         }
 
         self.grid_color.update(canvas);

@@ -24,7 +24,7 @@ fn main() {
     //graph.x_label("My X-Label"); // .color("brown");
     //graph.y_label("Y-Label"); // .color("teal").size(8.);
     graph.plot(&x, &y);
-    graph.xlim(0., 1.);
+    // graph.xlim(0., 1.);
 /*
     graph.scatter(&x, &y).color("blue").marker("X")
         .line_color(0xff8000)

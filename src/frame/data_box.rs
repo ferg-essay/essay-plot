@@ -14,6 +14,7 @@ pub struct DataBox {
 
     data_bounds: Bounds<Data>,
     view_bounds: Bounds<Data>,
+    pan_zoom_bounds: Option<Bounds<Data>>,
 
     x_lim: Option<(f32, f32)>,
     y_lim: Option<(f32, f32)>,
@@ -40,6 +41,7 @@ impl DataBox {
 
             data_bounds: Bounds::<Data>::unit(),
             view_bounds: Bounds::<Data>::unit(),
+            pan_zoom_bounds: None,
 
             x_lim: None,
             y_lim: None,
@@ -115,7 +117,7 @@ impl DataBox {
 
         self.update_aspect();
         
-        self.to_canvas = self.view_bounds.affine_to(&self.pos_canvas);
+        self.to_canvas = self.get_view_bounds().affine_to(&self.pos_canvas);
 
         if self.is_flip_y {
             self.to_canvas = self.to_canvas
@@ -169,7 +171,6 @@ impl DataBox {
         }
 
         self.view_bounds = Bounds::new(Point(xmin, ymin), Point(xmax, ymax));
-
         // pos.clone()
     }
 
@@ -236,7 +237,11 @@ impl DataBox {
     }
 
     pub(crate) fn get_view_bounds(&self) -> &Bounds<Data> {
-        &self.view_bounds
+        if let Some(bounds) = &self.pan_zoom_bounds {
+            bounds
+        } else {
+            &self.view_bounds
+        }
     }
 
     pub(crate) fn get_canvas_transform(&self) -> &Affine2d {
@@ -249,6 +254,7 @@ impl DataBox {
             CanvasEvent::ResetView(_) => {
                 //self.update_view();
                 self.is_stale = true;
+                self.pan_zoom_bounds = None;
                 true
             }
             CanvasEvent::Pan(_p_start, p_last, p_now) => {
@@ -260,7 +266,7 @@ impl DataBox {
                 let dy = p0.y() - p1.y();
 
                 let view = &self.view_bounds;
-                self.view_bounds = Bounds::new(
+                self.pan_zoom_bounds = Some(Bounds::new(
                     Point(
                         view.x0() + dx,
                         view.y0() + dy,
@@ -269,7 +275,7 @@ impl DataBox {
                         view.x1() + dx,
                         view.y1() + dy,
                     )
-                );
+                ));
 
                 true
             },
@@ -281,7 +287,7 @@ impl DataBox {
 
                     // let view = &self.view_bounds;
                     // TODO: check min size?
-                    self.view_bounds = Bounds::new(p0, p1);
+                    self.pan_zoom_bounds = Some(Bounds::new(p0, p1));
                 }
 
                 true

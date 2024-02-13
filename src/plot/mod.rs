@@ -1,12 +1,13 @@
 use essay_plot_api::Point;
 use essay_tensor::Tensor;
-use crate::{graph::Graph, artist::{ContainerOpt, GridColorOpt, LinesOpt, TextOpt}};
+use crate::{artist::{ContainerOpt, GridColorOpt, ImageOpt, LinesOpt, TextOpt}, graph::Graph};
 
 mod bar;
 mod contour;
 mod fill_between;
 mod grid_color;
 mod histogram;
+mod image;
 mod matshow;
 mod pie;
 mod plot;
@@ -51,6 +52,13 @@ pub use triplot::triplot;
 use self::specgram::SpecGramOpt;
 
 impl Graph {
+    pub fn image(
+        &mut self, 
+        y: impl Into<Tensor>,
+    ) -> ImageOpt {
+        image::image(self, y)
+    }
+
     pub fn pie(
         &mut self,
         x: impl Into<Tensor>, 

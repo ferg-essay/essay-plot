@@ -140,7 +140,7 @@ impl TextRender {
         let w_inside = w_space * 0.3;
 
         // let w_inside = size * 0.07;
-        let w_space = size * 0.25;
+        let w_space = size * 0.4;
         
         let mut x = x0;
         let y = y0.round();
@@ -149,7 +149,7 @@ impl TextRender {
             
             x = x.round();
 
-            if r.is_none() {
+            if r.is_none() || ch == ' ' {
                 x += w_space;
                 continue;
             }

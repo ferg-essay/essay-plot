@@ -76,7 +76,7 @@ fn calculate_spectrum(data: &Tensor, nfft: usize, overlap: usize) -> Tensor {
         }
 
         let value = rfft_norm(slice, ());
-        let value = value.subslice(0, value.len() - 1);
+        let value = value.subslice(1, value.len() - 1);
 
         values.push(value);
 

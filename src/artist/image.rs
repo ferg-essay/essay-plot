@@ -1,16 +1,21 @@
 use essay_plot_api::driver::Renderer;
-use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Affine2d};
+use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt};
 use essay_tensor::Tensor;
 
+use crate::data_artist_option_struct;
+use crate::frame::LegendHandler;
+use crate::graph::ConfigArc;
 use crate::{frame::Data, artist::{Norms, Norm}};
 
-use super::{Artist, ColorMap, ColorMaps, ToCanvas};
+use super::{Artist, ColorMap, ColorMaps, PlotArtist, PlotId, ToCanvas};
 
 pub struct Image {
     data: Tensor,
     norm: Norm,
     color_map: ColorMap,
     image: Tensor<u32>,
+    extent: Option<Bounds<Data>>,
+    is_stale: bool,
 }
 
 impl Image {
@@ -23,7 +28,9 @@ impl Image {
             data,
             norm: Norm::from(Norms::Linear),
             color_map: ColorMaps::Default.into(), // ColorMaps::Default.into(),
-            image: Tensor::empty()
+            image: Tensor::empty(),
+            extent: None,
+            is_stale: true,
         }
     }
 
@@ -33,7 +40,7 @@ impl Image {
         self
     }
 
-    pub fn cmap(&mut self, cmap: impl Into<ColorMap>) -> &mut Self {
+    pub fn color_map(&mut self, cmap: impl Into<ColorMap>) -> &mut Self {
         self.color_map = cmap.into();
 
         self
@@ -52,12 +59,17 @@ impl Artist<Data> for Image {
     }
     
     fn get_extent(&mut self) -> Bounds<Data> {
-        let (rows, cols) = (self.data.rows(), self.data.cols());
+        match &self.extent {
+            Some(extent) => extent.clone(),
+            None => {
+                let (rows, cols) = (self.data.rows(), self.data.cols());
 
-        Bounds::new(
-            Point(0.0, 0.),
-            Point(cols as f32, rows as f32),
-        )
+               Bounds::new(
+                    Point(0.0, 0.),
+                    Point(cols as f32, rows as f32),
+                )
+            }
+        }
     }
 
     fn draw(
@@ -91,5 +103,57 @@ impl Artist<Data> for Image {
         let colors = Tensor::from(colors).reshape([self.data.rows(), self.data.cols(), 4]);
     
         renderer.draw_image(&bounds, &colors, clip).unwrap();
+    }
+}
+
+impl PlotArtist<Data> for Image {
+    type Opt = ImageOpt;
+
+    fn config(&mut self, _cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+        unsafe { ImageOpt::new(id) }
+    }
+
+    fn get_legend(&self) -> Option<LegendHandler> {
+        None
+    }
+}
+
+data_artist_option_struct!(ImageOpt, Image);
+
+impl ImageOpt {
+    pub fn data(&mut self, data: impl Into<Tensor>) -> &mut Self {
+        let data = data.into();
+        assert!(data.rank() == 2, "Image data must be rank 2. Shape={:?}", data.shape().as_slice());
+
+        self.write(|artist| {
+            artist.data = data;
+            artist.is_stale = true;
+        });
+
+        self
+    }
+
+    pub fn extent(&mut self, extent: impl Into<Bounds<Data>>) -> &mut Self {
+        self.write(|artist| {
+            artist.extent = Some(extent.into());
+        });
+
+        self
+    }
+
+    pub fn norm(&mut self, norm: impl Into<Norm>) -> &mut Self {
+            self.write(|artist| {
+            artist.norm(norm);
+        });
+
+        self
+    }
+
+    pub fn color_map(&mut self, cmap: impl Into<ColorMap>) -> &mut Self {
+        self.write(|artist| {
+           artist.color_map(cmap);
+        });
+
+        self
     }
 }

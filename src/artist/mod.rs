@@ -59,7 +59,9 @@ pub use histogram::{
     Histogram, HistogramOpt, 
 };
 
-pub use image::Image;
+pub use image::{
+    Image, ImageOpt
+};
 
 pub use tricontour::TriContour;
 

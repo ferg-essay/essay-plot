@@ -313,8 +313,9 @@ impl YAxis {
         for yv in yvalues {
             if ymin <= yv && yv <= ymax {
                 self.major_ticks.push(yv);
+                let tick_v = yv;
                 self.major_labels.push(
-                    self.axis.major().format(&self.axis, yv, delta)
+                    self.axis.major().format(&self.axis, tick_v, delta)
                 );
             };
         }

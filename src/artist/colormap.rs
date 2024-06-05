@@ -48,6 +48,16 @@ impl ColorMap {
         }
     }
 
+    pub fn reverse(&self) -> Self {
+        let mut colors = self.colors.clone();
+        colors.reverse();
+
+        Self {
+            colors,
+            factor: self.factor,
+        }
+    }
+
     pub fn map(&self, v: f32) -> Color {
         let offset = v * self.factor;
         let i = (offset as usize).min(self.colors.len() - 2);

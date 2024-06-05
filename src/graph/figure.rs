@@ -48,8 +48,26 @@ impl Figure {
         device.main_loop(Box::new(inner)).unwrap();
     }
 
-    pub fn save(&mut self, width: u32, height: u32, path: impl AsRef<std::path::Path>) {
-        crate::wgpu::draw_hardcopy(width, height, &mut self.inner, path);    
+    pub fn get_width(&self) -> f32 {
+        self.inner.size.0
+    }
+
+    pub fn get_height(&self) -> f32 {
+        self.inner.size.1
+    }
+
+    pub fn get_dpi(&self) -> f32 {
+        self.inner.dpi
+    }
+
+    pub fn save(&mut self, path: impl AsRef<std::path::Path>, dpi: f32) {
+        crate::wgpu::draw_hardcopy(
+            self.get_width() * dpi,
+            self.get_height() * dpi,
+            dpi,
+            &mut self.inner, 
+            path
+        );    
     }
 }
 
@@ -81,6 +99,9 @@ pub struct FigureInner {
     gridspec: Bounds<Layout>,
     layout: LayoutArc,
 
+    size: (f32, f32),
+    dpi: f32,
+
     graphs: Vec<Graph>,
 }
 
@@ -88,6 +109,9 @@ impl FigureInner {
     pub fn new() -> Self {
         let config = read_config();
         Self {
+            size: (6.4, 4.8),
+            dpi: 200.,
+
             layout: LayoutArc::new(config),
             gridspec: Bounds::none(),
             graphs: Default::default(),

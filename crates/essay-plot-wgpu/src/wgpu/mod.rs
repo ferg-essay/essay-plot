@@ -1,6 +1,7 @@
 mod bezier;
 mod triangle2d;
 mod shape2d;
+mod shape2d_texture;
 mod image;
 mod main_loop;
 mod render;

@@ -44,10 +44,15 @@ impl Tri {
 
                     prev = *p;
                 },
-                PathCode::Bezier2(_, p) => {
-                    tri.add_edge(prev, *p);
+                PathCode::Bezier2(p1, p2) => {
+                    if Triangle::ccw(prev, *p1, *p2) {
+                        tri.add_edge(prev, *p2);
+                    } else {
+                        tri.add_edge(prev, *p1);
+                        tri.add_edge(*p1, *p2);
+                    }
 
-                    prev = *p;
+                    prev = *p2;
                 },
                 PathCode::Bezier3(_, _, p) => {
                     tri.add_edge(prev, *p);
@@ -440,6 +445,20 @@ impl Trap {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Triangle(Point, Point, Point);
+
+impl Triangle {
+    pub fn ccw(
+        a: impl Into<Point>,
+        b: impl Into<Point>,
+        c: impl Into<Point>
+    ) -> bool {
+        let a = a.into();
+        let b = b.into();
+        let c = c.into();
+
+        (b.x() - a.x()) * (c.y() - a.y()) - (c.x() - a.x()) * (b.y() - a.y()) > 0.
+    }
+}
 
 impl Index<usize> for Triangle {
     type Output = Point;

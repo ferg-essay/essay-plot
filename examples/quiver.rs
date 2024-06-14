@@ -1,8 +1,7 @@
 use essay_plot::prelude::*;
-use essay_tensor::{prelude::*, init::{arange, meshgrid, linspace}};
+use essay_tensor::init::{arange, meshgrid};
 
 fn main() { 
-
     let mut figure = Figure::new();
     let mut graph = figure.new_graph(());
 

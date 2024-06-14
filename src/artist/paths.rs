@@ -111,7 +111,7 @@ pub fn wedge(angle: (Angle, Angle)) -> Path<Unit> {
     let dt = (t1 - t0) / n as f32;
     let t = (0.5 * dt).tan();
     let alpha = dt.sin() * ((4. + 3. * t * t).sqrt() - 1.) / 3.;
-    // let mut vec = TensorVec::<[f32; 2]>::new();
+    
     let mut codes = Vec::new();
 
     codes.push(PathCode::MoveTo(Point(cos[0], sin[0])));
@@ -136,6 +136,51 @@ pub fn wedge(angle: (Angle, Angle)) -> Path<Unit> {
     let path = Path::new(codes);
 
     path
+}
+
+pub fn hollow_wedge(r: f32, angle: (Angle, Angle)) -> Path<Unit> {
+    assert!(r >= 0. && r <= 1.);
+
+    let halfpi = 0.5 * PI;
+
+    let (t0, t1) = (angle.0.to_radians(), angle.1.to_radians());
+    
+    let t1 = if t0 < t1 { t1 } else { t1 + TAU };
+
+    // TODO:
+    let n = 2.0f32.powf(((t1 - t0) / halfpi).ceil()) as usize;
+
+    let steps = linspace(t0, t1, n + 1);
+
+    let cos = steps.cos();
+    let sin = steps.sin();
+
+    let dt = (t1 - t0) / n as f32;
+    let t = (0.5 * dt).tan();
+    let alpha = dt.sin() * ((4. + 3. * t * t).sqrt() - 1.) / 3.;
+    
+    let mut codes = Vec::new();
+
+    codes.push(PathCode::MoveTo(Point(cos[0], sin[0])));
+
+    for i in 1..=n {
+        codes.push(PathCode::Bezier3(
+            Point(
+                cos[i - 1] - alpha * sin[i - 1],
+                sin[i - 1] + alpha * cos[i - 1],
+            ),
+            Point(cos[i] + alpha * sin[i], sin[i] - alpha * cos[i]),
+            Point(cos[i], sin[i]),
+        ));
+    }
+
+    // vec.push([0., 0.]);
+    codes.push(PathCode::ClosePoly(Point(0., 0.)));
+
+    //let path = Path::new(codes);
+
+    //path
+    todo!();
 }
 
 // Via matplotlib

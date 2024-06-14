@@ -20,7 +20,7 @@ fn main_plot() {
 
     graph.plot(&x, &y);
 
-    figure.save(640, 480, "../test.png");
+    figure.save("../test.png", 144.);
 }
 
 fn main_grid() { 
@@ -37,7 +37,7 @@ fn main_grid() {
     grid_color(&mut graph1, &z).shading(Shading::Flat);
     grid_color(&mut graph2, &z).shading(Shading::Gouraud);
 
-    figure.save(640, 480, "../test.png");
+    figure.save("../test.png", 144.);
 }
 
 fn main_plot2() {
@@ -114,6 +114,6 @@ fn main_plot2() {
     //graph3.title("Reward");
     //graph4.title("Reward");
 
-    figure.save(1024, 600, "../test.png");
+    figure.save("../test.png", 144.);
     figure.show();
 }

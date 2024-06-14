@@ -190,7 +190,7 @@ impl ImageRender {
 
     pub fn draw_image(
         &mut self, 
-        device: &wgpu::Device,
+        _device: &wgpu::Device,
         pos: &Bounds<Canvas>,
         image: &ImageId,
         affine: &Affine2d,
@@ -301,7 +301,7 @@ impl ImageRender {
                 (stride * item.index) as u64..(stride * (item.index + 1)) as u64
             ));
 
-            if let Some(image) = item.image {
+            if let Some(_image) = item.image {
                 todo!();
                 //write_rgba_texture(queue, &self.textures[item.tex_index], &image, 
                 //    image.dim(1) as u32, image.dim(0) as u32

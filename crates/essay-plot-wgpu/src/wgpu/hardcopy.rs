@@ -2,7 +2,7 @@ use std::{fs::File, io::BufWriter};
 
 use essay_plot_api::{Canvas, driver::FigureApi, Bounds, Clip};
 use wgpu::TextureView;
-use image::{ImageBuffer, ImageEncoder, Rgba};
+use image::{ImageBuffer, Rgba};
 
 use crate::{PlotCanvas, PlotRenderer};
 
@@ -57,8 +57,6 @@ pub fn draw_hardcopy(
 pub(crate) struct WgpuHardcopy {
     pub(crate) width: u32,
     pub(crate) height: u32,
-    pub(crate) wgpu_width: u32,
-    pub(crate) wgpu_height: u32,
     pub(crate) device: wgpu::Device,
     pub(crate) texture: wgpu::Texture,
     pub(crate) texture_size: wgpu::Extent3d,
@@ -73,24 +71,6 @@ impl WgpuHardcopy {
         // wgpu_canvas.event_loop = Some(event_loop);
 
         wgpu_canvas
-    }
-
-    pub fn draw(
-        &mut self, 
-        //draw: impl FnOnce(&WgpuHardcopy, &wgpu::TextureView),
-        figure: &mut dyn FigureApi,
-        dpi: usize,
-        path: impl AsRef<std::path::Path>,
-    ) {
-        let view = self.texture
-            .create_view(&wgpu::TextureViewDescriptor::default());
-
-        //self.clear_screen(&view);
-
-        //save(self, &view);
-
-        // frame.present();
-        pollster::block_on(self.extract_buffer(path, dpi));
     }
 
     pub fn save(
@@ -216,10 +196,6 @@ impl WgpuHardcopy {
 
         self.queue.submit(Some(encoder.finish()));
     }
-
-    pub(crate) fn set_stale(&self) {
-        
-    }
 }
 
 fn save_png(
@@ -300,8 +276,6 @@ async fn init_wgpu_args(width: u32, height: u32) -> WgpuHardcopy {
     WgpuHardcopy {
         width,
         height,
-        wgpu_width,
-        wgpu_height,
         device,
         texture,
         texture_size: texture_desc.size,

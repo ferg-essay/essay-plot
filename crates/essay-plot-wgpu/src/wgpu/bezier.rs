@@ -153,9 +153,12 @@ impl BezierRender {
         let mut nx = dy * lw2;
         let mut ny = dx * lw2;
 
+        /*
         let ccw = 
             (b1.x() - b0.x()) * (b2.y() - b0.y())
             - (b2.x() - b0.x()) * (b1.y() - b0.y());
+            */
+        let ccw = ccw(b0, b1, b2);
 
         let min_bezier_area = 1.;
         if ccw.abs() < min_bezier_area {
@@ -269,9 +272,15 @@ impl BezierRender {
         p1: &Point,
         p2: &Point,
     ) {
-        self.vertex_bezier(p0.x(), p0.y(), -1.0,1., 0.);
-        self.vertex_bezier(p1.x(), p1.y(), 0.0, -1., 0.);
-        self.vertex_bezier(p2.x(), p2.y(), 1.0, 1., 0.);
+        if ccw(p0, p1, p2) > 0. {
+            self.vertex_bezier(p0.x(), p0.y(), -1.0,1., 0.);
+            self.vertex_bezier(p1.x(), p1.y(), 0.0, -1., 0.);
+            self.vertex_bezier(p2.x(), p2.y(), 1.0, 1., 0.);
+        } else {
+            self.vertex_bezier(p0.x(), p0.y(), -1.0,1., 1.);
+            self.vertex_bezier(p1.x(), p1.y(), 0.0, 1., -1.);
+            self.vertex_bezier(p2.x(), p2.y(), 1.0, 1., 1.);
+        }
     }
 
     pub fn draw_style(
@@ -406,6 +415,11 @@ impl BezierRender {
         self.vertex_vec[self.vertex_offset] = vertex;
         self.vertex_offset += 1;
     }
+}
+
+fn ccw(b0: &Point, b1: &Point, b2: &Point) -> f32 {
+    (b1.x() - b0.x()) * (b2.y() - b0.y())
+    - (b2.x() - b0.x()) * (b1.y() - b0.y())
 }
 
 pub(crate) fn intersection(p0: Point, p1: Point, q0: Point, q1: Point) -> Point {

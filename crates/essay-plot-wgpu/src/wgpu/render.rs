@@ -108,21 +108,20 @@ impl PlotCanvas {
         self.shape2d_render.start_shape(None);
         self.bezier_render.start_shape();
 
-        let mut points = Vec::<Point>::new();
+        // let mut points = Vec::<Point>::new();
         let mut last = Point(0., 0.);
         for code in path.codes() {
             if let PathCode::Bezier2(p1, p2) = code {
                 self.bezier_render.draw_bezier_fill(&last, p1, p2);
+
+                //points.push(p1.clone());
             }
 
             last = code.tail();
 
-            points.push(last);
+            //points.push(last);
         }
 
-        //tri_new(&path);
-
-        //let triangles = triangulate(points);
         let triangles = triangulate2(path);
 
         for triangle in &triangles {

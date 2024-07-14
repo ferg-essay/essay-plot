@@ -1,9 +1,8 @@
 use essay_plot_api::{
-    Affine2d, 
     Bounds, Point, Canvas,
     PathOpt,
     driver::Renderer, 
-    TextStyle, Clip, Angle, FontFamily, FontStyle,
+    TextStyle, Clip, FontFamily, FontStyle,
 };
 
 use crate::{frame::Data, graph::ConfigArc, data_artist_option_struct, path_style_options};

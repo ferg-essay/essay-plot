@@ -1,6 +1,6 @@
 use core::fmt;
 
-use essay_plot_api::{Color, JoinStyle, CapStyle, PathOpt, LineStyle, ImageIndex, TextureId};
+use essay_plot_api::{path_opt::Hatch, CapStyle, Color, JoinStyle, LineStyle, PathOpt, TextureId};
 
 use crate::graph::Config;
 
@@ -22,7 +22,8 @@ pub struct PathStyle {
 
     line_style: Option<LineStyle>,
     alpha: Option<f32>,
-
+    texture: Option<TextureId>,
+    hatch: Option<Hatch>,
 
     gap_color: Option<Color>,
 
@@ -97,6 +98,18 @@ impl PathStyle {
 
     pub fn alpha(&mut self, alpha: f32) -> &mut Self {
         self.alpha = Some(alpha);
+
+        self
+    }
+
+    pub fn texture(&mut self, texture: TextureId) -> &mut Self {
+        self.texture = Some(texture);
+
+        self
+    }
+
+    pub fn hatch(&mut self, hatch: impl Into<Hatch>) -> &mut Self {
+        self.hatch = Some(hatch.into());
 
         self
     }
@@ -192,7 +205,11 @@ impl PathOpt for PathStyle {
     }
 
     fn get_texture(&self) -> &Option<TextureId> {
-        todo!()
+        &self.texture
+    }
+
+    fn get_hatch(&self) -> &Option<Hatch> {
+        &self.hatch
     }
 }
 
@@ -214,6 +231,8 @@ impl Default for PathStyle {
             line_style: None,
             gap_color: None,
             alpha: None,
+            texture: None,
+            hatch: None,
             marker: None,
         }
     }

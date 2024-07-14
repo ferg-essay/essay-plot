@@ -1,4 +1,4 @@
-use essay_plot_api::{Coord, Canvas, Bounds, driver::Renderer, Affine2d, Clip, PathOpt};
+use essay_plot_api::{Coord, Canvas, Bounds, driver::Renderer, Clip, PathOpt};
 
 use crate::{
     artist::{Artist, PathStyle, PlotId, PlotArtist, ToCanvas},
@@ -68,7 +68,3 @@ impl<M: Coord> PlotArtist<M> for PlotOptArtist<M> {
         None
     }
 }
-
-//pub trait PathStyleArtist : Artist<Data> {
-//    fn style_mut(&mut self) -> &mut PathStyle;
-//}

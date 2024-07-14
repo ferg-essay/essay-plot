@@ -22,6 +22,7 @@ pub fn draw_hardcopy(
 
     let mut plot_canvas = PlotCanvas::new(
         &wgpu.device,
+        &wgpu.queue,
         wgpu.texture.format(),
     );
 

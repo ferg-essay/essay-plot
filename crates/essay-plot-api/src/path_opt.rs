@@ -47,6 +47,11 @@ pub trait PathOpt {
     fn get_alpha(&self) -> &Option<f32>;
 
     ///
+    /// Hatch used to fill a closed path.
+    /// 
+    fn get_hatch(&self) -> &Option<Hatch>;
+
+    ///
     /// Texture used to fill a closed path.
     /// 
     fn get_texture(&self) -> &Option<TextureId>;
@@ -162,6 +167,13 @@ impl PathOpt for Stack<'_> {
             None => self.prev.get_texture(),
         }
     }
+
+    fn get_hatch(&self) -> &Option<Hatch> {
+        match self.next.get_hatch() {
+            Some(_) => self.next.get_hatch(),
+            None => self.prev.get_hatch(),
+        }
+    }
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -266,4 +278,9 @@ impl FromStr for CapStyle {
             _ => Err(StyleErr(format!("'{}' is an unknown cap_style", name)))
         }
     }
+}
+#[derive(Clone, Copy, PartialEq, Debug, Eq, Hash)]
+pub enum Hatch {
+    Vertical,
+    Horizontal,
 }

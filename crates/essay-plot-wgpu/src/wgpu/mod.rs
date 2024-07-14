@@ -9,6 +9,7 @@ mod triangulate;
 mod text;
 mod text_texture;
 mod text_cache;
+mod texture_store;
 mod wgpu;
 pub mod hardcopy;
 

@@ -1,6 +1,8 @@
 use essay_tensor::Tensor;
 
-use crate::{Path, PathOpt, TextStyle, Bounds, Point, Canvas, Clip, ImageId, FontStyle, FontTypeId};
+use crate::{
+    Bounds, Canvas, Clip, FontStyle, FontTypeId, ImageId, Path, PathOpt, Point, TextStyle, TextureId
+};
 
 pub trait Renderer {
     ///
@@ -63,6 +65,11 @@ pub trait Renderer {
         &mut self,
         colors: &Tensor<u8>, // [rows, cols, 4]
     ) -> ImageId;
+
+    fn create_texture(
+        &mut self,
+        image: &Tensor<u8>, // [rows, cols, 4]
+    ) -> TextureId;
 
     fn draw_image_ref(
         &mut self,

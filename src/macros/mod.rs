@@ -96,6 +96,11 @@ macro_rules! path_style_options {
             self.write(|ticks| { ticks.$field.cap_style(style); });
             self
         }
+    
+        pub fn hatch(&mut self, hatch: impl Into<essay_plot_api::Hatch>) -> &mut Self {
+            self.write(|ticks| { ticks.$field.hatch(hatch); });
+            self
+        }
     }
 }
 

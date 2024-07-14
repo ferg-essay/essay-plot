@@ -1,7 +1,7 @@
 use core::fmt;
 
 use essay_plot_api::{
-    Affine2d, Bounds, Point, Canvas, Path, PathCode, PathOpt,
+    Bounds, Point, Canvas, Path, PathCode, PathOpt,
     driver::Renderer, Clip
 };
 use essay_tensor::Tensor;

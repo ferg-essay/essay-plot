@@ -1,11 +1,11 @@
 use essay_plot_api::{
-    Canvas, Affine2d, Point, Bounds, Path, PathOpt, Color, PathCode, 
-    driver::{RenderErr, Renderer, FigureApi}, 
-    TextStyle, Coord, HorizAlign, VertAlign, JoinStyle, CapStyle, LineStyle, Clip, ImageId, FontStyle, FontTypeId
+    driver::{FigureApi, RenderErr, Renderer}, Affine2d, Bounds, Canvas, CapStyle, Clip, Color, Coord, FontStyle, FontTypeId, HorizAlign, ImageId, JoinStyle, LineStyle, Path, PathCode, PathOpt, Point, TextStyle, TextureId, VertAlign
 };
 use essay_tensor::Tensor;
 
-use super::{text::TextRender, shape2d::Shape2dRender, triangulate::triangulate2, triangle2d::GridMesh2dRender, bezier::BezierRender, image::ImageRender, text_cache::FontId};
+use super::{
+    bezier::BezierRender, image::ImageRender, shape2d::Shape2dRender, shape2d_texture::Shape2dTextureRender, text::TextRender, text_cache::FontId, triangle2d::GridMesh2dRender, triangulate::triangulate2
+};
 
 pub struct PlotCanvas {
     canvas: Canvas,
@@ -13,6 +13,7 @@ pub struct PlotCanvas {
     image_render: ImageRender,
     triangle_render: GridMesh2dRender,
     shape2d_render: Shape2dRender,
+    shape2d_texture_render: Shape2dTextureRender,
     bezier_render: BezierRender,
     text_render: TextRender,
 
@@ -26,12 +27,14 @@ pub struct PlotCanvas {
 impl PlotCanvas {
     pub fn new(
         device: &wgpu::Device,
+        queue: &wgpu::Queue,
         format: wgpu::TextureFormat,
     ) -> Self {
     
         let image_render = ImageRender::new(device, format);
         let triangle_render = GridMesh2dRender::new(device, format);
         let shape2d_render = Shape2dRender::new(device, format);
+        let shape2d_texture_render = Shape2dTextureRender::new(device, queue, format);
         let bezier_render = BezierRender::new(device, format);
         let mut text_render = TextRender::new(device, format, 512, 512);
 
@@ -42,6 +45,7 @@ impl PlotCanvas {
 
             image_render,
             shape2d_render,
+            shape2d_texture_render,
             text_render,
             triangle_render,
             bezier_render,
@@ -64,6 +68,7 @@ impl PlotCanvas {
         self.bezier_render.clear();
         self.text_render.clear();
         self.shape2d_render.clear();
+        self.shape2d_texture_render.clear();
         self.triangle_render.clear();
         self.image_render.clear();
     }
@@ -126,6 +131,32 @@ impl PlotCanvas {
 
         for triangle in &triangles {
             self.shape2d_render.draw_triangle(&triangle[0], &triangle[1], &triangle[2]);
+        }
+    }
+
+    fn fill_texture_path(
+        &mut self, 
+        path: &Path<Canvas>, 
+        texture: TextureId,
+        _clip: &Clip,
+    ) {
+        self.shape2d_texture_render.start_shape(texture, None);
+        //self.bezier_render.start_shape();
+
+        let mut last = Point(0., 0.);
+        for code in path.codes() {
+            if let PathCode::Bezier2(p1, p2) = code {
+                todo!();
+                //self.bezier_render.draw_bezier_fill(&last, p1, p2);
+            }
+
+            last = code.tail();
+        }
+
+        let triangles = triangulate2(path);
+
+        for triangle in &triangles {
+            self.shape2d_texture_render.draw_triangle(&triangle[0], &triangle[1], &triangle[2]);
         }
     }
 
@@ -271,7 +302,7 @@ impl PlotCanvas {
             JoinStyle::Round => {
                 let mp = line_intersection(p0, p1, q1, q2);
 
-                if mp != p0 { // non-parallel
+                if mp != p0 && p0.dist(&p1) > 1. && q1.dist(&q2) > 1. { // non-parallel
                     self.bezier_render.draw_bezier_fill(&p1, &mp, &q1);
                 }
             }
@@ -416,12 +447,32 @@ impl PlotCanvas {
         };
 
         if path.is_closed_path() && ! face_color.is_none() {
-            self.fill_path(&path, clip);
+            let mut is_texture = true;
 
-            self.shape2d_render.draw_style(face_color, &self.to_gpu);
-            self.bezier_render.draw_style(face_color, &self.to_gpu);
+            if let Some(hatch) = style.get_hatch() {
+                let texture = self.shape2d_texture_render.hatch_texture(*hatch);
 
-            if face_color != edge_color {
+                self.fill_texture_path(&path, texture, clip);
+
+                self.shape2d_texture_render.draw_style(face_color, &self.to_gpu);
+                //self.bezier_render.draw_style(face_color, &self.to_gpu);
+
+                is_texture = true;
+            } else if let Some(texture) = style.get_texture() {
+                self.fill_texture_path(&path, *texture, clip);
+    
+                self.shape2d_texture_render.draw_style(face_color, &self.to_gpu);
+                self.bezier_render.draw_style(face_color, &self.to_gpu);
+
+                is_texture = true;
+            } else {
+                self.fill_path(&path, clip);
+
+                self.shape2d_render.draw_style(face_color, &self.to_gpu);
+                self.bezier_render.draw_style(face_color, &self.to_gpu);
+            }
+
+            if face_color != edge_color || is_texture {
                 self.draw_lines(&path, style, clip);
 
                 self.shape2d_render.draw_style(edge_color, &self.to_gpu);
@@ -599,7 +650,7 @@ impl PlotCanvas {
         Ok(())
     }
 
-    fn draw_image(
+    fn _draw_image(
         &mut self,
         device: &wgpu::Device,
         bounds: &Bounds<Canvas>,  // Nx2 x,y in canvas coordinates
@@ -621,6 +672,13 @@ impl PlotCanvas {
         self.image_render.create_image(device, colors)
     }
 
+    fn create_texture(&mut self, image: &Tensor<u8>) -> TextureId {
+        assert!(image.rank() == 2, "colors rank must be 2 shape={:?}", image.shape().as_slice());
+
+        //self.shape2d_render.add_texture(image.rows(), image.cols(), image.as_slice())
+        todo!();
+    }
+
     fn draw_image_ref(
         &mut self,
         device: &wgpu::Device,
@@ -628,7 +686,7 @@ impl PlotCanvas {
         image: ImageId,    // N in rgba
         _clip: &Clip,
     ) -> Result<(), RenderErr> {
-            self.image_render.draw_image(device, bounds, &image, &self.to_gpu);
+        self.image_render.draw_image(device, bounds, &image, &self.to_gpu);
 
         Ok(())
     }
@@ -953,7 +1011,7 @@ impl<'a> PlotRenderer<'a> {
         if let Some(queue) = self.queue {
             if let Some(view) = self.view {
                 let mut encoder =
-                    self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+                   self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
                 let scissor = self.figure.to_scissor(clip);
 
@@ -962,6 +1020,7 @@ impl<'a> PlotRenderer<'a> {
                 // TODO: order issues with bezier and shape2d
                 self.figure.shape2d_render.flush(self.device, queue, view, &mut encoder, scissor);
                 self.figure.bezier_render.flush(self.device, queue, view, &mut encoder, scissor);
+                self.figure.shape2d_texture_render.flush(self.device, queue, view, &mut encoder, scissor);
                 self.figure.text_render.flush(queue, view, &mut encoder);
         
                 queue.submit(Some(encoder.finish()));
@@ -1053,6 +1112,13 @@ impl Renderer for PlotRenderer<'_> {
         colors: &Tensor<u8>, // [rows, cols, 4]
     ) -> ImageId {
         self.figure.create_image(self.device, colors)
+    }
+
+    fn create_texture(
+        &mut self,
+        colors: &Tensor<u8>, // [rows, cols, 4]
+    ) -> TextureId {
+        self.figure.create_texture(colors)
     }
 
     fn draw_image_ref(

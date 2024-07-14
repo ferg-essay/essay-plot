@@ -1,9 +1,9 @@
 use essay_plot_api::{
-    Bounds, Canvas, Clip, PathOpt, Affine2d, driver::Renderer, 
+    Bounds, Canvas, Clip, PathOpt, driver::Renderer, 
     PathCode, Path, Point, TextStyle, VertAlign, HorizAlign
 };
 
-use crate::{artist::{Artist, PathStyle, ColorCycle, StyleCycle, ToCanvas}, graph::Config};
+use crate::{artist::{Artist, PathStyle, StyleCycle, ToCanvas}, graph::Config};
 
 use super::data_box::DataBox;
 

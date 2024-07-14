@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use essay_plot_api::{Color, LineStyle, PathOpt, JoinStyle, CapStyle, ImageIndex, path_opt::StyleErr, TextureId};
+use essay_plot_api::{path_opt::{Hatch, StyleErr}, CapStyle, Color, JoinStyle, LineStyle, PathOpt, TextureId};
 
 use crate::graph::Config;
 
@@ -196,6 +196,10 @@ impl PathOpt for PropCycleChain<'_> {
 
     fn get_texture(&self) -> &Option<TextureId> {
         self.prev.get_texture()
+    }
+
+    fn get_hatch(&self) -> &Option<Hatch> {
+        self.prev.get_hatch()
     }
 }
 

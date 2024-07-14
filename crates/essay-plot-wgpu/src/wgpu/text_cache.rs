@@ -41,16 +41,16 @@ impl TextCache {
         );
 
         if self.fonts.len() <= id.0 {
-            self.fonts.push(load_font(*id, name));
+            self.fonts.push(load_font(name));
         }
 
         *id
     }
 
-    #[inline]
-    pub fn font(&mut self, id: FontId) -> &Font {
-        &self.fonts[id.0]
-    }
+    //#[inline]
+    //pub fn font(&mut self, id: FontId) -> &Font {
+    //    &self.fonts[id.0]
+    //}
 
     pub fn _font(&mut self, name: &str) -> &Font {
         let len = self.font_map.len();
@@ -62,7 +62,7 @@ impl TextCache {
         );
 
         if self.fonts.len() <= id.0 {
-            self.fonts.push(load_font(*id, name));
+            self.fonts.push(load_font(name));
         }
 
         &self.fonts[id.0]
@@ -154,34 +154,32 @@ impl Index<FontId> for TextCache {
     }
 }
 
-fn load_font(id: FontId, path: &str) -> Font {
+fn load_font(path: &str) -> Font {
     if let Ok(font_data) = fs::read(path) {
-        Font::from_data(id, font_data.as_slice()).unwrap()
+        Font::from_data(font_data.as_slice()).unwrap()
     } else {
         let font_data = include_bytes!(
             "../../assets/fonts/DejaVuSans.ttf"
         );
 
-        Font::from_data(id, font_data).unwrap()
+        Font::from_data(font_data).unwrap()
     }
 }
 
 pub struct Font {
-    id: FontId,
-
     data: Vec<u8>,
     offset: u32,
     key: CacheKey,
 }
 
 impl Font {
-    fn from_data(id: FontId, data: &[u8]) -> Option<Self> {
+    fn from_data(data: &[u8]) -> Option<Self> {
         let index = 0;
 
         let font = FontRef::from_index(data, index)?;
         let (offset, key) = (font.offset, font.key);
 
-        Some(Self { id, data: data.to_vec(), offset, key })
+        Some(Self { data: data.to_vec(), offset, key })
     }
 
     fn charmap(&self) -> Charmap {

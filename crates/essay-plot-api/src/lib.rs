@@ -35,7 +35,7 @@ pub use path::{
 pub use instance::Instance;
 
 pub use image::{
-    ImageId, ImageIndex
+    ImageId, ImageIndex,
 };
 
 pub use point::{
@@ -43,7 +43,7 @@ pub use point::{
 };
 
 pub use path_opt::{
-    PathOpt, JoinStyle, CapStyle, LineStyle, TextureId,
+    PathOpt, JoinStyle, CapStyle, LineStyle, TextureId, Hatch,
 };
 
 pub use text::{

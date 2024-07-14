@@ -1,6 +1,6 @@
 use essay_plot_api::Point;
 use essay_tensor::Tensor;
-use crate::{artist::{ContainerOpt, GridColorOpt, ImageOpt, LinesOpt, TextOpt}, graph::Graph};
+use crate::{artist::{ContainerOpt, ImageOpt, LinesOpt, TextOpt}, graph::Graph};
 
 mod bar;
 mod contour;

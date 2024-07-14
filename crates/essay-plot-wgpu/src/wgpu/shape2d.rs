@@ -1,8 +1,8 @@
 use bytemuck_derive::{Zeroable, Pod};
-use essay_plot_api::{Point, Color, Affine2d, Clip};
+use essay_plot_api::{Affine2d, Color, Point};
 use wgpu::util::DeviceExt;
 
-use super::render::line_normal;
+use super::{render::line_normal, texture_store::TextureCache};
 
 pub struct Shape2dRender {
     vertex_stride: usize,
@@ -19,6 +19,7 @@ pub struct Shape2dRender {
 
     is_stale: bool,
 
+    texture_cache: TextureCache,
     pipeline: wgpu::RenderPipeline,
 }
 
@@ -75,9 +76,14 @@ impl Shape2dRender {
             is_stale: false,
 
             shape_items: Vec::new(),
+            texture_cache: TextureCache::new(device, 512, 512),
             pipeline,
         }
     }
+
+    //pub fn add_texture(&mut self, width: usize, height: usize, data: &[u8]) -> TextureId {
+    //    self.texture_cache.add(width, height, data)
+    //}
 
     pub fn clear(&mut self) {
         self.shape_items.drain(..);
@@ -158,6 +164,13 @@ impl Shape2dRender {
     ) {
         if self.shape_items.len() == 0 {
             return;
+        }
+
+        self.texture_cache.flush(queue);
+
+        if false {
+            self.texture_cache.bind_group();
+            self.texture_cache.layout();
         }
 
         if self.is_stale {

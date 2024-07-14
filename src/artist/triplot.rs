@@ -1,9 +1,9 @@
-use essay_plot_api::{Bounds, Point, Canvas, Clip, PathOpt, Path, Color, PathCode, Affine2d, driver::Renderer};
-use essay_tensor::{Tensor};
+use essay_plot_api::{Bounds, Point, Canvas, Clip, PathOpt, Path, PathCode, driver::Renderer};
+use essay_tensor::Tensor;
 
 use crate::{frame::Data, tri::{Triangulation, triangulate}};
 
-use super::{Artist, PathStyle, colormap::ColorMap, ToCanvas};
+use super::{Artist, ToCanvas};
 
 pub struct TriPlot {
     data: Tensor,

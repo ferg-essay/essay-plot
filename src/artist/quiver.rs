@@ -1,4 +1,4 @@
-use essay_plot_api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer, Affine2d};
+use essay_plot_api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer};
 use essay_tensor::Tensor;
 
 use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options};
@@ -30,7 +30,7 @@ impl Quiver {
         let u : Tensor = u.into();
         let v : Tensor = v.into();
 
-        let uv = u.stack([v.clone()], ());
+        // let uv = u.stack([v.clone()], ());
 
         assert_eq!(u.shape(), v.shape(), "quiver requires matching u,v shape. u={:?}, v={:?}", 
             u.shape().as_slice(),

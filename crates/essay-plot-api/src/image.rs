@@ -33,4 +33,3 @@ impl ImageIndex {
         self.0
     }
 }
-

@@ -3,11 +3,11 @@ use std::time::Instant;
 use essay_plot_api::{driver::FigureApi, Point, CanvasEvent};
 use winit::{
     event::{Event, WindowEvent, ElementState, MouseButton },    
-    event_loop::{EventLoop, ControlFlow, EventLoopWindowTarget}, 
-    window::{Window, CursorIcon}, raw_window_handle::{HasRawWindowHandle, HasWindowHandle},
+    event_loop::{EventLoop, ControlFlow}, 
+    window::{Window, CursorIcon},
 };
 
-use super::{render::{PlotCanvas, PlotRenderer}};
+use super::render::{PlotCanvas, PlotRenderer};
 
 async fn init_wgpu_args(window: &Window) -> EventLoopArgs {
     window.set_title("Essay Plot");
@@ -135,6 +135,7 @@ fn run_event_loop(
 
     let mut figure_renderer = PlotCanvas::new(
         &device,
+        &queue,
         config.format,
     );
 

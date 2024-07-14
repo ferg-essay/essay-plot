@@ -204,6 +204,15 @@ fn path_opt_methods(name: &Option<Ident>) -> TokenStream {
             self
         }
 
+        /// Sets the path's hatch style
+        pub fn hatch(
+            &mut self, 
+            hatch: impl Into<essay_plot_base::Hatch>,
+        ) -> &mut Self {
+            self.plot.write_artist(|a| { a.#name.hatch(hatch); });
+            self
+        }
+
     }
 }
 

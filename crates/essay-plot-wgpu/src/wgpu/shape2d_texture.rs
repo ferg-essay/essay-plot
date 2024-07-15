@@ -94,11 +94,6 @@ impl Shape2dTextureRender {
         }
     }
 
-    pub fn add_texture(&mut self, width: usize, height: usize, data: &[u8]) -> TextureId {
-        //self.texture_cache.add(width, height, data)
-        todo!()
-    }
-
     pub fn hatch_texture(&self, hatch: Hatch) -> TextureId {
         *self.hatch_map.get(&hatch).unwrap()
     }
@@ -126,7 +121,7 @@ impl Shape2dTextureRender {
         });
     }
 
-    pub(crate) fn draw_line(
+    pub(crate) fn _draw_line(
         &mut self, 
         b0: &Point,
         b1: &Point,
@@ -134,13 +129,13 @@ impl Shape2dTextureRender {
     ) {
         let (nx, ny) = line_normal(*b0, *b1, lw2);
 
-        self.vertex(b0.x() - nx, b0.y() + ny);
-        self.vertex(b0.x() + nx, b0.y() - ny);
-        self.vertex(b1.x() + nx, b1.y() - ny);
+        self._vertex(b0.x() - nx, b0.y() + ny);
+        self._vertex(b0.x() + nx, b0.y() - ny);
+        self._vertex(b1.x() + nx, b1.y() - ny);
 
-        self.vertex(b1.x() + nx, b1.y() - ny);
-        self.vertex(b1.x() - nx, b1.y() + ny);
-        self.vertex(b0.x() - nx, b0.y() + ny);
+        self._vertex(b1.x() + nx, b1.y() - ny);
+        self._vertex(b1.x() - nx, b1.y() + ny);
+        self._vertex(b0.x() - nx, b0.y() + ny);
     }
 
     pub(crate) fn draw_triangle(
@@ -290,7 +285,7 @@ impl Shape2dTextureRender {
         self.vertex_offset = 0;
     }
 
-    fn vertex(&mut self, x: f32, y: f32) {
+    fn _vertex(&mut self, x: f32, y: f32) {
         //let x = x.round();
         //let y = y.round();
 
@@ -525,7 +520,7 @@ impl HatchBuilder {
         self.data.as_slice()
     }
 
-    fn set(&mut self, x: usize, y: usize, v: u8) -> &mut Self {
+    fn _set(&mut self, x: usize, y: usize, v: u8) -> &mut Self {
         self.data[x + y * self.width] = v;
 
         self

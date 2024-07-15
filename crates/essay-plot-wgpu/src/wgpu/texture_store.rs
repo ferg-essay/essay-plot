@@ -8,7 +8,6 @@ pub struct TextureCache {
 
     store: TextureStore,
 
-    texture_boxes: Vec<TextureBox>,
     texture_items: Vec<TextureItem>,
 
     is_dirty: bool,
@@ -30,7 +29,6 @@ impl TextureCache {
             layout,
 
             store,
-            texture_boxes: Vec::new(),
             texture_items: Vec::new(),
 
             is_dirty: true,
@@ -87,7 +85,7 @@ impl TextureCache {
 
 struct TextureItem {
     texture: wgpu::Texture,
-    layout: wgpu::BindGroupLayout,
+    _layout: wgpu::BindGroupLayout,
     bind_group: wgpu::BindGroup,
 }
 
@@ -99,20 +97,20 @@ impl TextureItem {
 
         Self {
             texture,
-            layout,
+            _layout: layout,
             bind_group,
         }
     }
 
-    fn layout(&self) -> &wgpu::BindGroupLayout {
-        &self.layout
+    fn _layout(&self) -> &wgpu::BindGroupLayout {
+        &self._layout
     }
 
-    fn texture(&self) -> &wgpu::Texture {
+    fn _texture(&self) -> &wgpu::Texture {
         &self.texture
     }
 
-    fn bind_group(&self) -> &wgpu::BindGroup {
+    fn _bind_group(&self) -> &wgpu::BindGroup {
         &self.bind_group
     }
 
@@ -133,8 +131,7 @@ struct TextureStore {
 
     data: Vec<u8>,
 
-    tail: usize,
-    cursors: Vec<TextureCursor>,
+    _tail: usize,
 }
 
 impl TextureStore {
@@ -149,131 +146,8 @@ impl TextureStore {
             width: width as usize,
             height: height as usize,
             data,
-            tail: 0,
-            cursors: Vec::new(),
+            _tail: 0,
         }
-    }
-
-    fn add(&mut self, width: usize, height: usize, data: &[u8]) -> TextureBox {
-        let cursor = self.cursor(width, height);
-
-        let (x, y) = (cursor.x(), cursor.y());
-        let c_w = cursor.width;
-
-        // let offset = 0;//cursor.offset;
-
-        for j in 0..height {
-            for i in 0..width {
-                self.data[x + i + (j + y) * c_w] = data[i + j * width];
-            }
-        }
-
-        TextureBox::new(x, y, width, height)
-    }
-
-    fn cursor(&mut self, width: usize, height: usize) -> TextureCursor {
-        let height = height.max(1);
-
-        let height_chunk = height + 31;
-        let height_chunk = height_chunk - height_chunk % 32;
-
-        let len = self.cursors.len();
-        for i in (0..len).rev() {
-            if self.cursors[i].height == height_chunk {
-                if width <= self.cursors[i].width - self.cursors[i].x {
-                    return self.cursors[i].add_x(width);
-                }
-
-                self.cursors.remove(i);
-            }
-        }
-
-        return self.add_cursor(height_chunk).add_x(width);
-    }
-
-    fn add_cursor(&mut self, height: usize) -> &mut TextureCursor {
-        assert!(height > 0 && height % 32 == 0);
-
-        let len = self.cursors.len();
-        self.cursors.push(TextureCursor::new(self.width, height, self.tail));
-
-        self.tail += self.width * height;
-
-        if self.data.len() < self.tail {
-            self.height = 2 * self.height;
-
-            self.data.resize(self.width * self.height, 0);
-        }
-
-        let cursor = &mut self.cursors[len];
-
-        let n_x = cursor.x + 1;
-        if n_x % 4 > 0 {
-            cursor.x += 4 - cursor.x % 4;
-        }
-
-        cursor
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-pub struct TextureBox {
-    x: usize,
-    y: usize,
-    width: usize,
-    height: usize,
-}
-
-impl TextureBox {
-    fn new(x: usize, y: usize, width: usize, height: usize) -> Self {
-        Self {
-            x,
-            y,
-            width,
-            height
-        }
-    }
-}
-
-#[derive(Clone)]
-struct TextureCursor {
-    width: usize,
-    height: usize,
-
-    offset: usize,
-
-    x: usize,
-}
-
-impl TextureCursor {
-    fn new(width: usize, height: usize, offset: usize) -> Self {
-        TextureCursor {
-            width,
-            height,
-            offset,
-            x: 0,
-        }
-    }
-
-    fn x(&self) -> usize {
-        self.x
-    }
-
-    fn y(&self) -> usize {
-        self.offset / self.width
-    }
-
-    fn add_x(&mut self, width: usize) -> Self {
-        let cursor = self.clone();
-
-        let mut n_x = self.x + width + 1;
-        if n_x % 4 > 0 {
-            n_x += 4 - n_x % 4;
-        }
-
-        self.x = n_x;
-
-        cursor
     }
 }
 

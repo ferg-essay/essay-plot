@@ -128,12 +128,12 @@ impl ImageRender {
         image
     }
 
-    pub(crate) fn draw(
+    pub(crate) fn _draw(
         &mut self, 
-        device: &wgpu::Device,
-        pos: &Bounds<Canvas>,
-        image: &Tensor<u8>,
-        affine: &Affine2d,
+        _device: &wgpu::Device,
+        _pos: &Bounds<Canvas>,
+        _image: &Tensor<u8>,
+        _affine: &Affine2d,
     ) {
         todo!();
         /*

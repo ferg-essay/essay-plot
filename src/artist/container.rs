@@ -25,10 +25,6 @@ impl<M: Coord> Container<M> {
     pub fn push(&mut self, artist: impl Artist<M> + 'static) {
         self.artists.push(Box::new(artist));
     }
-
-    pub(crate) fn clear(&mut self) {
-        self.artists.drain(..);
-    }
 }
 
 impl<M: Coord> Artist<M> for Container<M> {

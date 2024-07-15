@@ -304,7 +304,7 @@ impl DataBox {
     where
         A: Artist<Data> + 'static
     {
-        self.artists.artist(id)
+        self.artists._artist(id)
     }
 
     pub(crate) fn artist_mut<A>(&mut self, id: ArtistId) -> &mut A

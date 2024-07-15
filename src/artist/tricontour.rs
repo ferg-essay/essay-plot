@@ -3,17 +3,15 @@ use essay_tensor::{Tensor, math::normalize_unit};
 
 use crate::{frame::Data, contour::TriContourGenerator, tri::Triangulation};
 
-use super::{Artist, ColorMap, ColorMaps, PathStyle, ToCanvas};
+use super::{Artist, PathStyle, ToCanvas};
 
 pub struct Level {
-    value: f32,
     paths: Vec<Path<Data>>,
 }
 
 impl Level {
-    fn new(value: f32, paths: Vec<Path<Data>>) -> Self {
+    fn new(paths: Vec<Path<Data>>) -> Self {
         Self {
-            value,
             paths,
         }
     }
@@ -21,7 +19,7 @@ impl Level {
 
 pub struct TriContour {
     data: Tensor,
-    color_map: ColorMap,
+    // color_map: ColorMap,
 
     tri: Triangulation,
     norm: Tensor,
@@ -40,13 +38,13 @@ impl TriContour {
             data,
             tri,
             norm: Tensor::empty(),
-            color_map: ColorMaps::Default.into(),
+            // color_map: ColorMaps::Default.into(),
             bounds: Bounds::zero(),
             levels: Vec::new(),
         }
     }
 
-    pub(crate) fn set_data(&mut self, data: Tensor) {
+    pub(crate) fn _set_data(&mut self, data: Tensor) {
         assert!(data.rank() == 2, "contour requires 2d value {:?}", data.shape().as_slice());
 
         self.data = data;
@@ -55,7 +53,7 @@ impl TriContour {
 
 impl Artist<Data> for TriContour {
     fn update(&mut self, _canvas: &Canvas) {
-        let (rows, cols) = (self.data.rows(), self.data.cols());
+        //let (rows, cols) = (self.data.rows(), self.data.cols());
 
         //for vert in self.tri.triangles().iter_slice() {
         //  xy.push([i as f32, j as f32]);
@@ -85,7 +83,7 @@ impl Artist<Data> for TriContour {
                 .map(|p| Path::<Data>::lines(p))
                 .collect();
 
-            levels.push(Level::new(*threshold, paths));
+            levels.push(Level::new(paths));
         }
 
         self.levels = levels;

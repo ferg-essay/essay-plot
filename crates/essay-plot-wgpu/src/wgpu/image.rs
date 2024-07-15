@@ -128,7 +128,7 @@ impl ImageRender {
         image
     }
 
-    pub fn draw(
+    pub(crate) fn draw(
         &mut self, 
         device: &wgpu::Device,
         pos: &Bounds<Canvas>,

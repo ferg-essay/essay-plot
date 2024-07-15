@@ -160,10 +160,6 @@ impl Text {
         }
     }
 
-    pub(crate) fn pos(&mut self, pos: impl Into<Point>) {
-        self.pos = pos.into();
-    }
-
     pub fn text(&mut self, text: impl AsRef<str>) -> &mut Self {
         self.text = text.as_ref().to_string();
 

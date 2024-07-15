@@ -13,7 +13,6 @@ pub struct Image {
     data: Tensor,
     norm: Norm,
     color_map: ColorMap,
-    image: Tensor<u32>,
     extent: Option<Bounds<Data>>,
     is_stale: bool,
 }
@@ -28,7 +27,6 @@ impl Image {
             data,
             norm: Norm::from(Norms::Linear),
             color_map: ColorMaps::Default.into(), // ColorMaps::Default.into(),
-            image: Tensor::empty(),
             extent: None,
             is_stale: true,
         }
@@ -44,12 +42,6 @@ impl Image {
         self.color_map = cmap.into();
 
         self
-    }
-
-    pub(crate) fn set_data(&mut self, data: Tensor) {
-        assert!(data.rank() == 2, "image requires 2d value {:?}", data.shape().as_slice());
-
-        self.data = data;
     }
 }
 

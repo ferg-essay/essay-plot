@@ -441,11 +441,18 @@ fn hatch_vertical(
     queue: &wgpu::Queue, 
     textures: &mut TextureCache
 ) -> TextureId {
-    let mut builder = HatchBuilder::new(32, 32);
+    let mut builder = HatchBuilder::new(64, 64);
 
-    for j in 0..32 {
+    for j in 0..64 {
         builder[(0, j)] = 255;
         builder[(1, j)] = 255;
+        builder[(2, j)] = 255;
+        builder[(3, j)] = 255;
+
+        builder[(32, j)] = 255;
+        builder[(33, j)] = 255;
+        builder[(34, j)] = 255;
+        builder[(35, j)] = 255;
     }
 
     builder.add_to(device, queue, textures)
@@ -457,11 +464,18 @@ fn hatch_horizontal(
     queue: &wgpu::Queue, 
     textures: &mut TextureCache
 ) -> TextureId {
-    let mut builder = HatchBuilder::new(32, 32);
+    let mut builder = HatchBuilder::new(64, 64);
 
-    for j in 0..32 {
+    for j in 0..64 {
         builder[(j, 0)] = 255;
         builder[(j, 1)] = 255;
+        builder[(j, 2)] = 255;
+        builder[(j, 3)] = 255;
+
+        builder[(j, 32)] = 255;
+        builder[(j, 33)] = 255;
+        builder[(j, 34)] = 255;
+        builder[(j, 35)] = 255;
     }
 
     //for j in 17..32 {

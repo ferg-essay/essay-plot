@@ -1,8 +1,8 @@
-use std::{f32::consts::PI, ops::Deref};
+use std::f32::consts::PI;
 
 use essay_plot_api::{
-    Path, PathOpt,
-    driver::Renderer, Bounds, Canvas, Affine2d, Point, CanvasEvent, HorizAlign, VertAlign, Color, Clip, 
+    PathOpt,
+    driver::Renderer, Bounds, Canvas, Affine2d, Point, CanvasEvent, VertAlign, Color, Clip, 
 };
 
 use crate::{
@@ -21,8 +21,8 @@ pub struct Frame {
 
     to_canvas: Affine2d,
 
-    is_share_x: bool,
-    is_share_y: bool,
+    _is_share_x: bool,
+    _is_share_y: bool,
 
     path_style: PathStyle,
     // prop_cycle
@@ -36,13 +36,13 @@ pub struct Frame {
     top: TopFrame,
     right: RightFrame,
 
-    is_frame_visible: bool,
+    //is_frame_visible: bool,
 
     legend: Legend,
 
-    is_stale: bool, 
-    aspect_ratio: Option<f32>,
-    box_aspect_ratio: Option<f32>,
+    //is_stale: bool, 
+    //aspect_ratio: Option<f32>,
+    //box_aspect_ratio: Option<f32>,
     // is_visible
     // axis_locator
     // is_axis_below
@@ -85,12 +85,12 @@ impl Frame {
 
             legend: Legend::new(cfg),
 
-            is_stale: true,
-            is_share_x: false,
-            is_share_y: false,
-            is_frame_visible: true,
-            aspect_ratio: None,
-            box_aspect_ratio: None,
+            //is_stale: true,
+            _is_share_x: false,
+            _is_share_y: false,
+            //is_frame_visible: true,
+            //aspect_ratio: None,
+            //box_aspect_ratio: None,
         }
     }
 
@@ -167,7 +167,7 @@ impl Frame {
         self
     }
 
-    pub(crate) fn data(&self) -> &DataBox {
+    pub(crate) fn _data(&self) -> &DataBox {
         &self.data
     }
 

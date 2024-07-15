@@ -1,6 +1,6 @@
 use std::{alloc, any::TypeId, marker::PhantomData, ptr::{NonNull, self}, mem::{ManuallyDrop, self}};
 
-use essay_plot_api::{Coord, Bounds, driver::Renderer, Affine2d, Canvas, PathOpt, Clip, Point};
+use essay_plot_api::{Coord, Bounds, driver::Renderer, Canvas, PathOpt, Clip, Point};
 
 use crate::{artist::{Artist, StyleCycle, PlotArtist, ToCanvas}, graph::Config};
 
@@ -39,16 +39,16 @@ impl<M: Coord> PlotContainer<M> {
         id
     }
 
-    pub(crate) fn cycle(&self) -> &StyleCycle {
+    pub(crate) fn _cycle(&self) -> &StyleCycle {
         &self.cycle
     }
 
-    pub(crate) fn cycle_mut(&mut self) -> &mut StyleCycle {
+    pub(crate) fn _cycle_mut(&mut self) -> &mut StyleCycle {
         &mut self.cycle
     }
 
     fn _deref<A: Artist<M> + 'static>(&self, id: ArtistId) -> &A {
-        unsafe { self.ptrs[id.index()].deref() }
+        unsafe { self.ptrs[id.index()]._deref() }
     }
 
     fn deref_mut<A: Artist<M> + 'static>(&self, id: ArtistId) -> &mut A {
@@ -59,11 +59,11 @@ impl<M: Coord> PlotContainer<M> {
     //    self.artists[id.index()].style_mut()
     //}
 
-    pub(crate) fn artist<A>(&self, id: ArtistId) -> &A
+    pub(crate) fn _artist<A>(&self, id: ArtistId) -> &A
     where
         A: Artist<M> + 'static
     {
-        unsafe { self.ptrs[id.index()].deref() }
+        unsafe { self.ptrs[id.index()]._deref() }
     }
 
     pub(crate) fn artist_mut<A>(&mut self, id: ArtistId) -> &mut A
@@ -201,14 +201,13 @@ where
 // TODO: replace with downcast crate
 
 pub(crate) struct PlotPtr<M: Coord> {
-    id: ArtistId,
     type_id: TypeId, 
     marker: PhantomData<M>,
     data: NonNull<u8>,
 }
 
 impl<M: Coord> PlotPtr<M> {
-    pub(crate) fn new<A>(id: ArtistId, artist: A) -> Self
+    pub(crate) fn new<A>(_id: ArtistId, artist: A) -> Self
     where
         A: Artist<M> + 'static
     {
@@ -227,14 +226,13 @@ impl<M: Coord> PlotPtr<M> {
         }
 
         Self {
-            id,
             type_id: TypeId::of::<A>(),
             data: NonNull::new(data).unwrap(),
             marker: PhantomData,
         }
     }
 
-    pub unsafe fn deref<A>(&self) -> &A
+    pub unsafe fn _deref<A>(&self) -> &A
     where
         A: Artist<M> + 'static
     {

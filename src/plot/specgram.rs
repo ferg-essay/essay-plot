@@ -52,7 +52,7 @@ impl SpecGram {
         }
     }
 
-    pub(crate) fn set_data(&mut self, data: Tensor) {
+    pub(crate) fn _set_data(&mut self, data: Tensor) {
         assert!(data.rank() == 1, "specgram requires 2d value {:?}", data.shape().as_slice());
 
         self.data = data;

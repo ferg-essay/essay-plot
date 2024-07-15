@@ -139,18 +139,18 @@ impl Layout {
         }
     }
 
-    pub(crate) fn write<R>(&mut self, fun: impl FnOnce(&mut Layout) -> R) -> R {
+    pub(crate) fn _write<R>(&mut self, fun: impl FnOnce(&mut Layout) -> R) -> R {
         fun(self)
     }
 
-    pub(crate) fn artist<A>(&self, id: ArtistId) -> &A
+    pub(crate) fn _artist<A>(&self, id: ArtistId) -> &A
     where
         A: Artist<Data> + 'static
     {
-        self.frames[id.frame().index()].frame().data()._artist(id)
+        self.frames[id.frame().index()].frame()._data()._artist(id)
     }
 
-    pub(crate) fn artist_mut<A>(&mut self, id: ArtistId) -> &mut A
+    pub(crate) fn _artist_mut<A>(&mut self, id: ArtistId) -> &mut A
     where
         A: Artist<Data> + 'static
     {
@@ -185,7 +185,7 @@ impl LayoutArc {
         fun(&mut self.0.lock().unwrap())
     }
 
-    pub fn write_artist<A, R>(&self, id: ArtistId, fun: impl FnOnce(&Layout, &mut A) -> R) -> R
+    pub fn _write_artist<A, R>(&self, _id: ArtistId, _fun: impl FnOnce(&Layout, &mut A) -> R) -> R
     where
         A: Artist<Data> + 'static,
     {
@@ -260,10 +260,6 @@ impl LayoutSizes {
 pub struct FrameId(usize);
 
 impl FrameId {
-    pub(crate) fn new(index: usize) -> FrameId {
-        FrameId(index)
-    }
-
     pub fn index(&self) -> usize {
         self.0
     }

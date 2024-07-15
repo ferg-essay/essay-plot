@@ -52,7 +52,7 @@ macro_rules! data_artist_option_struct {
                 self.layout.write(|l| {
                     fun(l.frame_mut(self.id.frame())
                         .get_data_artist_mut::<$ty>(self.id))
-            });
+                });
             }
         }
     }

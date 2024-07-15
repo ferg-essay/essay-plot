@@ -1,4 +1,4 @@
-use essay_plot::{prelude::*, artist::TextCoords};
+use essay_plot::prelude::*;
 use essay_tensor::init::linspace;
 
 fn main() {

@@ -5,11 +5,6 @@ use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_s
 
 use super::{Artist, PathStyle, PlotArtist, PlotId, paths, ToCanvas};
 
-pub enum Shading {
-    Flat,
-    Gouraud,
-}
-
 pub struct Histogram {
     data: Tensor,
     style: PathStyle,
@@ -39,7 +34,7 @@ impl Histogram {
         }
     }
 
-    pub(crate) fn set_data(&mut self, data: Tensor) {
+    pub(crate) fn _set_data(&mut self, data: Tensor) {
         assert!(data.rank() == 1, "histogram requires 1D value {:?}", data.shape().as_slice());
 
         self.data = data;

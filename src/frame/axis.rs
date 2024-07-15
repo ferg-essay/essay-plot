@@ -1,4 +1,4 @@
-use essay_plot_api::{TextStyle, Canvas, driver::Renderer, Affine2d, Clip, PathOpt, VertAlign, Point, Path, HorizAlign, Bounds, PathCode};
+use essay_plot_api::{TextStyle, Canvas, driver::Renderer, Clip, PathOpt, VertAlign, Point, Path, HorizAlign, Bounds, PathCode};
 
 use crate::{artist::{PathStyle, TextCanvas, Artist, patch::CanvasPatch, paths, ToCanvas}, graph::Config, frame_option_struct, path_style_options};
 
@@ -39,7 +39,7 @@ impl Axis {
         &mut self.major
     }
 
-    pub(crate) fn minor(&self) -> &AxisTicks {
+    pub(crate) fn _minor(&self) -> &AxisTicks {
         &self.minor
     }
 
@@ -66,7 +66,7 @@ impl Axis {
         &self.show_grid
     }
 
-    pub(crate) fn visible(&mut self, is_visible: bool) {
+    pub(crate) fn _visible(&mut self, is_visible: bool) {
         self.is_visible = is_visible;
     }
 
@@ -500,7 +500,7 @@ impl AxisTicks {
         self.label_text.text_style_mut()
     }
 
-    pub(crate) fn grid_style_mut(&mut self) -> &mut PathStyle {
+    pub(crate) fn _grid_style_mut(&mut self) -> &mut PathStyle {
         &mut self.grid_style
     }
 
@@ -624,7 +624,7 @@ impl ShowGrid {
         }
     }
 
-    pub(crate) fn is_show_minor(&self) -> bool {
+    pub(crate) fn _is_show_minor(&self) -> bool {
         match self {
             ShowGrid::None => false,
             ShowGrid::Major => false,

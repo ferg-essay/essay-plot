@@ -1,13 +1,6 @@
-use essay_plot::{prelude::*, plot::grid_color, artist::{Shading, patch::{Patch, self}}, frame::AspectMode};
-use essay_tensor::init::{linspace, meshgrid};
+use essay_plot::{artist::{patch, Patch}, prelude::*};
 
 fn main() { 
-    let x = linspace(0., 2. * 6.28, 51);
-    let y = linspace(0., 6.28, 101);
-    let [x, y] = meshgrid([x, y]);
-
-    let z = &x.sin() + &y.sin();
-
     let mut figure = Figure::new();
     let mut graph = figure.new_graph(());
 

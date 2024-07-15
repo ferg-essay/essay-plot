@@ -121,6 +121,7 @@ impl MaxNLocator {
         }
     }
 
+    #[cfg(test)]
     pub fn steps(&mut self, steps: &[f32]) -> &mut Self {
         assert!(steps.len() > 0);
 
@@ -270,7 +271,7 @@ mod test {
 
     #[test]
     fn max_n_locator_view_limits() {
-        let mut locator = MaxNLocator::new(Some(9));;
+        let mut locator = MaxNLocator::new(Some(9));
         locator.steps(&vec![1., 2., 2.5, 5., 10.]);
 
         assert_eq!(locator.view_limits(0., 0.), (-1., 1.));
@@ -288,7 +289,7 @@ mod test {
 
     #[test]
     fn max_n_locator_tick_values_0_1() {
-        let mut locator = MaxNLocator::new(Some(9));;
+        let mut locator = MaxNLocator::new(Some(9));
         locator.steps(&vec![1., 2., 2.5, 5., 10.]);
 
         assert_eq!(
@@ -314,7 +315,7 @@ mod test {
 
     #[test]
     fn max_n_locator_tick_values_offset() {
-        let mut locator = MaxNLocator::new(Some(9));;
+        let mut locator = MaxNLocator::new(Some(9));
         locator.steps(&vec![1., 2., 2.5, 5., 10.]);
 
         assert_eq!(
@@ -330,7 +331,7 @@ mod test {
 
     #[test]
     fn max_n_locator_tick_values_ranges() {
-        let mut locator = MaxNLocator::new(Some(9));;
+        let mut locator = MaxNLocator::new(Some(9));
         locator.steps(&vec![1., 2., 2.5, 5., 10.]);
 
         assert_eq!(
@@ -386,7 +387,7 @@ mod test {
 
     #[test]
     fn max_n_locator_tick_zero() {
-        let mut locator = MaxNLocator::new(Some(9));;
+        let mut locator = MaxNLocator::new(Some(9));
         locator.steps(&vec![1., 2., 2.5, 5., 10.]);
 
         assert_eq!(

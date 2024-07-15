@@ -309,7 +309,7 @@ impl FromStr for Markers {
 // filled_markers = '.', 'o', 'v', '^', '<', '>', '8', 's', 'p', '*',
 // 'h', 'H', 'D', 'd', 'P', 'X'
 
-pub enum FillStyle {
+pub enum _FillStyle {
     None,
     Left,
     Right,
@@ -321,30 +321,6 @@ pub enum FillStyle {
 fn triangle_path() -> Path<Unit> {
     Path::closed_poly(tf32!([
         [0., 1.], [-1., -1.], [1., -1.]
-    ]))
-}
-
-fn triangle_path_up() -> Path<Unit> {
-    Path::closed_poly(tf32!([
-        [0., 1.], [-3./5., -1./5.], [3./5., -1./5.],
-    ]))
-}
-
-fn triangle_path_down() -> Path<Unit> {
-    Path::closed_poly(tf32!([
-        [-3./5., -1./5.], [3./5., -1./5.], [1., -1.], [-1., -1.]
-    ]))
-}
-
-fn triangle_path_left() -> Path<Unit> {
-    Path::closed_poly(tf32!([
-        [0., 1.], [0., -1.], [-1., -1.],
-    ]))
-}
-
-fn triangle_path_right() -> Path<Unit> {
-    Path::closed_poly(tf32!([
-        [0., 1.], [0., -1.], [1., -1.],
     ]))
 }
 

@@ -141,17 +141,7 @@ impl PlotCanvas {
         _clip: &Clip,
     ) {
         self.shape2d_texture_render.start_shape(texture, None);
-        //self.bezier_render.start_shape();
-
-        let mut last = Point(0., 0.);
-        for code in path.codes() {
-            if let PathCode::Bezier2(p1, p2) = code {
-                todo!();
-                //self.bezier_render.draw_bezier_fill(&last, p1, p2);
-            }
-
-            last = code.tail();
-        }
+        // TODO: bezier
 
         let triangles = triangulate2(path);
 

@@ -1,24 +1,17 @@
 use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Path, driver::Renderer};
-use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
+use essay_tensor::{Tensor, tensor::TensorVec, math::normalize_unit};
 
 use crate::{frame::Data, contour::ContourGenerator};
 
 use super::{Artist, ColorMap, ColorMaps, PathStyle, ToCanvas};
 
-pub enum Shading {
-    Solid,
-    Gouraud,
-}
-
 pub struct Level {
-    value: f32,
     paths: Vec<Path<Data>>,
 }
 
 impl Level {
-    fn new(value: f32, paths: Vec<Path<Data>>) -> Self {
+    fn new(paths: Vec<Path<Data>>) -> Self {
         Self {
-            value,
             paths,
         }
     }
@@ -48,7 +41,7 @@ impl Contour {
         }
     }
 
-    pub(crate) fn set_data(&mut self, data: Tensor) {
+    pub(crate) fn _set_data(&mut self, data: Tensor) {
         assert!(data.rank() == 2, "contour requires 2d value {:?}", data.shape().as_slice());
 
         self.data = data;
@@ -88,7 +81,7 @@ impl Artist<Data> for Contour {
                 .map(|p| Path::<Data>::lines(p))
                 .collect();
 
-            levels.push(Level::new(*threshold, paths));
+            levels.push(Level::new(paths));
         }
 
         self.levels = levels;
@@ -112,14 +105,14 @@ impl Artist<Data> for Contour {
         clip: &Clip,
         _style: &dyn PathOpt,
     ) {
-        let path = Path::<Data>::closed_poly(tf32!([
-            [0.0, 0.0], [1.0, 0.0], [1.0, 1.0],
-            [0.0, 1.0]
-            ]));
+        //let path = Path::<Data>::closed_poly(tf32!([
+        //    [0.0, 0.0], [1.0, 0.0], [1.0, 1.0],
+        //    [0.0, 1.0]
+        //    ]));
             
-        let scale_canvas = to_canvas.strip_translation();
-        let path: Path<Canvas> = path.transform(&scale_canvas);
-        let xy = to_canvas.transform(&self.xy);
+        // let scale_canvas = to_canvas.strip_translation();
+        // let path: Path<Canvas> = path.transform(&scale_canvas);
+        // let xy = to_canvas.transform(&self.xy);
 
         let colormap = &self.color_map;
 
@@ -128,7 +121,7 @@ impl Artist<Data> for Contour {
             colors.push(colormap.map(*v).to_rgba());
         }
 
-        let colors = colors.into_tensor();
+        // let colors = colors.into_tensor();
 
         let mut style = PathStyle::new();
 

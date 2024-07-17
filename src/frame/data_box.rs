@@ -254,54 +254,6 @@ impl DataBox {
         &self.to_canvas
     }
 
-    // true if request redraw
-    pub fn event(&mut self, _renderer: &mut dyn Renderer, event: &CanvasEvent) -> bool {
-        match event {
-            CanvasEvent::ResetView(_) => {
-                //self.update_view();
-                self._is_stale = true;
-                self.pan_zoom_bounds = None;
-                true
-            }
-            CanvasEvent::Pan(_p_start, p_last, p_now) => {
-                let to_data = self.pos_canvas.affine_to(&self.get_view_bounds());
-                let p0 = to_data.transform_point(*p_last);
-                let p1 = to_data.transform_point(*p_now);
-
-                let dx = p0.x() - p1.x();
-                let dy = p0.y() - p1.y();
-
-                let view = &self.get_view_bounds();
-                self.pan_zoom_bounds = Some(Bounds::new(
-                    Point(
-                        view.x0() + dx,
-                        view.y0() + dy,
-                    ),
-                    Point(
-                        view.x1() + dx,
-                        view.y1() + dy,
-                    )
-                ));
-
-                true
-            },
-            CanvasEvent::ZoomBounds(p_start, p_now) => {
-                if self.pos_canvas.contains(*p_now) {
-                    let to_data = self.pos_canvas.affine_to(&self.get_view_bounds());
-                    let p0 = to_data.transform_point(*p_start);
-                    let p1 = to_data.transform_point(*p_now);
-
-                    // let view = &self.view_bounds;
-                    // TODO: check min size?
-                    self.pan_zoom_bounds = Some(Bounds::new(p0, p1));
-                }
-
-                true
-            },
-            _ => { false }
-        }
-    }
-
     //pub(crate) fn style_mut(&mut self, id: ArtistId) -> &mut PathStyle {
     //    self.artists.style_mut(id)
     //}
@@ -363,6 +315,54 @@ impl Artist<Canvas> for DataBox {
         //for artist in &mut self.artists {
         //    artist.draw(renderer, &to_canvas, &self.pos_canvas, &style);
         //}
+    }
+
+    // true if request redraw
+    fn event(&mut self, _renderer: &mut dyn Renderer, event: &CanvasEvent) -> bool {
+        match event {
+            CanvasEvent::ResetView(_) => {
+                //self.update_view();
+                self._is_stale = true;
+                self.pan_zoom_bounds = None;
+                true
+            }
+            CanvasEvent::Pan(_p_start, p_last, p_now) => {
+                let to_data = self.pos_canvas.affine_to(&self.get_view_bounds());
+                let p0 = to_data.transform_point(*p_last);
+                let p1 = to_data.transform_point(*p_now);
+
+                let dx = p0.x() - p1.x();
+                let dy = p0.y() - p1.y();
+
+                let view = &self.get_view_bounds();
+                self.pan_zoom_bounds = Some(Bounds::new(
+                    Point(
+                        view.x0() + dx,
+                        view.y0() + dy,
+                    ),
+                    Point(
+                        view.x1() + dx,
+                        view.y1() + dy,
+                    )
+                ));
+
+                true
+            },
+            CanvasEvent::ZoomBounds(p_start, p_now) => {
+                if self.pos_canvas.contains(*p_now) {
+                    let to_data = self.pos_canvas.affine_to(&self.get_view_bounds());
+                    let p0 = to_data.transform_point(*p_start);
+                    let p1 = to_data.transform_point(*p_now);
+
+                    // let view = &self.view_bounds;
+                    // TODO: check min size?
+                    self.pan_zoom_bounds = Some(Bounds::new(p0, p1));
+                }
+
+                true
+            },
+            _ => { false }
+        }
     }
 }
 

@@ -22,13 +22,14 @@ impl Colorbar {
         }
     }
 
-    pub(crate) fn set_pos(&mut self, pos: Bounds<Canvas>) {
-        self.pos = pos;
+    pub fn set_pos(&mut self, pos: Bounds<Canvas>) {
+        self.pos = pos.clone();
     }
 }
 
 impl Artist<Data> for Colorbar {
     fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        self.pos = pos.clone();
         let is_triangle = false;
         if is_triangle {
             self.bounds = Bounds::new(Point(0., 0.), Point(2., 100.));

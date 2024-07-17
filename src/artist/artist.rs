@@ -1,7 +1,7 @@
 use std::{marker::PhantomData, ops::Deref};
 
 use essay_graphics::{api::{
-    driver::Renderer, Affine2d, Bounds, Canvas, Clip, Coord, PathOpt
+    driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Coord, PathOpt
 }, layout::ViewHandle};
 
 use crate::{frame::{ArtistId, Data, Frame, LegendHandler}, graph::ConfigArc};
@@ -18,6 +18,11 @@ pub trait Artist<M: Coord> : Send {
         clip: &Clip,
         style: &dyn PathOpt,
     );
+
+    #[allow(unused_variables)]
+    fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) -> bool {
+        false
+    }
 }
 
 pub trait PlotArtist : Artist<Data> + Sized {

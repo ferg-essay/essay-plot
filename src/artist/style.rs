@@ -7,7 +7,7 @@ use crate::graph::Config;
 use super::Markers;
 
 pub trait PathStyleOpt : PathOpt {
-    fn get_marker(&self) -> &Option<Markers>;
+    fn _get_marker(&self) -> &Option<Markers>;
 }
 
 #[derive(Clone)]
@@ -214,7 +214,7 @@ impl PathOpt for PathStyle {
 }
 
 impl PathStyleOpt for PathStyle {
-    fn get_marker(&self) -> &Option<Markers> {
+    fn _get_marker(&self) -> &Option<Markers> {
         &self.marker
     }
 }

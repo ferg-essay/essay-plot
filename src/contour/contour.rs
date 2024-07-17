@@ -333,10 +333,6 @@ impl Cursor {
         true
     }
 
-    fn to_path(self) -> Tensor {
-        self.vec.into_tensor()
-    }
-
     fn to_vec(self) -> TensorVec<[f32; 2]> {
         self.vec
     }

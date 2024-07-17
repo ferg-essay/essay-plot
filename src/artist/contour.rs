@@ -49,7 +49,7 @@ impl Contour {
 }
 
 impl Artist<Data> for Contour {
-    fn update(&mut self, pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
         let mut xy = TensorVec::<[f32; 2]>::new();
         let (rows, cols) = (self.data.rows(), self.data.cols());
 

@@ -30,7 +30,7 @@ pub struct DataBox {
     to_canvas: Affine2d,
     style: PathStyle,
 
-    is_stale: bool,
+    _is_stale: bool,
 }
 
 impl DataBox {
@@ -55,7 +55,7 @@ impl DataBox {
             style: PathStyle::default(),
 
             to_canvas: Affine2d::eye(),
-            is_stale: true,
+            _is_stale: true,
         }
     }
 
@@ -122,7 +122,7 @@ impl DataBox {
         self.pos_canvas = pos.clone();
 
         self.update_aspect();
-        
+
         self.to_canvas = self.get_view_bounds().affine_to(&self.pos_canvas);
 
         if self.is_flip_y {
@@ -259,7 +259,7 @@ impl DataBox {
         match event {
             CanvasEvent::ResetView(_) => {
                 //self.update_view();
-                self.is_stale = true;
+                self._is_stale = true;
                 self.pan_zoom_bounds = None;
                 true
             }
@@ -334,6 +334,7 @@ impl Artist<Canvas> for DataBox {
         self.data_bounds = self.artists.get_extent();
     
         self.update_view();
+        self.set_pos(pos); // TODO: cleanup order
     }
 
     fn get_extent(&mut self) -> Bounds<Canvas> {

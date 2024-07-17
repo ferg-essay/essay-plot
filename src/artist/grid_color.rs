@@ -152,7 +152,7 @@ impl GridColor {
 }
 
 impl Artist<Data> for GridColor {
-    fn update(&mut self, pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
         if self.is_stale {
             self.is_stale = false;
 
@@ -167,7 +167,6 @@ impl Artist<Data> for GridColor {
 
             self.xy = xy.into_tensor();
             self.norm.set_bounds(&self.data);
-            println!("Bounds: {:?} {:?}", self.norm.min(), self.norm.max());
         }
     }
     

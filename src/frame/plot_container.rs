@@ -129,7 +129,7 @@ impl Artist<Data> for PlotContainer {
 }
 
 trait ArtistHandleTrait<M: Coord> : Send {
-    fn id(&self) -> ArtistId;
+    // fn id(&self) -> ArtistId;
 
     //fn style_mut(&mut self) -> &mut PathStyle;
 
@@ -165,9 +165,9 @@ impl<A: Artist<Data>> ArtistHandleTrait<Data> for ArtistHandle<Data, A>
 where
     A: PlotArtist + 'static,
 {
-    fn id(&self) -> ArtistId {
-        self.id
-    }
+    //fn id(&self) -> ArtistId {
+    //    self.id
+    //}
 
     //fn style_mut(&mut self) -> &mut PathStyle {
     //    &mut self.style

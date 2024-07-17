@@ -209,7 +209,7 @@ impl fmt::Debug for Graph {
     }
 }
 
-struct FrameTextOpt {
+pub struct FrameTextOpt {
     view: ViewHandle<Frame>,
     artist: FrameArtist,
 }

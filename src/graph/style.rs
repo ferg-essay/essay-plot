@@ -59,7 +59,7 @@ impl PlotArtist for PlotOptHandle<Data> {
     ) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "artist");
 
-        unsafe { PlotOpt::new(artist) }
+        PlotOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

@@ -1,7 +1,7 @@
 use std::f32::consts::TAU;
 
 use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers, IntoMarker, Shading, DrawStyle}, plot::{bar, grid_color, contour, triplot, tricontour, matshow, stem, fill_between, plot}, graph::{Graph, PlotOpt}};
-use essay_plot_api::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
+use essay_plot::api::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
 use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::TensorVec};
 
 fn main() {

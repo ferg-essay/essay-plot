@@ -10,7 +10,7 @@ pub struct Norm {
     scale: Box<dyn Fn(f32) -> f32 + Send + 'static>,
 }
 
-pub trait NormScale : Send + 'static {
+pub trait _NormScale : Send + 'static {
     fn scale(&self, v: f32) -> f32;
 }
 

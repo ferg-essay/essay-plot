@@ -46,8 +46,8 @@ impl<A: PlotArtist> IntoArtist for A {
     }
 }
 
-pub trait SimpleArtist<M: Coord> : Artist<M> {
-}
+//pub trait SimpleArtist<M: Coord> : Artist<M> {
+//}
 
 pub struct ArtistHandle<A: Artist<Data>> {
     view: ViewHandle<Frame>,

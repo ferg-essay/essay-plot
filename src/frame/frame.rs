@@ -326,26 +326,27 @@ impl ViewTrait for Frame {
             Point(pos_data.xmin(), pos_data.ymax()),
             Point(pos_data.xmax(), pos_data.ymax()),
         );
-        self.top.set_pos(pos_top);
+        self.top.update(&pos_top, canvas);
 
         let pos_right = Bounds::<Canvas>::new(
             Point(pos_data.xmax(), pos_data.ymin()),
             Point(pos_data.xmax(), pos_data.ymax()),
         );
-        self.right.set_pos(pos_right);
+        self.right.update(&pos_right, canvas);
 
         let pos_canvas = Bounds::<Canvas>::new(
             Point(pos_data.xmin(), pos_data.ymax()),
             Point(pos_data.xmin(), pos_data.ymax()),
         );
-        self.legend.set_pos(pos_canvas);
+        self.legend.update(&pos_canvas, canvas);
 
         // TODO:
         self.bottom.update_axis(&self.data);
-        self.left.update_axis(&self.data);
-
         self.bottom.update(&pos, canvas);
+
+        self.left.update_axis(&self.data);
         self.left.update(&pos, canvas);
+
         self.top.update(&pos, canvas);
         self.right.update(&pos, canvas);
 

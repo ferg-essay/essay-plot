@@ -340,7 +340,7 @@ impl ViewTrait for Frame {
         );
         self.legend.set_pos(pos_canvas);
 
-        // XXX:
+        // TODO:
         self.bottom.update_axis(&self.data);
         self.left.update_axis(&self.data);
 

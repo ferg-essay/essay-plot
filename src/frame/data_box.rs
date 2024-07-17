@@ -6,7 +6,7 @@ use essay_graphics::{api::{
 
 use crate::{artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, graph::{Config, ConfigArc}};
 
-use super::{plot_container::PlotContainer, ArtistId, Frame, FrameId, LegendHandler};
+use super::{plot_container::PlotContainer, ArtistId, Frame, LegendHandler};
 
 pub struct DataBox {
     pos_canvas: Bounds<Canvas>,
@@ -34,7 +34,7 @@ pub struct DataBox {
 }
 
 impl DataBox {
-    pub fn new(frame_id: FrameId, cfg: &Config) -> Self {
+    pub fn new(cfg: &Config) -> Self {
         Self {
             pos_canvas: Bounds::none(),
 
@@ -50,7 +50,7 @@ impl DataBox {
             aspect_mode: AspectMode::BoundingBox,
             is_flip_y: false,
 
-            artists: PlotContainer::new(frame_id, cfg),
+            artists: PlotContainer::new(cfg),
 
             style: PathStyle::default(),
 

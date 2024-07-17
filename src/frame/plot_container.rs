@@ -4,19 +4,17 @@ use essay_graphics::api::{Coord, Bounds, driver::Renderer, Canvas, PathOpt, Clip
 
 use crate::{artist::{Artist, StyleCycle, PlotArtist, ToCanvas}, graph::Config};
 
-use super::{legend::LegendHandler, ArtistId, Data, FrameId};
+use super::{legend::LegendHandler, ArtistId, Data};
 
 pub(crate) struct PlotContainer {
-    frame: FrameId,
     ptrs: Vec<PlotPtr<Data>>,
     artists: Vec<Box<dyn ArtistHandleTrait<Data>>>,
     cycle: StyleCycle,
 }
 
 impl PlotContainer {
-    pub(crate) fn new(frame: FrameId, cfg: &Config) -> Self {
+    pub(crate) fn new(cfg: &Config) -> Self {
         let container = Self {
-            frame,
             ptrs: Vec::new(),
             artists: Vec::new(),
             cycle: StyleCycle::from_config(cfg, "frame.cycle"),
@@ -29,7 +27,7 @@ impl PlotContainer {
     where
         A: PlotArtist + 'static
     {
-        let id = ArtistId::new_data(self.frame, self.ptrs.len());
+        let id = ArtistId::new_data(self.ptrs.len());
 
         let plot = PlotPtr::new(id, artist);
         self.ptrs.push(plot);

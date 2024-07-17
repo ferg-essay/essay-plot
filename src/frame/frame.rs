@@ -1,8 +1,11 @@
 use std::f32::consts::PI;
 
-use essay_graphics::{api::{
-    driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Color, PathOpt, Point, VertAlign 
-}, layout::ViewTrait};
+use essay_graphics::{
+    api::{
+        driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Color, PathOpt, Point, VertAlign 
+    }, 
+    layout::ViewTrait
+};
 
 use crate::{
     artist::{
@@ -11,11 +14,9 @@ use crate::{
     graph::{Config, ConfigArc}
 };
 
-use super::{data_box::DataBox, axis::{Axis, AxisTicks, XAxis, YAxis}, layout::FrameId, LayoutArc, legend::Legend, Data, ArtistId};
+use super::{data_box::DataBox, axis::{Axis, AxisTicks, XAxis, YAxis}, legend::Legend, Data, ArtistId};
 
 pub struct Frame {
-    id: FrameId,
-    
     pos: Bounds<Canvas>,
 
     config: ConfigArc,
@@ -68,16 +69,12 @@ pub struct Frame {
 
 impl Frame {
     pub(crate) fn new(cfg: &ConfigArc) -> Self {
-        let id = FrameId(0);
-
         Self {
-            id,
-
             config: cfg.clone(),
 
             pos: Bounds::none(),
 
-            data: DataBox::new(id, cfg),
+            data: DataBox::new(cfg),
 
             title: TextCanvas::new(),
 
@@ -101,11 +98,6 @@ impl Frame {
             //aspect_ratio: None,
             //box_aspect_ratio: None,
         }
-    }
-
-    #[inline]
-    pub fn id(&self) -> FrameId {
-        self.id
     }
 
     pub(crate) fn pos(&self) -> &Bounds<Canvas> {
@@ -190,15 +182,15 @@ impl Frame {
         &mut self.data
     }
 
-    pub(crate) fn text_opt(&self, layout: LayoutArc, artist: FrameArtist) -> FrameTextOpt {
-        match artist {
-            FrameArtist::Title => FrameTextOpt::new(layout, self.id, artist),
-            FrameArtist::XLabel => FrameTextOpt::new(layout, self.id, artist),
-            FrameArtist::YLabel => FrameTextOpt::new(layout, self.id, artist),
-
-            _ => panic!("Invalid artist {:?}", artist)
-        }
-    }
+    // pub(crate) fn text_opt(&self, layout: LayoutArc, artist: FrameArtist) -> FrameTextOpt {
+    //    match artist {
+    //        FrameArtist::Title => FrameTextOpt::new(layout, self.id, artist),
+    //        FrameArtist::XLabel => FrameTextOpt::new(layout, self.id, artist),
+    //        FrameArtist::YLabel => FrameTextOpt::new(layout, self.id, artist),
+    //
+    //        _ => panic!("Invalid artist {:?}", artist)
+    //    }
+    //}
 
     pub(crate) fn get_text_mut(&mut self, artist: FrameArtist) -> &mut TextCanvas {
         match artist {
@@ -669,24 +661,20 @@ impl Artist<Canvas> for RightFrame {
 }
 
 pub struct FrameTextOpt {
-    layout: LayoutArc,
-    id: FrameId,
     artist: FrameArtist,
 }
 
 impl FrameTextOpt {
-    fn new(layout: LayoutArc, id: FrameId, artist: FrameArtist) -> Self {
+    fn new(artist: FrameArtist) -> Self {
         Self {
-            layout,
-            id,
             artist,
         }
     }
 
-    fn write(&mut self, fun: impl FnOnce(&mut TextCanvas)) {
-        self.layout.write(|l| {
-            fun(l.frame_mut(self.id).get_text_mut(self.artist))
-        })
+    fn write(&mut self, _fun: impl FnOnce(&mut TextCanvas)) {
+        // self.layout.write(|l| {
+        //     fun(l.frame_mut(self.id).get_text_mut(self.artist))
+        // })
     }
 
     pub fn label(&mut self, label: &str) -> &mut Self {

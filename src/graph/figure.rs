@@ -38,13 +38,8 @@ impl Figure {
     }
 
     pub fn new_graph(&mut self, pos: impl Into<Bounds<Grid>>) -> Graph {
-        // self.inner.new_graph(grid)
         Graph::new(self.layout.add_view(pos, Frame::new(&self.config)))
     }
-
-    // pub fn graph(&mut self, id: GraphId) -> Graph {
-    //     self.inner.get_graph(id)
-    // }
 
     pub fn poly_graphs<'a, R: PolyRow<'a>>(&'a mut self, _layout: R) -> R::Item {
         todo!()
@@ -53,7 +48,6 @@ impl Figure {
     }
 
     pub fn show(self) {
-        // let mut figure = self;
         let layout = self.layout;
         let mut device = self.device;
 
@@ -83,22 +77,6 @@ impl Figure {
     }
 }
 
-/*
-impl ops::Index<GraphId> for Figure {
-    type Output = Graph;
-
-    fn index(&self, index: GraphId) -> &Self::Output {
-        self.inner.graph(index)
-    }
-}
-
-impl ops::IndexMut<GraphId> for Figure {
-    fn index_mut(&mut self, index: GraphId) -> &mut Self::Output {
-        self.inner.graph_mut(index)
-    }
-}
-*/
-
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct GraphId(usize);
 
@@ -108,94 +86,6 @@ impl GraphId {
         self.0
     }
 }
-
-/*
-pub struct FigureInner {
-    _gridspec: Bounds<Layout>,
-    layout: LayoutArc,
-
-    size: (f32, f32),
-    dpi: f32,
-
-    graphs: Vec<Graph>,
-}
-
-impl FigureInner {
-    pub fn new() -> Self {
-        let config = read_config();
-        Self {
-            size: (6.4, 4.8),
-            dpi: 200.,
-
-            layout: LayoutArc::new(config),
-            _gridspec: Bounds::none(),
-            graphs: Default::default(),
-        }
-    }
-
-    pub fn new_graph(
-        &mut self, 
-        grid: impl Into<Bounds<Layout>>, 
-    ) -> Graph {
-        let len = self.graphs.len();
-        let id = GraphId(len);
-
-        let mut grid : Bounds<Layout> = grid.into();
-
-        if grid.is_zero() || grid.is_none() {
-            if id.index() == 0 {
-                grid = Bounds::unit();
-            } else {
-                let layout = self.layout.bounds();
-                grid = Bounds::new(
-                    Point(0., layout.ymax()),
-                    Point(1., layout.ymax() + 1.),
-                );
-            }
-        }
-
-        let frame_id = self.layout.add_frame(grid.clone());
-
-        let id = GraphId(self.graphs.len());
-
-        let graph = Graph::new(id, frame_id, self.layout.clone());
-
-        self.graphs.push(graph);
-
-        Graph::new(id, frame_id, self.layout.clone())
-    }
-
-    pub fn graph(&self, id: GraphId) -> &Graph {
-        &self.graphs[id.index()]
-    }
-
-    pub fn graph_mut(&mut self, id: GraphId) -> &mut Graph {
-        &mut self.graphs[id.index()]
-    }
-
-    pub fn get_graph(&mut self, id: GraphId) -> Graph {
-        self.graphs[id.index()].clone()
-    }
-
-    pub fn update_canvas(&mut self, canvas: &Canvas) {
-        self.layout.update_canvas(canvas);
-    }
-}
-
-impl FigureApi for FigureInner {
-    fn update(&mut self, canvas: &Canvas) {
-        self.layout.update_canvas(canvas);
-    }
-
-    fn draw(&mut self, renderer: &mut dyn Renderer) { // }, bounds: &Bounds<Canvas>) {
-        // self.layout.draw(renderer, bounds);
-    }
-
-    fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
-        self.layout.event(renderer, event);
-    }
-}
-    */
 
 pub trait PolyRow<'a> {
     type Item;

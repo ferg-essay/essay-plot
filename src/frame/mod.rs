@@ -6,15 +6,10 @@ mod axis;
 mod tick_locator;
 mod data_box;
 mod frame;
-mod layout;
 
-pub use tick_locator::{
-    IndexLocator,
-};
+pub use tick_locator::IndexLocator;
 
-pub use axis::{
-    AxisOpt,
-};
+pub use axis::AxisOpt;
 
 pub use data_box::{
     Data, AspectMode,
@@ -28,9 +23,9 @@ pub use artist_id::{
     ArtistId, ArtistEnum,
 };
 
-pub use layout::{
-    Layout, LayoutArc, FrameId,
-};
+//pub use layout::{
+//    Layout, LayoutArc, FrameId,
+//};
 
 pub use legend::{
     Legend, LegendHandler,

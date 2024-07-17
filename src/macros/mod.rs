@@ -41,6 +41,7 @@ macro_rules! data_artist_option_struct {
             }
         
             #[inline]
+            #[allow(unused)]
             fn write<R>(&mut self, fun: impl FnOnce(&mut $ty) -> R) -> R {
                 self.artist.write(|artist| fun(artist))
             }

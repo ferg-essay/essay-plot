@@ -1,6 +1,9 @@
-use essay_plot::{prelude::*, artist::{patch::PathPatch, Markers, IntoMarker, DrawStyle}, plot::{bar, grid_color, contour, triplot, tricontour, matshow, stem, fill_between, plot}, graph::{Graph, PlotOpt}};
-use essay_plot::api::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
-use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::TensorVec};
+use essay_plot::{
+    prelude::*, artist::patch::PathPatch, 
+    graph::{Graph, PlotOpt}
+};
+use essay_plot::api::{Point, PathCode, Path};
+use essay_tensor::init::linspace;
 
 fn main() {
     //let mut gui = WgpuBackend::new();
@@ -33,9 +36,9 @@ fn main() {
         .line_width(5.);
     */
 
-    let x = linspace(0., 6.28, 51);
-    let y1 = x.sin();
-    let y2 = (2. * &x).cos();
+    //let x = linspace(0., 6.28, 51);
+    //let y1 = x.sin();
+    //let y2 = (2. * &x).cos();
     //let y2 = linspace(2., 2., 21);
     //graph.scatter(&x, &y).color("blue").marker(Markers::Asterisk(5, Angle::Deg(0.))); // .size(2500.);
     //graph.plot(&x, &y).color("xkcd:purple"); // .label("sin");
@@ -99,7 +102,7 @@ fn main() {
     
     //let x = tf32!([40., 30., 20., 5., 5.]);
     //let x = tf32!([40., 30.]);
-    let x = tf32!([25., 25., 50.]);
+    //let x = tf32!([25., 25., 50.]);
     // let axes = figure.new_graph(());
     //graph.pie(tf32!([40., 30., 20., 5., 5., 5., 5.]));
     // let x = linspace(0., 20., 21);
@@ -151,27 +154,6 @@ fn main() {
 
     figure.show();
     */
-}
-
-pub fn bezier3(
-    graph: &mut Graph, 
-    p0: impl Into<Point>,
-    p1: impl Into<Point>,
-    p2: impl Into<Point>,
-    p3: impl Into<Point>
-) {
-    //graph.add_data_artist(Bezier3(p0.into(), p1.into(), p2.into(), p3.into()));
-    todo!()
-}
-
-pub fn bezier2(
-    graph: &mut Graph, 
-    p0: impl Into<Point>,
-    p1: impl Into<Point>,
-    p2: impl Into<Point>,
-) -> PlotOpt {
-    //graph.add_data_artist(Bezier2(p0.into(), p1.into(), p2.into()))
-    todo!()
 }
 
 pub fn plot_quad(

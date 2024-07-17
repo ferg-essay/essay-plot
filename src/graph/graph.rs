@@ -1,10 +1,10 @@
 use core::fmt;
 
-use essay_graphics::{api::Color, layout::ViewHandle};
+use essay_graphics::layout::ViewHandle;
 
 use crate::{
-    artist::{Artist, IntoArtist, PlotArtist, TextCanvas},
-    frame::{AspectMode, AxisOpt, Data, Frame, FrameArtist}
+    artist::{Artist, IntoArtist, PlotArtist},
+    frame::{AspectMode, AxisOpt, Data, Frame, FrameArtist, FrameTextOpt}
 };
 
 use super::{style::PlotOptHandle, PlotOpt};
@@ -206,40 +206,5 @@ impl fmt::Debug for Graph {
         write!(f, "Graph[{:?}]",
             self.view,
         )
-    }
-}
-
-pub struct FrameTextOpt {
-    view: ViewHandle<Frame>,
-    artist: FrameArtist,
-}
-
-impl FrameTextOpt {
-    fn new(view: ViewHandle<Frame>, artist: FrameArtist) -> Self {
-        Self {
-            view,
-            artist,
-        }
-    }
-
-    fn write(&mut self, fun: impl FnOnce(&mut TextCanvas)) {
-        self.view.write(|frame| {
-            fun(frame.get_text_mut(self.artist))
-        })
-    }
-
-    pub fn label(&mut self, label: &str) -> &mut Self {
-        self.write(|text| { text.label(label); });
-        self
-    }
-
-    pub fn color(&mut self, color: impl Into<Color>) -> &mut Self {
-        self.write(|text| { text.path_style_mut().color(color); });
-        self
-    }
-
-    pub fn size(&mut self, size: f32) -> &mut Self {
-        self.write(|text| { text.text_style_mut().size(size); });
-        self
     }
 }

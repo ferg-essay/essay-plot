@@ -4,7 +4,7 @@ use essay_graphics::{
     api::{
         driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Color, PathOpt, Point, VertAlign 
     }, 
-    layout::ViewTrait
+    layout::{ViewHandle, ViewTrait}
 };
 
 use crate::{
@@ -14,7 +14,7 @@ use crate::{
     graph::{Config, ConfigArc}
 };
 
-use super::{data_box::DataBox, axis::{Axis, AxisTicks, XAxis, YAxis}, legend::Legend, Data, ArtistId};
+use super::{data_box::DataBox, axis::{Axis, AxisTicks, XAxis, YAxis}, legend::Legend};
 
 pub struct Frame {
     pos: Bounds<Canvas>,
@@ -100,9 +100,9 @@ impl Frame {
         }
     }
 
-    pub(crate) fn pos(&self) -> &Bounds<Canvas> {
-        &self.pos
-    }
+    // pub(crate) fn pos(&self) -> &Bounds<Canvas> {
+    //     &self.pos
+    // }
 
     pub(crate) fn config(&self) -> &ConfigArc {
         &self.config
@@ -157,13 +157,13 @@ impl Frame {
             Point(pos_data.xmin(), pos_data.ymax()),
             Point(pos_data.xmax(), pos_data.ymax()),
         );
-        self.top.set_pos(pos_top);
+        self.top.set_pos(&pos_top);
 
         let pos_right = Bounds::<Canvas>::new(
             Point(pos_data.xmax(), pos_data.ymin()),
             Point(pos_data.xmax(), pos_data.ymax()),
         );
-        self.right.set_pos(pos_right);
+        self.right.set_pos(&pos_right);
 
         let pos_canvas = Bounds::<Canvas>::new(
             Point(pos_data.xmin(), pos_data.ymax()),
@@ -222,18 +222,18 @@ impl Frame {
         }
     }
 
-    pub(crate) fn get_data_artist_mut<A>(&mut self, id: ArtistId) -> &mut A
-    where
-        A: Artist<Data> + 'static
-    {
-        self.data_mut().artist_mut(id)
-    }
+    // pub(crate) fn get_data_artist_mut<A>(&mut self, id: ArtistId) -> &mut A
+    // where
+    //    A: Artist<Data> + 'static
+    // {
+    //     self.data_mut().artist_mut(id)
+    // }
 
     pub(crate) fn colorbar(&mut self) {
         self.right.colorbar();
     }
 
-    pub(crate) fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
+    pub(crate) fn _event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
         if self.data.get_pos().contains(event.point()) {
             if self.data.event(renderer, event) {
                 self.left.update_axis(&self.data);
@@ -372,6 +372,17 @@ impl ViewTrait for Frame {
 
         self.legend.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
     }
+
+    fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
+        if self.data.get_pos().contains(event.point()) {
+            if self.data.event(renderer, event) {
+                self.left.update_axis(&self.data);
+                self.bottom.update_axis(&self.data);
+
+                renderer.request_redraw(&self.pos);
+            };
+        }
+    }
 }
 //impl Coord for Figure {}
 
@@ -423,7 +434,7 @@ impl TopFrame {
         }
     }
 
-    pub fn set_pos(&mut self, pos: Bounds<Canvas>) {
+    pub fn set_pos(&mut self, pos: &Bounds<Canvas>) {
         self.pos = pos.clone();
 
         if let Some(spine) = &mut self.spine {
@@ -436,7 +447,8 @@ impl TopFrame {
 }
 
 impl Artist<Canvas> for TopFrame {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn update(&mut self, pos: &Bounds<Canvas>, _canvas: &Canvas) {
+        self.set_pos(pos);
     }
     
     fn get_extent(&mut self) -> Bounds<Canvas> {
@@ -609,7 +621,7 @@ impl RightFrame {
         }
     }
 
-    pub fn set_pos(&mut self, pos: Bounds<Canvas>) {
+    pub fn set_pos(&mut self, pos: &Bounds<Canvas>) {
         self.pos = pos.clone();
 
         if let Some(spine) = &mut self.spine {
@@ -634,6 +646,8 @@ impl RightFrame {
 
 impl Artist<Canvas> for RightFrame {
     fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        self.set_pos(pos);
+
         if let Some(colorbar) = &mut self.colorbar {
             colorbar.update(pos, canvas);
         }
@@ -660,6 +674,41 @@ impl Artist<Canvas> for RightFrame {
     }
 }
 
+pub struct FrameTextOpt {
+    view: ViewHandle<Frame>,
+    artist: FrameArtist,
+}
+
+impl FrameTextOpt {
+    pub(crate) fn new(view: ViewHandle<Frame>, artist: FrameArtist) -> Self {
+        Self {
+            view,
+            artist,
+        }
+    }
+
+    fn write(&mut self, fun: impl FnOnce(&mut TextCanvas)) {
+        self.view.write(|frame| {
+            fun(frame.get_text_mut(self.artist))
+        })
+    }
+
+    pub fn label(&mut self, label: &str) -> &mut Self {
+        self.write(|text| { text.label(label); });
+        self
+    }
+
+    pub fn color(&mut self, color: impl Into<Color>) -> &mut Self {
+        self.write(|text| { text.path_style_mut().color(color); });
+        self
+    }
+
+    pub fn size(&mut self, size: f32) -> &mut Self {
+        self.write(|text| { text.text_style_mut().size(size); });
+        self
+    }
+}
+/*
 pub struct FrameTextOpt {
     artist: FrameArtist,
 }
@@ -692,6 +741,7 @@ impl FrameTextOpt {
         self
     }
 }
+    */
 
 struct FrameMargins {
     top: f32,

@@ -1,7 +1,7 @@
 use core::fmt;
 
 use essay_tensor::Tensor;
-use essay_plot_api::{Bounds, Path, PathOpt, Canvas, driver::Renderer, Clip};
+use essay_graphics::api::{Bounds, Path, PathOpt, Canvas, driver::Renderer, Clip};
 
 use crate::{frame::Data, artist::PathStyle};
 
@@ -38,7 +38,7 @@ impl PathCollection {
 }
 
 impl Artist<Data> for PathCollection {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
         self.bounds = Bounds::from(&self.xy);
     }
     

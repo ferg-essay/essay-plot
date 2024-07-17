@@ -24,7 +24,7 @@ mod artist;
 mod lines;
 
 pub use artist::{
-    Artist, IntoArtist, PlotArtist, PlotId, ToCanvas,
+    Artist, IntoArtist, PlotArtist, ArtistHandle, ToCanvas,
 };
 
 pub use bar::{

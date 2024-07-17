@@ -1,14 +1,13 @@
-use std::ops::Deref;
+use std::{marker::PhantomData, ops::Deref};
 
-use essay_plot_api::{
-    Coord, Bounds, Affine2d, Canvas, PathOpt,
-    driver::Renderer, Clip,
-};
+use essay_graphics::{api::{
+    driver::Renderer, Affine2d, Bounds, Canvas, Clip, Coord, PathOpt
+}, layout::ViewHandle};
 
-use crate::{graph::ConfigArc, frame::{LayoutArc, ArtistId, LegendHandler}};
+use crate::{frame::{ArtistId, Data, Frame, LegendHandler}, graph::ConfigArc};
 
 pub trait Artist<M: Coord> : Send {
-    fn update(&mut self, canvas: &Canvas);
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas);
 
     fn get_extent(&mut self) -> Bounds<M>;
     
@@ -21,25 +20,25 @@ pub trait Artist<M: Coord> : Send {
     );
 }
 
-pub trait PlotArtist<M: Coord> : Artist<M> {
+pub trait PlotArtist : Artist<Data> + Sized {
     type Opt;
     
     fn config(
         &mut self, 
         cfg: &ConfigArc, 
-        id: PlotId,
+        view: ArtistHandle<Self>,
     ) -> Self::Opt;
 
     fn get_legend(&self) -> Option<LegendHandler>;
 }
 
-pub trait IntoArtist<M: Coord> {
-    type Artist : PlotArtist<M>;
+pub trait IntoArtist {
+    type Artist : PlotArtist;
 
     fn into_artist(self) -> Self::Artist;
 }
 
-impl<M: Coord, A: PlotArtist<M>> IntoArtist<M> for A {
+impl<A: PlotArtist> IntoArtist for A {
     type Artist = Self;
 
     fn into_artist(self) -> Self::Artist {
@@ -50,28 +49,28 @@ impl<M: Coord, A: PlotArtist<M>> IntoArtist<M> for A {
 pub trait SimpleArtist<M: Coord> : Artist<M> {
 }
 
-pub struct PlotId {
-    layout: LayoutArc,
-    artist_id: ArtistId,
+pub struct ArtistHandle<A: Artist<Data>> {
+    view: ViewHandle<Frame>,
+    id: ArtistId,
+    marker: PhantomData<A>
 }
 
-impl PlotId {
+impl<A: Artist<Data> + 'static> ArtistHandle<A> {
     pub(crate) fn new(
-        layout: LayoutArc, 
-        artist_id: ArtistId
+        view: ViewHandle<Frame>, 
+        id: ArtistId
     ) -> Self {
         Self {
-            layout,
-            artist_id
+            view,
+            id,
+            marker: Default::default(),
         }
     }
 
-    pub fn layout(&self) -> &LayoutArc {
-        &self.layout
-    }
-
-    pub fn id(&self) -> &ArtistId {
-        &self.artist_id
+    pub fn write<R>(&mut self, fun: impl FnOnce(&mut A) -> R) -> R {
+        self.view.write(|f| {
+            fun(f.data_mut().artist_mut(self.id))
+        })
     }
 }
 

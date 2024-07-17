@@ -1,4 +1,4 @@
-use essay_plot_api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer};
+use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer};
 use essay_tensor::{Tensor, math::normalize_unit};
 
 use crate::{frame::Data, contour::TriContourGenerator, tri::Triangulation};
@@ -52,7 +52,7 @@ impl TriContour {
 }
 
 impl Artist<Data> for TriContour {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
         //let (rows, cols) = (self.data.rows(), self.data.cols());
 
         //for vert in self.tri.triangles().iter_slice() {

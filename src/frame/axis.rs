@@ -1,4 +1,4 @@
-use essay_plot_api::{TextStyle, Canvas, driver::Renderer, Clip, PathOpt, VertAlign, Point, Path, HorizAlign, Bounds, PathCode};
+use essay_graphics::api::{TextStyle, Canvas, driver::Renderer, Clip, PathOpt, VertAlign, Point, Path, HorizAlign, Bounds, PathCode};
 
 use crate::{artist::{PathStyle, TextCanvas, Artist, patch::CanvasPatch, paths, ToCanvas}, graph::Config, frame_option_struct, path_style_options};
 
@@ -78,9 +78,9 @@ impl Axis {
         self.formatter.format(value, delta)
     }
 
-    pub(crate) fn update(&mut self, canvas: &Canvas) {
-        self.major.update(canvas);
-        self.minor.update(canvas);
+    pub(crate) fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        self.major.update(pos, canvas);
+        self.minor.update(pos, canvas);
     }
 }
 
@@ -254,8 +254,8 @@ impl XAxis {
         }
     }
 
-    pub(crate) fn update(&mut self, canvas: &Canvas) {
-        self.axis.update(canvas);
+    pub(crate) fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        self.axis.update(pos, canvas);
     }
 
     pub(crate) fn axis_mut(&mut self) -> &mut Axis {
@@ -437,8 +437,8 @@ impl YAxis {
         }
     }
 
-    pub(crate) fn update(&mut self, canvas: &Canvas) {
-        self.axis.update(canvas);
+    pub(crate) fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        self.axis.update(pos, canvas);
     }
 
     pub(crate) fn axis_mut(&mut self) -> &mut Axis {
@@ -527,8 +527,8 @@ impl AxisTicks {
         self.label_text.height()
     }
 
-    pub(crate) fn update(&mut self, canvas: &Canvas) {
-        self.label_text.update(canvas);
+    pub(crate) fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        self.label_text.update(pos, canvas);
     }
 }
 
@@ -566,7 +566,7 @@ impl AxisOpt {
             _ => panic!("invalid major()")
         };
 
-        AxisTicksOpt::new(self.layout.clone(), self.frame_id, artist)
+        AxisTicksOpt::new(&self.view, artist)
     }
 
     pub fn major_grid(&self) -> AxisGridOpt {
@@ -576,7 +576,7 @@ impl AxisOpt {
             _ => panic!("invalid major()")
         };
 
-        AxisGridOpt::new(self.layout.clone(), self.frame_id, artist)
+        AxisGridOpt::new(&self.view, artist)
     }
 }
 

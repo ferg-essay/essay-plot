@@ -1,6 +1,6 @@
 use core::fmt;
 
-use essay_plot_api::{
+use essay_graphics::api::{
     Bounds, Point, Canvas, Path, PathCode, PathOpt,
     driver::Renderer, Clip
 };
@@ -12,7 +12,11 @@ use crate::{
     data_artist_option_struct, path_style_options, graph::ConfigArc
 };
 
-use super::{Artist, PlotArtist, PlotId, markers::{MarkerStyle, IntoMarker}, PathCollection, ToCanvas};
+use super::{
+    Artist, PlotArtist, ArtistHandle, 
+    markers::{MarkerStyle, IntoMarker}, 
+    PathCollection, ToCanvas
+};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum DrawStyle {
@@ -155,14 +159,14 @@ fn build_path(line: &Tensor, draw_style: &DrawStyle) -> Path<Data> {
 }
 
 impl Artist<Data> for Lines2d {
-    fn update(&mut self, canvas: &Canvas) {
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
         self.extent = Bounds::from(&self.xy);
 
         if self.is_stale {
             self.is_stale = false;
 
             if let Some(collection) = &mut self.collection {
-                collection.update(canvas);
+                collection.update(pos, canvas);
             }
         }
     }
@@ -198,13 +202,13 @@ impl Artist<Data> for Lines2d {
     }
 }
 
-impl PlotArtist<Data> for Lines2d {
+impl PlotArtist for Lines2d {
     type Opt = LinesOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, artist: ArtistHandle<Lines2d>) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "lines");
 
-        unsafe { LinesOpt::new(id) }
+        LinesOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

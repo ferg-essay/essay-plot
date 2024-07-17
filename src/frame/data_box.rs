@@ -1,13 +1,12 @@
 use core::fmt;
 
-use essay_plot_api::{
-    driver::Renderer, PathOpt,
-    Bounds, Affine2d, Point, Canvas, Coord, CanvasEvent, Clip,
-};
+use essay_graphics::{api::{
+    driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Coord, PathOpt, Point
+}, layout::ViewHandle};
 
-use crate::{artist::{Artist, PathStyle, PlotArtist, ToCanvas}, graph::Config};
+use crate::{artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, graph::{Config, ConfigArc}};
 
-use super::{plot_container::PlotContainer, ArtistId, FrameId, LegendHandler};
+use super::{plot_container::PlotContainer, ArtistId, Frame, FrameId, LegendHandler};
 
 pub struct DataBox {
     pos_canvas: Bounds<Canvas>,
@@ -26,7 +25,7 @@ pub struct DataBox {
     aspect_mode: AspectMode,
     is_flip_y: bool,
 
-    artists: PlotContainer<Data>,
+    artists: PlotContainer,
 
     to_canvas: Affine2d,
     style: PathStyle,
@@ -94,7 +93,12 @@ impl DataBox {
         self
     }
 
-    pub fn add_artist(&mut self, artist: impl PlotArtist<Data> + 'static) -> ArtistId {
+    pub fn add_artist<A: PlotArtist + 'static>(
+        &mut self, 
+        artist: A,
+        config: &ConfigArc,
+        view: ViewHandle<Frame>,
+    ) -> A::Opt {
         //let mut artist = artist;
 
         //let bounds = artist.get_extent();
@@ -104,7 +108,9 @@ impl DataBox {
 
         let id = self.artists.add_artist(artist);
 
-        id
+        let artist_view = ArtistHandle::<A>::new(view, id);
+
+        self.artist_mut::<A>(id).config(config, artist_view)
     }
 
     ///
@@ -320,17 +326,14 @@ impl DataBox {
 }
 
 impl Artist<Canvas> for DataBox {
-    fn update(&mut self, canvas: &Canvas) {
-        self.artists.update(canvas);
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        self.set_pos(pos);
+        
+        self.artists.update(pos, canvas);
 
-        self.is_stale = true;
-        if self.is_stale {
-            self.is_stale = false;
-
-            self.data_bounds = self.artists.get_extent();
+        self.data_bounds = self.artists.get_extent();
     
-            self.update_view();
-        }
+        self.update_view();
     }
 
     fn get_extent(&mut self) -> Bounds<Canvas> {

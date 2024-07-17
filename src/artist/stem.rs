@@ -2,7 +2,7 @@ use core::fmt;
 
 use essay_tensor::{Tensor, array::Axis};
 
-use essay_plot_api::{
+use essay_graphics::api::{
     Bounds, Point, Canvas, Path, PathCode, PathOpt,
     driver::Renderer, Clip
 };
@@ -14,7 +14,7 @@ use crate::{
     data_artist_option_struct, path_style_options
 };
 
-use super::{Artist, PlotArtist, PlotId, PathCollection, ToCanvas};
+use super::{Artist, PlotArtist, ArtistHandle, PathCollection, ToCanvas};
 
 pub struct Stem {
     xy: Tensor,
@@ -63,7 +63,7 @@ impl Stem {
 }
 
 impl Artist<Data> for Stem {
-    fn update(&mut self, canvas: &Canvas) {
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
         if self.is_stale {
             self.is_stale = false;
 
@@ -81,7 +81,7 @@ impl Artist<Data> for Stem {
         }
 
         if let Some(markers) = &mut self.markers {
-            markers.update(canvas);
+            markers.update(pos, canvas);
         }
     }
     
@@ -122,17 +122,17 @@ impl Artist<Data> for Stem {
     }
 }
 
-impl PlotArtist<Data> for Stem {
+impl PlotArtist for Stem {
     type Opt = StemOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, artist: ArtistHandle<Stem>) -> Self::Opt {
         self.line_style = PathStyle::from_config(cfg, "stem.lines");
         self.baseline_style = PathStyle::from_config(cfg, "stem.lines");
         self.marker_style = PathStyle::from_config(cfg, "stem.marker");
 
         self.baseline_style.color("red"); // C3
 
-        unsafe { StemOpt::new(id) }
+        StemOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

@@ -1,38 +1,50 @@
-use std::ops;
+use essay_graphics::layout::{Grid, Layout};
+use essay_graphics::wgpu::WgpuBackend;
 
-use essay_plot_wgpu::WgpuBackend;
-
-use essay_plot_api::{
-    driver::{Renderer, Backend, FigureApi},
-    Bounds, Point, CanvasEvent, Canvas,
+use essay_graphics::api::{
+    driver::Backend,
+    Bounds, Point,
 };
 
-use crate::{graph::Graph, frame::{Layout, LayoutArc}};
+use crate::frame::Frame;
+use crate::graph::Graph; // , frame::{Layout, LayoutArc}};
 
 use super::config::read_config;
+use super::ConfigArc;
 
 pub struct Figure {
-    // inner: Arc<Mutex<FigureInner>>,
+    size: (f32, f32),
+    dpi: f32,
+
     device: Box<dyn Backend>,
-    inner: FigureInner,
+    // inner: FigureInner,
+    config: ConfigArc,
+    layout: Layout,
 }
 
 impl Figure {
     pub fn new() -> Self {
         Self {
             // inner: Arc::new(Mutex::new(FigureInner::new())),
-            inner: FigureInner::new(),
+            // inner: FigureInner::new(),
             device: Box::new(WgpuBackend::new()),
+            config: read_config().into_arc(),
+
+            layout: Layout::new(),
+
+            size: (6.4, 4.8),
+            dpi: 200.,
         }
     }
 
-    pub fn new_graph(&mut self, grid: impl Into<Bounds<Layout>>) -> Graph {
-        self.inner.new_graph(grid)
+    pub fn new_graph(&mut self, pos: impl Into<Bounds<Grid>>) -> Graph {
+        // self.inner.new_graph(grid)
+        Graph::new(self.layout.add_view(pos, Frame::new(&self.config)))
     }
 
-    pub fn graph(&mut self, id: GraphId) -> Graph {
-        self.inner.get_graph(id)
-    }
+    // pub fn graph(&mut self, id: GraphId) -> Graph {
+    //     self.inner.get_graph(id)
+    // }
 
     pub fn poly_graphs<'a, R: PolyRow<'a>>(&'a mut self, _layout: R) -> R::Item {
         todo!()
@@ -42,22 +54,22 @@ impl Figure {
 
     pub fn show(self) {
         // let mut figure = self;
-        let inner = self.inner;
+        let layout = self.layout;
         let mut device = self.device;
 
-        device.main_loop(Box::new(inner)).unwrap();
+        device.main_loop(Box::new(layout)).unwrap();
     }
 
     pub fn get_width(&self) -> f32 {
-        self.inner.size.0
+        self.size.0
     }
 
     pub fn get_height(&self) -> f32 {
-        self.inner.size.1
+        self.size.1
     }
 
     pub fn get_dpi(&self) -> f32 {
-        self.inner.dpi
+        self.dpi
     }
 
     pub fn save(&mut self, path: impl AsRef<std::path::Path>, dpi: f32) {
@@ -65,12 +77,13 @@ impl Figure {
             self.get_width() * dpi,
             self.get_height() * dpi,
             dpi,
-            &mut self.inner, 
+            &mut self.layout, 
             path
         );    
     }
 }
 
+/*
 impl ops::Index<GraphId> for Figure {
     type Output = Graph;
 
@@ -84,6 +97,7 @@ impl ops::IndexMut<GraphId> for Figure {
         self.inner.graph_mut(index)
     }
 }
+*/
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct GraphId(usize);
@@ -95,6 +109,7 @@ impl GraphId {
     }
 }
 
+/*
 pub struct FigureInner {
     _gridspec: Bounds<Layout>,
     layout: LayoutArc,
@@ -168,16 +183,19 @@ impl FigureInner {
 }
 
 impl FigureApi for FigureInner {
-    fn draw(&mut self, renderer: &mut dyn Renderer, bounds: &Bounds<Canvas>) {
-        self.layout.draw(renderer, bounds);
+    fn update(&mut self, canvas: &Canvas) {
+        self.layout.update_canvas(canvas);
+    }
+
+    fn draw(&mut self, renderer: &mut dyn Renderer) { // }, bounds: &Bounds<Canvas>) {
+        // self.layout.draw(renderer, bounds);
     }
 
     fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
         self.layout.event(renderer, event);
     }
 }
-
-//impl Coord for Figure {}
+    */
 
 pub trait PolyRow<'a> {
     type Item;

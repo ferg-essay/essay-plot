@@ -7,11 +7,11 @@ pub mod frame;
 pub mod plot;
 
 pub mod api {
-    pub use essay_plot_api::*;
+    pub use essay_graphics::api::*;
 }
 
 pub mod wgpu {
-    pub use essay_plot_wgpu::*;
+    pub use essay_graphics::wgpu::*;
 }
 
 pub mod prelude {

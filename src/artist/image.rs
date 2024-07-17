@@ -1,5 +1,5 @@
-use essay_plot_api::driver::Renderer;
-use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt};
+use essay_graphics::api::driver::Renderer;
+use essay_graphics::api::{Canvas, Bounds, Point, Clip, PathOpt};
 use essay_tensor::Tensor;
 
 use crate::data_artist_option_struct;
@@ -7,7 +7,7 @@ use crate::frame::LegendHandler;
 use crate::graph::ConfigArc;
 use crate::{frame::Data, artist::{Norms, Norm}};
 
-use super::{Artist, ColorMap, ColorMaps, PlotArtist, PlotId, ToCanvas};
+use super::{Artist, ArtistHandle, ColorMap, ColorMaps, PlotArtist, ToCanvas};
 
 pub struct Image {
     data: Tensor,
@@ -46,7 +46,7 @@ impl Image {
 }
 
 impl Artist<Data> for Image {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
         self.norm.set_bounds(&self.data);
     }
     
@@ -98,11 +98,11 @@ impl Artist<Data> for Image {
     }
 }
 
-impl PlotArtist<Data> for Image {
+impl PlotArtist for Image {
     type Opt = ImageOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, id: PlotId) -> Self::Opt {
-        unsafe { ImageOpt::new(id) }
+    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistHandle<Image>) -> Self::Opt {
+        ImageOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

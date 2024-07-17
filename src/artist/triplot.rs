@@ -1,4 +1,4 @@
-use essay_plot_api::{Bounds, Point, Canvas, Clip, PathOpt, Path, PathCode, driver::Renderer};
+use essay_graphics::api::{Bounds, Point, Canvas, Clip, PathOpt, Path, PathCode, driver::Renderer};
 use essay_tensor::Tensor;
 
 use crate::{frame::Data, tri::{Triangulation, triangulate}};
@@ -27,7 +27,7 @@ impl TriPlot {
 }
 
 impl Artist<Data> for TriPlot {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
         if self.is_stale {
             self.is_stale = false;
             self.triangulation = Some(triangulate(&self.data));

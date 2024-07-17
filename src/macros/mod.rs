@@ -2,29 +2,23 @@
 macro_rules! frame_option_struct {
     ($name: ident, $ty: ident, $getter: ident) => {
         pub struct $name {
-            layout: $crate::frame::LayoutArc,
-            frame_id: $crate::frame::FrameId,
+            view: essay_graphics::layout::ViewHandle<$crate::frame::Frame>,
             artist: $crate::frame::FrameArtist,
         }
         
         impl $name {
             pub(crate) fn new(
-                layout: $crate::frame::LayoutArc, 
-                frame_id: $crate::frame::FrameId,
+                view: &essay_graphics::layout::ViewHandle<$crate::frame::Frame>, 
                 artist: $crate::frame::FrameArtist,
             ) -> Self {
                 Self {
-                    layout,
-                    frame_id,
+                    view: view.clone(),
                     artist,
                 }
             }
         
             fn write(&mut self, fun: impl FnOnce(&mut $ty)) {
-                self.layout.write(|l|
-                    fun(l.frame_mut(self.frame_id)
-                        .$getter(self.artist))
-                );
+                self.view.write(|frame| fun(frame.$getter(self.artist)));
             }
         }
     }
@@ -34,25 +28,21 @@ macro_rules! frame_option_struct {
 macro_rules! data_artist_option_struct {
     ($name: ident, $ty: ty) => {
         pub struct $name {
-            layout: $crate::frame::LayoutArc,
-            id: $crate::frame::ArtistId,
+            artist: $crate::artist::ArtistHandle<$ty>,
         }
         
         impl $name {
-            pub(crate) unsafe fn new(
-                plot_id: $crate::artist::PlotId,
+            pub(crate) fn new(
+                artist: $crate::artist::ArtistHandle<$ty>,
             ) -> Self {
                 Self {
-                    layout: plot_id.layout().clone(),
-                    id: *plot_id.id(),
+                    artist: artist,
                 }
             }
         
-            fn write(&mut self, fun: impl FnOnce(&mut $ty)) {
-                self.layout.write(|l| {
-                    fun(l.frame_mut(self.id.frame())
-                        .get_data_artist_mut::<$ty>(self.id))
-                });
+            #[inline]
+            fn write<R>(&mut self, fun: impl FnOnce(&mut $ty) -> R) -> R {
+                self.artist.write(|artist| fun(artist))
             }
         }
     }
@@ -62,17 +52,17 @@ macro_rules! data_artist_option_struct {
 macro_rules! path_style_options {
     ($field: ident) => {
 
-        pub fn color(&mut self, color: impl Into<essay_plot_api::Color>) -> &mut Self {
+        pub fn color(&mut self, color: impl Into<essay_graphics::api::Color>) -> &mut Self {
             self.write(|ticks| { ticks.$field.color(color); });
             self
         }
 
-        pub fn face_color(&mut self, color: impl Into<essay_plot_api::Color>) -> &mut Self {
+        pub fn face_color(&mut self, color: impl Into<essay_graphics::api::Color>) -> &mut Self {
             self.write(|ticks| { ticks.$field.face_color(color); });
             self
         }
 
-        pub fn edge_color(&mut self, color: impl Into<essay_plot_api::Color>) -> &mut Self {
+        pub fn edge_color(&mut self, color: impl Into<essay_graphics::api::Color>) -> &mut Self {
             self.write(|ticks| { ticks.$field.edge_color(color); });
             self
         }
@@ -82,22 +72,22 @@ macro_rules! path_style_options {
             self
         }
     
-        pub fn line_style(&mut self, style: impl Into<essay_plot_api::LineStyle>) -> &mut Self {
+        pub fn line_style(&mut self, style: impl Into<essay_graphics::api::LineStyle>) -> &mut Self {
             self.write(|ticks| { ticks.$field.line_style(style); });
             self
         }
     
-        pub fn join_style(&mut self, style: impl Into<essay_plot_api::JoinStyle>) -> &mut Self {
+        pub fn join_style(&mut self, style: impl Into<essay_graphics::api::JoinStyle>) -> &mut Self {
             self.write(|ticks| { ticks.$field.join_style(style); });
             self
         }
     
-        pub fn cap_style(&mut self, style: impl Into<essay_plot_api::CapStyle>) -> &mut Self {
+        pub fn cap_style(&mut self, style: impl Into<essay_graphics::api::CapStyle>) -> &mut Self {
             self.write(|ticks| { ticks.$field.cap_style(style); });
             self
         }
     
-        pub fn hatch(&mut self, hatch: impl Into<essay_plot_api::Hatch>) -> &mut Self {
+        pub fn hatch(&mut self, hatch: impl Into<essay_graphics::api::Hatch>) -> &mut Self {
             self.write(|ticks| { ticks.$field.hatch(hatch); });
             self
         }

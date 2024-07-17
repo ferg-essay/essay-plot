@@ -1,7 +1,7 @@
-use essay_plot_api::{driver::Renderer, Bounds, Canvas, Clip, PathOpt};
+use essay_graphics::api::{driver::Renderer, Bounds, Canvas, Clip, PathOpt};
 use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 
-use crate::{artist::{Artist, ColorMap, ColorMaps, GridColor, Norm, Norms, PlotArtist, PlotId, Shading, ToCanvas}, data_artist_option_struct, frame::{Data, LegendHandler}, graph::{ConfigArc, Graph}};
+use crate::{artist::{Artist, ArtistHandle, ColorMap, ColorMaps, GridColor, Norm, Norms, PlotArtist, Shading, ToCanvas}, data_artist_option_struct, frame::{Data, LegendHandler}, graph::{ConfigArc, Graph}};
 
 pub fn specgram(
     graph: &mut Graph, 
@@ -87,7 +87,7 @@ fn calculate_spectrum(data: &Tensor, nfft: usize, overlap: usize) -> Tensor {
 }
 
 impl Artist<Data> for SpecGram {
-    fn update(&mut self, canvas: &Canvas) {
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
         if self.is_stale {
             self.is_stale = false;
             let spectrum = calculate_spectrum(
@@ -104,7 +104,7 @@ impl Artist<Data> for SpecGram {
             self.grid_color.set_norm(min, max);
         }
 
-        self.grid_color.update(canvas);
+        self.grid_color.update(pos, canvas);
     }
     
     fn get_extent(&mut self) -> Bounds<Data> {
@@ -122,11 +122,11 @@ impl Artist<Data> for SpecGram {
     }
 }
 
-impl PlotArtist<Data> for SpecGram {
+impl PlotArtist for SpecGram {
     type Opt = SpecGramOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, id: PlotId) -> Self::Opt {
-        unsafe { SpecGramOpt::new(id) }
+    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistHandle<SpecGram>) -> Self::Opt {
+        SpecGramOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

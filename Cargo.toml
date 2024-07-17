@@ -11,9 +11,10 @@ path = "src/lib.rs"
 env_logger = { version = "0.11" }
 log = { version = "0.4.17" }
 essay-tensor = { path = "../essay-tensor"  }
-essay-plot-api = { path = "crates/essay-plot-api" }
-essay-plot-wgpu = { path = "crates/essay-plot-wgpu" }
-futures = "0.3"
+essay-graphics = { path = "../essay-graphics"  }
+# essay-plot-api = { path = "crates/essay-plot-api" }
+# essay-plot-wgpu = { path = "crates/essay-plot-wgpu" }
+#futures = "0.3"
 
 [workspace]
 members = [

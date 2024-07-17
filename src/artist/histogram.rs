@@ -1,9 +1,9 @@
-use essay_plot_api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer};
+use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer};
 use essay_tensor::Tensor;
 
 use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options};
 
-use super::{Artist, PathStyle, PlotArtist, PlotId, paths, ToCanvas};
+use super::{paths, Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas};
 
 pub struct Histogram {
     data: Tensor,
@@ -43,7 +43,7 @@ impl Histogram {
 }
 
 impl Artist<Data> for Histogram {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
         if self.is_stale {
             self.is_stale = false;
 
@@ -90,13 +90,13 @@ impl Artist<Data> for Histogram {
     }
 }
 
-impl PlotArtist<Data> for Histogram {
+impl PlotArtist for Histogram {
     type Opt = HistogramOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, artist: ArtistHandle<Histogram>) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "histogram");
 
-        unsafe { HistogramOpt::new(id) }
+        HistogramOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

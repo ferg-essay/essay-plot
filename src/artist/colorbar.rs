@@ -1,4 +1,4 @@
-use essay_plot_api::{Point, Canvas, Bounds, driver::Renderer, Clip, PathOpt, Color, CapStyle};
+use essay_graphics::api::{Point, Canvas, Bounds, driver::Renderer, Clip, PathOpt, Color, CapStyle};
 use essay_tensor::{Tensor, init::linspace, tf32};
 
 use crate::frame::Data;
@@ -28,7 +28,7 @@ impl Colorbar {
 }
 
 impl Artist<Data> for Colorbar {
-    fn update(&mut self, canvas: &Canvas) {
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
         let is_triangle = false;
         if is_triangle {
             self.bounds = Bounds::new(Point(0., 0.), Point(2., 100.));
@@ -38,7 +38,7 @@ impl Artist<Data> for Colorbar {
         let x = linspace(0., 1., 101);//.reshape([101, 1]);
         self.data = x.stack([x.clone()], -1);
         self.mesh.set_data(self.data.clone());
-        self.mesh.update(canvas);
+        self.mesh.update(pos, canvas);
     }
 
     fn get_extent(&mut self) -> Bounds<Data> {

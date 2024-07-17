@@ -1,10 +1,15 @@
-use essay_plot_api::{Path, Bounds, Canvas, PathOpt, driver::Renderer, JoinStyle, affine, Clip};
+use essay_graphics::api::{Path, Bounds, Canvas, PathOpt, driver::Renderer, JoinStyle, affine, Clip};
 use essay_tensor::Tensor;
 
 use crate::{
-    artist::{paths::{self}, Artist, PathCollection, Markers, PathStyle, PlotId, PlotArtist, ToCanvas}, 
-    graph::{Graph, ConfigArc}, frame::{Data, LegendHandler}, 
-    data_artist_option_struct, path_style_options
+    artist::{
+        paths::{self}, 
+        Artist, ArtistHandle, Markers, PathCollection, PathStyle, PlotArtist, ToCanvas
+    }, 
+    data_artist_option_struct, 
+    path_style_options,
+    frame::{Data, LegendHandler}, 
+    graph::{ConfigArc, Graph}, 
 };
 
 pub fn scatter(
@@ -74,7 +79,7 @@ impl ScatterPlot {
 }
 
 impl Artist<Data> for ScatterPlot {
-    fn update(&mut self, canvas: &Canvas) {
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
         if self.is_stale {
             self.is_stale = false;
 
@@ -86,7 +91,7 @@ impl Artist<Data> for ScatterPlot {
             self.collection = PathCollection::new(path, &self.xy);
         }
 
-        self.collection.update(canvas);
+        self.collection.update(pos, canvas);
     }
 
     fn get_extent(&mut self) -> Bounds<Data> {
@@ -106,17 +111,17 @@ impl Artist<Data> for ScatterPlot {
     }
 }
 
-impl PlotArtist<Data> for ScatterPlot {
+impl PlotArtist for ScatterPlot {
     type Opt = ScatterOpt;
 
     fn config(
         &mut self, 
         cfg: &ConfigArc, 
-        id: PlotId,
+        artist: ArtistHandle<ScatterPlot>,
     ) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "scatter");
 
-        unsafe { ScatterOpt::new(id) }
+        ScatterOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

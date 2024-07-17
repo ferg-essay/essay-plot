@@ -1,15 +1,14 @@
 use std::f32::consts::PI;
 
-use essay_plot_api::{
-    PathOpt,
-    driver::Renderer, Bounds, Canvas, Affine2d, Point, CanvasEvent, VertAlign, Color, Clip, 
-};
+use essay_graphics::{api::{
+    driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Color, PathOpt, Point, VertAlign 
+}, layout::ViewTrait};
 
 use crate::{
     artist::{
-        patch::CanvasPatch, TextCanvas, Artist, PathStyle, Colorbar, paths, ToCanvas
+        patch::CanvasPatch, paths, Artist, Colorbar, PathStyle, TextCanvas, ToCanvas
     }, 
-    graph::Config
+    graph::{Config, ConfigArc}
 };
 
 use super::{data_box::DataBox, axis::{Axis, AxisTicks, XAxis, YAxis}, layout::FrameId, LayoutArc, legend::Legend, Data, ArtistId};
@@ -19,7 +18,11 @@ pub struct Frame {
     
     pos: Bounds<Canvas>,
 
+    config: ConfigArc,
+
     to_canvas: Affine2d,
+
+    margins: FrameMargins,
 
     _is_share_x: bool,
     _is_share_y: bool,
@@ -64,15 +67,21 @@ pub struct Frame {
 }
 
 impl Frame {
-    pub(crate) fn new(id: FrameId, cfg: &Config) -> Self {
+    pub(crate) fn new(cfg: &ConfigArc) -> Self {
+        let id = FrameId(0);
+
         Self {
             id,
+
+            config: cfg.clone(),
 
             pos: Bounds::none(),
 
             data: DataBox::new(id, cfg),
 
             title: TextCanvas::new(),
+
+            margins: FrameMargins::new(cfg),
 
             bottom: BottomFrame::new(cfg),
             left: LeftFrame::new(cfg),
@@ -103,22 +112,28 @@ impl Frame {
         &self.pos
     }
 
-    pub(crate) fn update(&mut self, canvas: &Canvas) {
-        self.title.update(canvas);
+    pub(crate) fn config(&self) -> &ConfigArc {
+        &self.config
+    }
 
-        self.data.update(canvas);
+    /*
+    pub(crate) fn _update(&mut self, canvas: &Canvas) {
+        self.title.update(pos, canvas);
+
+        self.data.update(pos, canvas);
 
         self.bottom.update_axis(&self.data);
         self.left.update_axis(&self.data);
 
-        self.bottom.update(canvas);
-        self.left.update(canvas);
-        self.top.update(canvas);
-        self.right.update(canvas);
+        self.bottom.update(pos, canvas);
+        self.left.update(pos, canvas);
+        self.top.update(pos, canvas);
+        self.right.update(pos, canvas);
 
         self.legend.update_handlers(&self.data);
-        self.legend.update(canvas);
+        self.legend.update(pos, canvas);
     }
+    */
 
     ///
     /// Sets the device bounds and propagates to children
@@ -126,7 +141,7 @@ impl Frame {
     /// The position for a frame is the size of the data box. The frame,
     /// axes and titles are relative to the data box.
     /// 
-    pub(crate) fn set_pos(&mut self, pos: &Bounds<Canvas>) -> &mut Self {
+    pub(crate) fn _set_pos(&mut self, pos: &Bounds<Canvas>) -> &mut Self {
         self.pos = pos.clone();
 
         let title = self.title.get_extent();
@@ -237,7 +252,7 @@ impl Frame {
         }
     }
 
-    pub(crate) fn draw(&mut self, renderer: &mut dyn Renderer) {
+    pub(crate) fn _draw(&mut self, renderer: &mut dyn Renderer) {
         let clip = Clip::from(&self.pos);
 
         let frame_to_canvas = ToCanvas::new(
@@ -279,6 +294,93 @@ impl Frame {
     }
 }
 
+impl ViewTrait for Frame {
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        let pos = Bounds::from([
+            pos.xmin() + pos.width() * self.margins.left,
+            pos.ymin() + pos.height() * self.margins.top,
+            pos.xmin() + pos.width() * self.margins.right,
+            pos.ymin() + pos.height() * self.margins.bottom,
+        ]);
+
+        self.pos = pos.clone();
+
+        let title = self.title.get_extent();
+
+        // title exists outside the pos bounds
+        self.title.update(&Bounds::from([
+            pos.xmin(), pos.ymax(), 
+            pos.xmax(), pos.ymax() + title.height()
+        ]), canvas); 
+
+        let pos_data = Bounds::<Canvas>::new(
+            Point(pos.xmin(), pos.ymin()), 
+            Point(pos.xmax(), pos.ymax()),
+        );
+
+        self.data.update(&pos_data, canvas);
+
+        let pos_data = self.data.get_pos();
+
+        let pos_top = Bounds::<Canvas>::new(
+            Point(pos_data.xmin(), pos_data.ymax()),
+            Point(pos_data.xmax(), pos_data.ymax()),
+        );
+        self.top.set_pos(pos_top);
+
+        let pos_right = Bounds::<Canvas>::new(
+            Point(pos_data.xmax(), pos_data.ymin()),
+            Point(pos_data.xmax(), pos_data.ymax()),
+        );
+        self.right.set_pos(pos_right);
+
+        let pos_canvas = Bounds::<Canvas>::new(
+            Point(pos_data.xmin(), pos_data.ymax()),
+            Point(pos_data.xmin(), pos_data.ymax()),
+        );
+        self.legend.set_pos(pos_canvas);
+
+        // XXX:
+        self.bottom.update_axis(&self.data);
+        self.left.update_axis(&self.data);
+
+        self.bottom.update(&pos, canvas);
+        self.left.update(&pos, canvas);
+        self.top.update(&pos, canvas);
+        self.right.update(&pos, canvas);
+
+        self.legend.update_handlers(&self.data);
+        self.legend.update(&pos, canvas);
+    }
+
+    fn draw(&mut self, renderer: &mut dyn Renderer) {
+        let clip = Clip::from(&self.pos);
+
+        let frame_to_canvas = ToCanvas::new(
+            self.pos.clone(), 
+            self.to_canvas.clone()
+        );
+
+        let to_canvas = ToCanvas::new(
+            self.pos.clone(), 
+            self.data.get_canvas_transform().clone()
+        );
+
+        self.title.draw(renderer, &to_canvas, &clip, &self.path_style);
+
+        self.bottom.draw(renderer, &self.data, &frame_to_canvas, &clip, &self.path_style);
+        self.left.draw(renderer, &self.data, &frame_to_canvas, &clip, &self.path_style);
+
+        self.top.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
+        self.right.draw(renderer,  &frame_to_canvas, &clip, &self.path_style);
+
+        // TODO: grid order
+        self.data.draw(renderer, &to_canvas, &clip, &self.path_style);
+
+        self.legend.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
+    }
+}
+//impl Coord for Figure {}
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -341,7 +443,7 @@ impl TopFrame {
 }
 
 impl Artist<Canvas> for TopFrame {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
     }
     
     fn get_extent(&mut self) -> Bounds<Canvas> {
@@ -416,9 +518,9 @@ impl BottomFrame {
         self.title.label(text)
     }
 
-    fn update(&mut self, canvas: &Canvas) {
-        self.title.update(canvas);
-        self.x_axis.update(canvas);
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        self.title.update(pos, canvas);
+        self.x_axis.update(pos, canvas);
     }
 
     fn axis_mut(&mut self) -> &mut Axis {
@@ -483,9 +585,9 @@ impl LeftFrame {
         self.title.label(text)
     }
 
-    fn update(&mut self, canvas: &Canvas) {
-        self.title.update(canvas);
-        self.y_axis.update(canvas);
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        self.title.update(pos, canvas);
+        self.y_axis.update(pos, canvas);
     }
 
     fn axis_mut(&mut self) -> &mut Axis {
@@ -538,9 +640,9 @@ impl RightFrame {
 }
 
 impl Artist<Canvas> for RightFrame {
-    fn update(&mut self, canvas: &Canvas) {
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
         if let Some(colorbar) = &mut self.colorbar {
-            colorbar.update(canvas);
+            colorbar.update(pos, canvas);
         }
     }
     
@@ -599,5 +701,43 @@ impl FrameTextOpt {
     pub fn size(&mut self, size: f32) -> &mut Self {
         self.write(|text| { text.text_style_mut().size(size); });
         self
+    }
+}
+
+struct FrameMargins {
+    top: f32,
+    bottom: f32,
+    left: f32,
+    right: f32,
+}
+
+impl FrameMargins {
+    fn new(cfg: &Config) -> Self {
+        let bottom = match cfg.get_as_type("figure.subplot", "bottom") {
+            Some(value) => value,
+            None => 0.
+        };
+
+        let top = match cfg.get_as_type("figure.subplot", "top") {
+            Some(value) => value,
+            None => 1.
+        };
+
+        let left = match cfg.get_as_type("figure.subplot", "left") {
+            Some(value) => value,
+            None => 0.
+        };
+
+        let right = match cfg.get_as_type("figure.subplot", "right") {
+            Some(value) => value,
+            None => 1.
+        };
+
+        Self {
+            bottom,
+            top, 
+            left,
+            right, 
+        }
     }
 }

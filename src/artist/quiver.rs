@@ -1,9 +1,9 @@
-use essay_plot_api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer};
+use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer};
 use essay_tensor::Tensor;
 
 use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options};
 
-use super::{Artist, PathStyle, PlotArtist, PlotId, paths, ToCanvas};
+use super::{paths, Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas};
 
 pub struct Quiver {
     x: Tensor,
@@ -90,7 +90,7 @@ impl Quiver {
 }
 
 impl Artist<Data> for Quiver {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
         if self.is_stale {
             self.is_stale = false;
 
@@ -140,10 +140,10 @@ impl Artist<Data> for Quiver {
     }
 }
 
-impl PlotArtist<Data> for Quiver {
+impl PlotArtist for Quiver {
     type Opt = QuiverOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, artist: ArtistHandle<Quiver>) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "quiver");
 
         // TODO: when Cycle is changed, this shouldn't be necessary
@@ -151,7 +151,7 @@ impl PlotArtist<Data> for Quiver {
             self.style.color("k");
         }
 
-        unsafe { QuiverOpt::new(id) }
+        QuiverOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

@@ -1,4 +1,4 @@
-use essay_plot_api::{
+use essay_graphics::api::{
     Bounds, Canvas, Clip, PathOpt, driver::Renderer, 
     PathCode, Path, Point, TextStyle, VertAlign, HorizAlign
 };
@@ -53,7 +53,7 @@ impl Legend {
 }
 
 impl Artist<Canvas> for Legend {
-    fn update(&mut self, canvas: &Canvas) {
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
         let font_size = match self.text_style.get_size() {
             Some(size) => *size,
             None => 10.,

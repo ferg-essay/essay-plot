@@ -1,23 +1,21 @@
-use essay_plot_api::{Coord, Canvas, Bounds, driver::Renderer, Clip, PathOpt};
+use essay_graphics::api::{Coord, Canvas, Bounds, driver::Renderer, Clip, PathOpt};
 
 use crate::{
-    artist::{Artist, PathStyle, PlotId, PlotArtist, ToCanvas},
-    frame::{Data, LegendHandler}, 
-    data_artist_option_struct, path_style_options,
+    artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, data_artist_option_struct, frame::{Data, LegendHandler}, path_style_options
 };
 
-data_artist_option_struct!(PlotOpt, PlotOptArtist<Data>);
+data_artist_option_struct!(PlotOpt, PlotOptHandle<Data>);
 
 impl PlotOpt {
     path_style_options!(style);
 }
 
-pub struct PlotOptArtist<M: Coord> {
+pub struct PlotOptHandle<M: Coord> {
     artist: Box<dyn Artist<M>>,
     style: PathStyle,
 }
 
-impl<M: Coord> PlotOptArtist<M> {
+impl<M: Coord> PlotOptHandle<M> {
     pub fn new<A>(artist: A) -> Self
     where
         A: Artist<M> + 'static
@@ -29,12 +27,12 @@ impl<M: Coord> PlotOptArtist<M> {
     }
 }
 
-impl<M: Coord> Artist<M> for PlotOptArtist<M> {
-    fn update(&mut self, canvas: &Canvas) {
-        self.artist.update(canvas);
+impl Artist<Data> for PlotOptHandle<Data> {
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+        self.artist.update(pos, canvas);
     }
 
-    fn get_extent(&mut self) -> Bounds<M> {
+    fn get_extent(&mut self) -> Bounds<Data> {
         self.artist.get_extent()
     }
 
@@ -51,17 +49,17 @@ impl<M: Coord> Artist<M> for PlotOptArtist<M> {
     }
 }
 
-impl<M: Coord> PlotArtist<M> for PlotOptArtist<M> {
+impl PlotArtist for PlotOptHandle<Data> {
     type Opt = PlotOpt;
 
     fn config(
         &mut self, 
         cfg: &super::ConfigArc, 
-        id: PlotId,
+        artist: ArtistHandle<PlotOptHandle<Data>>,
     ) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "artist");
 
-        unsafe { PlotOpt::new(id) }
+        unsafe { PlotOpt::new(artist) }
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

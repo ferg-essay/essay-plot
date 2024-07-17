@@ -1,9 +1,9 @@
-use essay_plot_api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer};
+use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer};
 use essay_tensor::{Tensor, init::linspace};
 
 use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options};
 
-use super::{Artist, PathStyle, PlotArtist, PlotId, paths, ToCanvas};
+use super::{artist::ArtistHandle, paths, Artist, PathStyle, PlotArtist, ToCanvas};
 
 pub struct Bar {
     height: Tensor,
@@ -90,7 +90,7 @@ impl Bar {
 }
 
 impl Artist<Data> for Bar {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
         if self.is_stale {
             self.is_stale = false;
 
@@ -154,13 +154,13 @@ impl Artist<Data> for Bar {
     }
 }
 
-impl PlotArtist<Data> for Bar {
+impl PlotArtist for Bar {
     type Opt = BarOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, view: ArtistHandle<Bar>) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "bar");
 
-        unsafe { BarOpt::new(id) }
+        BarOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

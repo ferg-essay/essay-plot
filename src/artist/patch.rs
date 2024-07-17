@@ -1,13 +1,13 @@
 use core::fmt;
 
-use essay_plot_api::{
+use essay_graphics::api::{
     PathOpt, Point, Affine2d, Bounds, Canvas, Path, Angle,
     driver::Renderer, Coord, Clip
 };
 
 use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options, transform_options};
 
-use super::{Artist, paths, PathStyle, PlotArtist, PlotId, IntoArtist, ToCanvas};
+use super::{paths, Artist, ArtistHandle, IntoArtist, PathStyle, PlotArtist, ToCanvas};
 
 pub trait PatchTrait<M: Coord> : Send {
     fn get_path(&mut self) -> &Path<M>;
@@ -47,7 +47,7 @@ impl Patch {
 }
 
 impl Artist<Data> for Patch {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
     }
     
     fn get_extent(&mut self) -> Bounds<Data> {
@@ -64,7 +64,7 @@ impl Artist<Data> for Patch {
         let to_canvas = to_canvas.matmul(&self.transform);
         let path = self.path.transform(&to_canvas);
         let style = self.style.push(style);
-
+        
         renderer.draw_path(
             &path,
             &style, 
@@ -73,13 +73,13 @@ impl Artist<Data> for Patch {
     }
 }
 
-impl PlotArtist<Data> for Patch {
+impl PlotArtist for Patch {
     type Opt = PatchOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, artist: ArtistHandle<Patch>) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "patch");
 
-        unsafe { PatchOpt::new(id) }
+        PatchOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {
@@ -217,7 +217,7 @@ impl Arrow {
     }
 }
 
-impl IntoArtist<Data> for Arrow {
+impl IntoArtist for Arrow {
     type Artist = Patch;
 
     fn into_artist(self) -> Self::Artist {
@@ -253,7 +253,7 @@ impl CanvasPatch {
 }
 
 impl Artist<Canvas> for CanvasPatch {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
     }
     
     fn get_extent(&mut self) -> Bounds<Canvas> {
@@ -292,7 +292,7 @@ impl<M: Coord> PathPatch<M> {
 }
 
 impl Artist<Canvas> for PathPatch<Canvas> {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
     }
     
     fn get_extent(&mut self) -> Bounds<Canvas> {
@@ -317,7 +317,7 @@ impl Artist<Canvas> for PathPatch<Canvas> {
 }
 
 impl Artist<Data> for PathPatch<Data> {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
     }
     
     fn get_extent(&mut self) -> Bounds<Data> {
@@ -383,7 +383,7 @@ impl PatchTrait<Canvas> for Line {
 }
 
 impl Artist<Canvas> for Line {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
     }
     
     fn get_extent(&mut self) -> Bounds<Canvas> {
@@ -461,7 +461,7 @@ impl PatchTrait<Data> for Wedge {
 }
 
 impl Artist<Data> for Wedge {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
     }
     
     fn get_extent(&mut self) -> Bounds<Data> {

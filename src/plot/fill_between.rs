@@ -1,4 +1,4 @@
-use essay_plot_api::{Path, PathCode, Point};
+use essay_graphics::api::{Path, PathCode, Point};
 use essay_tensor::Tensor;
 
 use crate::{

@@ -1,4 +1,4 @@
-use essay_plot_api::{Canvas, Bounds, Point, Clip, PathOpt, Path, driver::Renderer};
+use essay_graphics::api::{Canvas, Bounds, Point, Clip, PathOpt, Path, driver::Renderer};
 use essay_tensor::{Tensor, tensor::TensorVec, math::normalize_unit};
 
 use crate::{frame::Data, contour::ContourGenerator};
@@ -49,7 +49,7 @@ impl Contour {
 }
 
 impl Artist<Data> for Contour {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, pos: &Bounds<Canvas>, _canvas: &Canvas) {
         let mut xy = TensorVec::<[f32; 2]>::new();
         let (rows, cols) = (self.data.rows(), self.data.cols());
 

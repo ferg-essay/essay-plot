@@ -1,21 +1,25 @@
 use core::fmt;
 
+use essay_graphics::{api::Color, layout::ViewHandle};
+
 use crate::{
-    artist::{Artist, PlotArtist, PlotId, IntoArtist},
-    frame::{Data, LayoutArc, FrameId, FrameArtist, FrameTextOpt, AxisOpt, AspectMode}
+    artist::{Artist, IntoArtist, PlotArtist, TextCanvas},
+    frame::{AspectMode, AxisOpt, Data, Frame, FrameArtist}
 };
 
-use super::{style::{PlotOptArtist, PlotOpt}, GraphId};
+use super::{style::PlotOptHandle, PlotOpt};
 
 #[derive(Clone)]
 pub struct Graph {
-    id: GraphId,
-    frame_id: FrameId,
+    //id: GraphId,
+    //frame_id: FrameId,
 
-    layout: LayoutArc,
+    //layout: LayoutArc,
+    view: ViewHandle<Frame>,
 }
 
 impl Graph {
+    /*
     pub(crate) fn new(id: GraphId, frame_id: FrameId, layout: LayoutArc) -> Self {
         let mut graph = Self {
             id,
@@ -27,7 +31,18 @@ impl Graph {
 
         graph
     }
+    */
+    pub(crate) fn new(view: ViewHandle<Frame>) -> Self {
+        let mut graph = Self {
+            view
+        };
 
+        graph.default_properties();
+
+        graph
+    }
+
+    /*
     #[inline]
     pub fn id(&self) -> GraphId {
         self.id
@@ -37,10 +52,12 @@ impl Graph {
     pub fn frame_id(&self) -> FrameId {
         self.frame_id
     }
+    */
 
     fn text_opt(&self, artist: FrameArtist) -> FrameTextOpt {
-        let layout = self.layout.clone();
-        self.layout.read(|l| l.frame(self.frame_id).text_opt(layout, artist))
+        FrameTextOpt::new(self.view.clone(), artist)
+        // let layout = self.layout.clone();
+        // self.layout.read(|l| l.frame(self.frame_id).text_opt(layout, artist))
     }
 
     pub fn title(&mut self, label: &str) -> FrameTextOpt {
@@ -50,15 +67,11 @@ impl Graph {
     }
 
     pub fn x(&mut self) -> AxisOpt {
-        let layout = self.layout.clone();
-
-        AxisOpt::new(layout, self.frame_id(), FrameArtist::X)
+        AxisOpt::new(&self.view, FrameArtist::X)
     }
 
     pub fn y(&mut self) -> AxisOpt {
-        let layout = self.layout.clone();
-
-        AxisOpt::new(layout, self.frame_id(), FrameArtist::Y)
+        AxisOpt::new(&self.view, FrameArtist::Y)
     }
 
     pub fn x_label(&mut self, label: &str) -> FrameTextOpt {
@@ -74,60 +87,49 @@ impl Graph {
     }
 
     pub fn aspect(&mut self, aspect: f32) -> &mut Self {
-        self.layout.write(|l| {
-            l.frame_mut(self.frame_id)
-            .data_mut()
-            .aspect(aspect);
+        self.view.write(|f| { 
+            f.data_mut().aspect(aspect); 
         });
 
         self
     }
 
     pub fn aspect_mode(&mut self, mode: AspectMode) -> &mut Self {
-        self.layout.write(|l| {
-            l.frame_mut(self.frame_id)
-            .data_mut()
-            .aspect_mode(mode);
+        self.view.write(|f| { 
+            f.data_mut().aspect_mode(mode); 
         });
 
         self
     }
 
     pub fn flip_y(&mut self, is_flip_y: bool) -> &mut Self {
-        self.layout.write(|l| {
-            l.frame_mut(self.frame_id)
-            .data_mut()
-            .flip_y(is_flip_y);
+        self.view.write(|f| { 
+            f.data_mut().flip_y(is_flip_y); 
         });
 
         self
     }
 
     pub fn xlim(&mut self, x_min: f32, x_max: f32) -> &mut Self {
-        self.layout.write(|l| {
-            l.frame_mut(self.frame_id)
-            .data_mut()
-            .xlim(x_min, x_max);
+        self.view.write(|f| { 
+            f.data_mut().xlim(x_min, x_max); 
         });
 
         self
     }
 
     pub fn ylim(&mut self, y_min: f32, y_max: f32) -> &mut Self {
-        self.layout.write(|l| {
-            l.frame_mut(self.frame_id)
-            .data_mut()
-            .ylim(y_min, y_max);
+        self.view.write(|f| { 
+            f.data_mut().ylim(y_min, y_max); 
         });
 
         self
     }
 
     pub fn colorbar(&mut self) -> &mut Self {
-        let _id = self.layout.write(|l|
-            l.frame_mut(self.frame_id)
-            .colorbar()
-        );
+        self.view.write(|f| { 
+            f.colorbar();
+        });
 
         self
     }
@@ -145,7 +147,7 @@ impl Graph {
     where
         A: Artist<Data> + 'static
     {
-        self.artist(PlotOptArtist::new(artist))
+        self.artist(PlotOptHandle::new(artist))
     }
 
     /*
@@ -160,45 +162,84 @@ impl Graph {
     pub fn artist<'a, A>(
         &mut self, 
         artist: A,
-    ) -> <A::Artist as PlotArtist<Data>>::Opt 
+    ) -> <A::Artist as PlotArtist>::Opt 
     where
-        A: IntoArtist<Data> + 'static
+        A: IntoArtist + 'static
     {
         let artist = artist.into_artist();
 
-        let id = self.layout.write(|l|
-            l.frame_mut(self.frame_id)
-            .data_mut()
-            .add_artist(artist)
-        );
+        self.view.write(|f| {
+            let config = f.config().clone();
 
+            f.data_mut().add_artist(artist, &config, self.view.clone())
+        })
+
+        /*
         let plot_id = PlotId::new(
-            self.layout.clone(),
+            self.view.clone(),
             id
         );
 
-        self.layout.write(move |layout| {
-            let config = layout.config().clone();
+        self.view.write(|frame| {
+            let config = frame.config().clone();
 
+            frame.data_mut()
+                .artist_mut::<A::Artist>(id)
+                .config(&config, plot_id)
+                */
+
+                /*
             layout
                 .frame_mut(id.frame())
                 .data_mut()
                 .artist_mut::<A::Artist>(id)
                 .config(&config, plot_id)
-        })
+                */
+        // })
     }
 }
 
 impl fmt::Debug for Graph {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let pos = self.layout.read(|l| l.frame(self.frame_id).pos().clone());
+        // let pos = self.layout.read(|l| l.frame(self.frame_id).pos().clone());
 
-        write!(f, "Graph[{}]({},{}; {}x{})",
-            self.frame_id.index(),
-            pos.xmin(),
-            pos.ymin(),
-            pos.width(),
-            pos.height(),
+        write!(f, "Graph[{:?}]",
+            self.view,
         )
+    }
+}
+
+struct FrameTextOpt {
+    view: ViewHandle<Frame>,
+    artist: FrameArtist,
+}
+
+impl FrameTextOpt {
+    fn new(view: ViewHandle<Frame>, artist: FrameArtist) -> Self {
+        Self {
+            view,
+            artist,
+        }
+    }
+
+    fn write(&mut self, fun: impl FnOnce(&mut TextCanvas)) {
+        self.view.write(|frame| {
+            fun(frame.get_text_mut(self.artist))
+        })
+    }
+
+    pub fn label(&mut self, label: &str) -> &mut Self {
+        self.write(|text| { text.label(label); });
+        self
+    }
+
+    pub fn color(&mut self, color: impl Into<Color>) -> &mut Self {
+        self.write(|text| { text.path_style_mut().color(color); });
+        self
+    }
+
+    pub fn size(&mut self, size: f32) -> &mut Self {
+        self.write(|text| { text.text_style_mut().size(size); });
+        self
     }
 }

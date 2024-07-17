@@ -1,4 +1,4 @@
-use essay_plot_api::{
+use essay_graphics::api::{
     Bounds, Point, Canvas,
     PathOpt,
     driver::Renderer, 
@@ -7,7 +7,7 @@ use essay_plot_api::{
 
 use crate::{frame::Data, graph::ConfigArc, data_artist_option_struct, path_style_options};
 
-use super::{Artist, PathStyle, PlotArtist, PlotId, artist::ToCanvas};
+use super::{artist::ToCanvas, Artist, ArtistHandle, PathStyle, PlotArtist};
 
 pub struct TextCanvas {
     pos: Bounds<Canvas>,
@@ -83,7 +83,7 @@ impl Artist<Canvas> for TextCanvas {
         self.extent.clone()
     }
 
-    fn update(&mut self, canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, canvas: &Canvas) {
         self.extent = match &self.text {
             None => Bounds::zero(),
             Some(text) => {
@@ -195,7 +195,7 @@ impl Text {
 }
 
 impl Artist<Data> for Text {
-    fn update(&mut self, _canvas: &Canvas) {
+    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
     }
     
     fn get_extent(&mut self) -> Bounds<Data> {
@@ -234,13 +234,13 @@ impl Artist<Data> for Text {
     }
 }
 
-impl PlotArtist<Data> for Text {
+impl PlotArtist for Text {
     type Opt = TextOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistHandle<Text>) -> Self::Opt {
         // self.style = PathStyle::from_config(cfg, "text");
 
-        unsafe { TextOpt::new(id) }
+        TextOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<crate::frame::LegendHandler> {

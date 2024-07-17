@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use essay_plot_api::{Bounds, Canvas, Point, Coord, driver::Renderer, CanvasEvent};
+use essay_graphics::api::{Bounds, Canvas, Point, Coord, driver::Renderer, CanvasEvent};
 
 use crate::{graph::{Config, ConfigArc}, artist::Artist};
 
@@ -53,7 +53,7 @@ impl Layout {
 
         let id = FrameId(self.frames.len());
 
-        let frame = Frame::new(id, self.config());
+        let frame = Frame::new(self.config());
 
         self.frames.push(LayoutBox::new(frame, bound));
 
@@ -257,7 +257,7 @@ impl LayoutSizes {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct FrameId(usize);
+pub struct FrameId(pub usize);
 
 impl FrameId {
     pub fn index(&self) -> usize {
@@ -310,11 +310,12 @@ impl LayoutBox {
     }
 
     fn draw(&mut self, renderer: &mut dyn Renderer, canvas: &Canvas) {
-        self.frame.update(canvas);
-        let pos_frame = self.pos_canvas.clone();
-        self.frame.set_pos(&pos_frame);
+        todo!();
+        //self.frame.update(canvas);
+        //let pos_frame = self.pos_canvas.clone();
+        //self.frame.set_pos(&pos_frame);
 
-        self.frame.draw(renderer);
+        //self.frame.draw(renderer);
     }
 }
 

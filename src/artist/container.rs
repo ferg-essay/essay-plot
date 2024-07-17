@@ -1,11 +1,11 @@
-use essay_plot_api::{
+use essay_graphics::api::{
     Bounds, Coord, Canvas, PathOpt,
     driver::Renderer, Clip
 };
 
 use crate::{graph::ConfigArc, frame::{Data, LegendHandler}, data_artist_option_struct};
 
-use super::{Artist, PathStyle, StyleCycle, PlotArtist, PlotId, ToCanvas};
+use super::{Artist, ArtistHandle, PathStyle, PlotArtist, StyleCycle, ToCanvas};
 
 pub struct Container<M: Coord> {
     artists: Vec<Box<dyn Artist<M>>>,
@@ -28,9 +28,9 @@ impl<M: Coord> Container<M> {
 }
 
 impl<M: Coord> Artist<M> for Container<M> {
-    fn update(&mut self, canvas: &Canvas) {
+    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
         for artist in &mut self.artists {
-            artist.update(canvas);
+            artist.update(pos, canvas);
         }
     }
 
@@ -65,13 +65,13 @@ impl<M: Coord> Artist<M> for Container<M> {
     }
 }
 
-impl PlotArtist<Data> for Container<Data> {
+impl PlotArtist for Container<Data> {
     type Opt = ContainerOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, id: PlotId) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, artist: ArtistHandle<Container<Data>>) -> Self::Opt {
         self.cycle = StyleCycle::from_config(cfg, "container.cycle");
 
-        unsafe { ContainerOpt::new(id) }
+        ContainerOpt::new(artist)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

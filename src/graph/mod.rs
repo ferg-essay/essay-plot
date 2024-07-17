@@ -8,7 +8,7 @@ pub use graph::{
 };
 
 pub use figure::{
-    Figure, FigureInner, GraphId,
+    Figure, GraphId,
 };
 
 pub use config::{

@@ -28,7 +28,7 @@ impl Colorbar {
 }
 
 impl Artist<Data> for Colorbar {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.pos = pos.clone();
         let is_triangle = false;
         if is_triangle {
@@ -39,10 +39,10 @@ impl Artist<Data> for Colorbar {
         let x = linspace(0., 1., 101);//.reshape([101, 1]);
         self.data = x.stack([x.clone()], -1);
         self.mesh.set_data(self.data.clone());
-        self.mesh.update(pos, canvas);
+        self.mesh.resize(renderer, pos);
     }
 
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         self.bounds.clone()
     }
 

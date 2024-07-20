@@ -52,7 +52,7 @@ impl TriContour {
 }
 
 impl Artist<Data> for TriContour {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
         //let (rows, cols) = (self.data.rows(), self.data.cols());
 
         //for vert in self.tri.triangles().iter_slice() {
@@ -91,7 +91,7 @@ impl Artist<Data> for TriContour {
         // self.xy = xy.into_tensor();
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         self.bounds.clone()
     }
 

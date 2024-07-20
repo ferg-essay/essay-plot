@@ -86,13 +86,13 @@ impl PlotContainer {
 }
 
 impl Artist<Data> for PlotContainer {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         for artist in &self.artists {
-            artist.update(self, pos, canvas);
+            artist.resize(self, renderer, pos);
         }
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         let mut bounds = Bounds::none();
 
         for artist in &self.artists {
@@ -131,7 +131,7 @@ trait ArtistHandleTrait<M: Coord> : Send {
 
     //fn style_mut(&mut self) -> &mut PathStyle;
 
-    fn update(&self, container: &PlotContainer, pos: &Bounds<Canvas>, canvas: &Canvas);
+    fn resize(&self, container: &PlotContainer, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
     fn get_extent(&self, container: &PlotContainer) -> Bounds<M>;
     fn get_legend(&self, container: &PlotContainer) -> Option<LegendHandler>;
 
@@ -171,12 +171,12 @@ where
     //    &mut self.style
     //}
 
-    fn update(&self, container: &PlotContainer, pos: &Bounds<Canvas>, canvas: &Canvas) {
-        container.deref_mut::<A>(self.id).update(pos, canvas);
+    fn resize(&self, container: &PlotContainer, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        container.deref_mut::<A>(self.id).resize(renderer, pos);
     }
 
     fn get_extent(&self, container: &PlotContainer) -> Bounds<Data> {
-        container.deref_mut::<A>(self.id).get_extent()
+        container.deref_mut::<A>(self.id).bounds()
     }
 
     fn draw(

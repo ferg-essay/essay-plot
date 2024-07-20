@@ -136,7 +136,7 @@ impl Frame {
     pub(crate) fn _set_pos(&mut self, pos: &Bounds<Canvas>) -> &mut Self {
         self.pos = pos.clone();
 
-        let title = self.title.get_extent();
+        let title = self.title.bounds();
 
         // title exists outside the pos bounds
         self.title.set_pos([
@@ -287,66 +287,78 @@ impl Frame {
 }
 
 impl ViewTrait for Frame {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
-        let pos = Bounds::from([
-            pos.xmin() + pos.width() * self.margins.left,
-            pos.ymin() + pos.height() * self.margins.top,
-            pos.xmin() + pos.width() * self.margins.right,
-            pos.ymin() + pos.height() * self.margins.bottom,
-        ]);
+    fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
+        if let CanvasEvent::Resize(pos) = event {
+            let pos = Bounds::from([
+                pos.xmin() + pos.width() * self.margins.left,
+                pos.ymin() + pos.height() * self.margins.top,
+                pos.xmin() + pos.width() * self.margins.right,
+                pos.ymin() + pos.height() * self.margins.bottom,
+            ]);
 
-        self.pos = pos.clone();
+            self.pos = pos.clone();
 
-        let title = self.title.get_extent();
+            let title = self.title.bounds();
 
-        // title exists outside the pos bounds
-        self.title.update(&Bounds::from([
-            pos.xmin(), pos.ymax(), 
-            pos.xmax(), pos.ymax() + title.height()
-        ]), canvas); 
+            // title exists outside the pos bounds
+            self.title.resize(
+                renderer,
+                &Bounds::from([
+                    pos.xmin(), pos.ymax(), 
+                    pos.xmax(), pos.ymax() + title.height()
+                ])
+            );
 
-        let pos_data = Bounds::<Canvas>::new(
-            Point(pos.xmin(), pos.ymin()), 
-            Point(pos.xmax(), pos.ymax()),
-        );
+            let pos_data = Bounds::<Canvas>::new(
+                Point(pos.xmin(), pos.ymin()), 
+                Point(pos.xmax(), pos.ymax()),
+            );
 
-        self.data.update(&pos_data, canvas);
+            self.data.resize(renderer, &pos_data);
 
-        let pos_data = self.data.get_pos();
+            let pos_data = self.data.get_pos();
 
-        let pos_top = Bounds::<Canvas>::new(
-            Point(pos_data.xmin(), pos_data.ymax()),
-            Point(pos_data.xmax(), pos_data.ymax()),
-        );
-        self.top.update(&pos_top, canvas);
+            let pos_top = Bounds::<Canvas>::new(
+                Point(pos_data.xmin(), pos_data.ymax()),
+                Point(pos_data.xmax(), pos_data.ymax()),
+            );
+            self.top.resize(renderer, &pos_top);
 
-        let pos_right = Bounds::<Canvas>::new(
-            Point(pos_data.xmax(), pos_data.ymin()),
-            Point(pos_data.xmax(), pos_data.ymax()),
-        );
-        self.right.update(&pos_right, canvas);
+            let pos_right = Bounds::<Canvas>::new(
+                Point(pos_data.xmax(), pos_data.ymin()),
+                Point(pos_data.xmax(), pos_data.ymax()),
+            );
+            self.right.resize(renderer, &pos_right);
 
-        let pos_canvas = Bounds::<Canvas>::new(
-            Point(pos_data.xmin(), pos_data.ymax()),
-            Point(pos_data.xmin(), pos_data.ymax()),
-        );
-        self.legend.update(&pos_canvas, canvas);
+            let pos_canvas = Bounds::<Canvas>::new(
+                Point(pos_data.xmin(), pos_data.ymax()),
+                Point(pos_data.xmin(), pos_data.ymax()),
+            );
+            self.legend.resize(renderer, &pos_canvas);
 
-        // TODO:
-        self.bottom.update_axis(&self.data);
-        self.bottom.update(&pos, canvas);
+            // TODO:
+            self.bottom.update_axis(&self.data);
+            self.bottom.resize(renderer, &pos);
 
-        self.left.update_axis(&self.data);
-        self.left.update(&pos, canvas);
+            self.left.update_axis(&self.data);
+            self.left.resize(renderer, &pos);
 
-        self.top.update(&pos, canvas);
-        self.right.update(&pos, canvas);
+            self.top.resize(renderer, &pos);
+            self.right.resize(renderer, &pos);
 
-        self.legend.update_handlers(&self.data);
-        self.legend.update(&pos, canvas);
+            self.legend.update_handlers(&self.data);
+            self.legend.resize(renderer, &pos);
+        } else if self.data.get_pos().contains(event.point()) {
+            if self.data.event(renderer, event) {
+                self.left.update_axis(&self.data);
+                self.bottom.update_axis(&self.data);
+
+                renderer.request_redraw(&self.pos);
+            };
+        }
     }
 
-    fn draw(&mut self, renderer: &mut dyn Renderer) {
+    fn draw(&mut self, renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
         let clip = Clip::from(&self.pos);
 
         let frame_to_canvas = ToCanvas::new(
@@ -371,17 +383,6 @@ impl ViewTrait for Frame {
         self.data.draw(renderer, &to_canvas, &clip, &self.path_style);
 
         self.legend.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
-    }
-
-    fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
-        if self.data.get_pos().contains(event.point()) {
-            if self.data.event(renderer, event) {
-                self.left.update_axis(&self.data);
-                self.bottom.update_axis(&self.data);
-
-                renderer.request_redraw(&self.pos);
-            };
-        }
     }
 }
 //impl Coord for Figure {}
@@ -447,11 +448,11 @@ impl TopFrame {
 }
 
 impl Artist<Canvas> for TopFrame {
-    fn update(&mut self, pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.set_pos(pos);
     }
     
-    fn get_extent(&mut self) -> Bounds<Canvas> {
+    fn bounds(&mut self) -> Bounds<Canvas> {
         self.bounds.clone()
     }
 
@@ -523,9 +524,9 @@ impl BottomFrame {
         self.title.label(text)
     }
 
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
-        self.title.update(pos, canvas);
-        self.x_axis.update(pos, canvas);
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        self.title.resize(renderer, pos);
+        self.x_axis.resize(renderer, pos);
     }
 
     fn axis_mut(&mut self) -> &mut Axis {
@@ -590,9 +591,9 @@ impl LeftFrame {
         self.title.label(text)
     }
 
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
-        self.title.update(pos, canvas);
-        self.y_axis.update(pos, canvas);
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        self.title.resize(renderer, pos);
+        self.y_axis.update(renderer, pos);
     }
 
     fn axis_mut(&mut self) -> &mut Axis {
@@ -645,15 +646,15 @@ impl RightFrame {
 }
 
 impl Artist<Canvas> for RightFrame {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.set_pos(pos);
 
         if let Some(colorbar) = &mut self.colorbar {
-            colorbar.update(pos, canvas);
+            colorbar.resize(renderer, pos);
         }
     }
     
-    fn get_extent(&mut self) -> Bounds<Canvas> {
+    fn bounds(&mut self) -> Bounds<Canvas> {
         self.bounds.clone()
     }
 

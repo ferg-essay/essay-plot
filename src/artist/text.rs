@@ -79,11 +79,11 @@ impl TextCanvas {
 }
 
 impl Artist<Canvas> for TextCanvas {
-    fn get_extent(&mut self) -> Bounds<Canvas> {
+    fn bounds(&mut self) -> Bounds<Canvas> {
         self.extent.clone()
     }
 
-    fn update(&mut self, _pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
         self.extent = match &self.text {
             None => Bounds::zero(),
             Some(text) => {
@@ -95,8 +95,8 @@ impl Artist<Canvas> for TextCanvas {
                 let width = text.len() as f32 * size as f32; //  * 0.5;
 
                 Bounds::extent(
-                    canvas.to_px(width),
-                    canvas.to_px(size)
+                    renderer.to_px(width),
+                    renderer.to_px(size)
                 )
             }
         }
@@ -195,10 +195,10 @@ impl Text {
 }
 
 impl Artist<Data> for Text {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         Bounds::none()
     }
 

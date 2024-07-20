@@ -1,4 +1,4 @@
-use essay_graphics::api::{Path, Bounds, Canvas, PathOpt, driver::Renderer, JoinStyle, affine, Clip};
+use essay_graphics::api::{affine2d, driver::Renderer, Bounds, Canvas, Clip, JoinStyle, Path, PathOpt};
 use essay_tensor::Tensor;
 
 use crate::{
@@ -42,7 +42,7 @@ impl ScatterPlot {
         let scale = 10.;
         let size = scale * scale;
         let path = paths::unit_pos().transform(
-            &affine::scale(scale, scale)
+            &affine2d::scale(scale, scale)
         );
 
         let collection = PathCollection::new(path, xy.clone());
@@ -79,23 +79,23 @@ impl ScatterPlot {
 }
 
 impl Artist<Data> for ScatterPlot {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         if self.is_stale {
             self.is_stale = false;
 
             // 0.5 because source is [-1, 1]
-            let scale = 0.5 * self.size.sqrt() * canvas.scale_factor();
+            let scale = 0.5 * self.size.sqrt() * renderer.scale_factor();
 
             let path: Path<Canvas> = self.marker.get_scaled_path(scale);
 
             self.collection = PathCollection::new(path, &self.xy);
         }
 
-        self.collection.update(pos, canvas);
+        self.collection.resize(renderer, pos);
     }
 
-    fn get_extent(&mut self) -> Bounds<Data> {
-        self.collection.get_extent()
+    fn bounds(&mut self) -> Bounds<Data> {
+        self.collection.bounds()
     }
 
     fn draw(

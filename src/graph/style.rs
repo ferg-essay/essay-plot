@@ -28,12 +28,12 @@ impl<M: Coord> PlotOptHandle<M> {
 }
 
 impl Artist<Data> for PlotOptHandle<Data> {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
-        self.artist.update(pos, canvas);
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        self.artist.resize(renderer, pos);
     }
 
-    fn get_extent(&mut self) -> Bounds<Data> {
-        self.artist.get_extent()
+    fn bounds(&mut self) -> Bounds<Data> {
+        self.artist.bounds()
     }
 
     fn draw(

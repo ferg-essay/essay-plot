@@ -46,11 +46,11 @@ impl Image {
 }
 
 impl Artist<Data> for Image {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
         self.norm.set_bounds(&self.data);
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         match &self.extent {
             Some(extent) => extent.clone(),
             None => {
@@ -72,7 +72,7 @@ impl Artist<Data> for Image {
         _style: &dyn PathOpt,
     ) {
         //let to_canvas = to_canvas.translate(0., self.).scale(1., -1.);
-        let extent = self.get_extent();
+        let extent = self.bounds();
         let bounds = Bounds::new(
             to_canvas.transform_point(extent.p0()),
             to_canvas.transform_point(extent.p1()),

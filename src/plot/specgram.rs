@@ -87,7 +87,7 @@ fn calculate_spectrum(data: &Tensor, nfft: usize, overlap: usize) -> Tensor {
 }
 
 impl Artist<Data> for SpecGram {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         if self.is_stale {
             self.is_stale = false;
             let spectrum = calculate_spectrum(
@@ -104,11 +104,11 @@ impl Artist<Data> for SpecGram {
             self.grid_color.set_norm(min, max);
         }
 
-        self.grid_color.update(pos, canvas);
+        self.grid_color.resize(renderer, pos);
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
-        self.grid_color.get_extent()
+    fn bounds(&mut self) -> Bounds<Data> {
+        self.grid_color.bounds()
     }
 
     fn draw(

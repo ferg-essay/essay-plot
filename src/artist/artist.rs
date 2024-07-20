@@ -7,9 +7,9 @@ use essay_graphics::{api::{
 use crate::{frame::{ArtistId, Data, Frame, LegendHandler}, graph::ConfigArc};
 
 pub trait Artist<M: Coord> : Send {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas);
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
 
-    fn get_extent(&mut self) -> Bounds<M>;
+    fn bounds(&mut self) -> Bounds<M>;
     
     fn draw(
         &mut self, 

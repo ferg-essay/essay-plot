@@ -49,7 +49,7 @@ impl Contour {
 }
 
 impl Artist<Data> for Contour {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
         let mut xy = TensorVec::<[f32; 2]>::new();
         let (rows, cols) = (self.data.rows(), self.data.cols());
 
@@ -89,7 +89,7 @@ impl Artist<Data> for Contour {
         self.xy = xy.into_tensor();
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         let (rows, cols) = (self.data.rows(), self.data.cols());
 
         Bounds::new(

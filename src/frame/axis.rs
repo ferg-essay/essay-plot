@@ -78,9 +78,9 @@ impl Axis {
         self.formatter.format(value, delta)
     }
 
-    pub(crate) fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
-        self.major.update(pos, canvas);
-        self.minor.update(pos, canvas);
+    pub(crate) fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        self.major.update(renderer, pos);
+        self.minor.update(renderer, pos);
     }
 }
 
@@ -254,8 +254,8 @@ impl XAxis {
         }
     }
 
-    pub(crate) fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
-        self.axis.update(pos, canvas);
+    pub(crate) fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        self.axis.resize(renderer, pos);
     }
 
     pub(crate) fn axis_mut(&mut self) -> &mut Axis {
@@ -437,8 +437,8 @@ impl YAxis {
         }
     }
 
-    pub(crate) fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
-        self.axis.update(pos, canvas);
+    pub(crate) fn update(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        self.axis.resize(renderer, pos);
     }
 
     pub(crate) fn axis_mut(&mut self) -> &mut Axis {
@@ -527,8 +527,8 @@ impl AxisTicks {
         self.label_text.height()
     }
 
-    pub(crate) fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
-        self.label_text.update(pos, canvas);
+    pub(crate) fn update(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        self.label_text.resize(renderer, pos);
     }
 }
 

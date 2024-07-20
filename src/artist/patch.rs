@@ -47,10 +47,10 @@ impl Patch {
 }
 
 impl Artist<Data> for Patch {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         Bounds::none()
     }
 
@@ -253,10 +253,10 @@ impl CanvasPatch {
 }
 
 impl Artist<Canvas> for CanvasPatch {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
     }
     
-    fn get_extent(&mut self) -> Bounds<Canvas> {
+    fn bounds(&mut self) -> Bounds<Canvas> {
         self.bounds.clone()
     }
 
@@ -292,10 +292,10 @@ impl<M: Coord> PathPatch<M> {
 }
 
 impl Artist<Canvas> for PathPatch<Canvas> {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
     }
     
-    fn get_extent(&mut self) -> Bounds<Canvas> {
+    fn bounds(&mut self) -> Bounds<Canvas> {
         todo!()
     }
 
@@ -317,10 +317,10 @@ impl Artist<Canvas> for PathPatch<Canvas> {
 }
 
 impl Artist<Data> for PathPatch<Data> {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         self.path.get_bounds()
     }
 
@@ -383,10 +383,10 @@ impl PatchTrait<Canvas> for Line {
 }
 
 impl Artist<Canvas> for Line {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
     }
     
-    fn get_extent(&mut self) -> Bounds<Canvas> {
+    fn bounds(&mut self) -> Bounds<Canvas> {
         self.get_path().get_bounds()
     }
 
@@ -461,10 +461,10 @@ impl PatchTrait<Data> for Wedge {
 }
 
 impl Artist<Data> for Wedge {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         self.get_path().get_bounds()
     }
 

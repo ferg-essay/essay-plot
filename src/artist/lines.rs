@@ -159,19 +159,19 @@ fn build_path(line: &Tensor, draw_style: &DrawStyle) -> Path<Data> {
 }
 
 impl Artist<Data> for Lines2d {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.extent = Bounds::from(&self.xy);
 
         if self.is_stale {
             self.is_stale = false;
 
             if let Some(collection) = &mut self.collection {
-                collection.update(pos, canvas);
+                collection.resize(renderer, pos);
             }
         }
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         self.extent.clone()
     }
 

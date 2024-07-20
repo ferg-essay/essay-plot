@@ -278,18 +278,18 @@ impl DataBox {
 }
 
 impl Artist<Canvas> for DataBox {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.set_pos(pos);
         
-        self.artists.update(pos, canvas);
+        self.artists.resize(renderer, pos);
 
-        self.data_bounds = self.artists.get_extent();
+        self.data_bounds = self.artists.bounds();
     
         self.update_view();
         self.set_pos(pos); // TODO: cleanup order
     }
 
-    fn get_extent(&mut self) -> Bounds<Canvas> {
+    fn bounds(&mut self) -> Bounds<Canvas> {
         self.pos_canvas.clone()
     }
 

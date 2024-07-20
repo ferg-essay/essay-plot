@@ -53,16 +53,16 @@ impl Legend {
 }
 
 impl Artist<Canvas> for Legend {
-    fn update(&mut self, _pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
         let font_size = match self.text_style.get_size() {
             Some(size) => *size,
             None => 10.,
         };
 
-        self.glyph_size = canvas.to_px(font_size);
+        self.glyph_size = renderer.to_px(font_size);
     }
 
-    fn get_extent(&mut self) -> Bounds<Canvas> {
+    fn bounds(&mut self) -> Bounds<Canvas> {
         self.extent.clone()
     }
 

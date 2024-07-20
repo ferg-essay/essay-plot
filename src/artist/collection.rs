@@ -38,11 +38,11 @@ impl PathCollection {
 }
 
 impl Artist<Data> for PathCollection {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
         self.bounds = Bounds::from(&self.xy);
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         self.bounds.clone()
     }
 

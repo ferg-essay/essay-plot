@@ -63,7 +63,7 @@ impl Stem {
 }
 
 impl Artist<Data> for Stem {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         if self.is_stale {
             self.is_stale = false;
 
@@ -71,7 +71,7 @@ impl Artist<Data> for Stem {
             self.paths = build_paths(&self.xy);
 
             // 0.5 because source is [-1, 1]
-            let scale = canvas.to_px(3.);
+            let scale = renderer.to_px(3.);
 
             if let Some(marker) = &self.marker {
                 let path: Path<Canvas> = marker.get_scaled_path(scale);
@@ -81,11 +81,11 @@ impl Artist<Data> for Stem {
         }
 
         if let Some(markers) = &mut self.markers {
-            markers.update(pos, canvas);
+            markers.resize(renderer, pos);
         }
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         self.extent.clone()
     }
 

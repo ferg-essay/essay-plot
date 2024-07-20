@@ -152,7 +152,7 @@ impl GridColor {
 }
 
 impl Artist<Data> for GridColor {
-    fn update(&mut self, _pos: &Bounds<Canvas>, _canvas: &Canvas) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
         if self.is_stale {
             self.is_stale = false;
 
@@ -170,7 +170,7 @@ impl Artist<Data> for GridColor {
         }
     }
     
-    fn get_extent(&mut self) -> Bounds<Data> {
+    fn bounds(&mut self) -> Bounds<Data> {
         let (rows, cols) = match self.shading {
             Shading::Gouraud => (self.data.rows() - 1, self.data.cols() - 1),
             Shading::Flat => (self.data.rows(), self.data.cols())

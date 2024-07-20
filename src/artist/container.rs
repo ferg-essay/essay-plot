@@ -28,20 +28,20 @@ impl<M: Coord> Container<M> {
 }
 
 impl<M: Coord> Artist<M> for Container<M> {
-    fn update(&mut self, pos: &Bounds<Canvas>, canvas: &Canvas) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         for artist in &mut self.artists {
-            artist.update(pos, canvas);
+            artist.resize(renderer, pos);
         }
     }
 
-    fn get_extent(&mut self) -> Bounds<M> {
+    fn bounds(&mut self) -> Bounds<M> {
         let mut bounds = Bounds::<M>::none();
 
         for artist in &mut self.artists {
             bounds = if bounds.is_none() {
-                    artist.get_extent().clone()
+                    artist.bounds().clone()
             } else {
-                bounds.union(&artist.get_extent())
+                bounds.union(&artist.bounds())
             };
         }
 

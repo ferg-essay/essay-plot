@@ -64,7 +64,6 @@ impl Artist<Data> for Patch {
         let to_canvas = to_canvas.matmul(&self.transform);
         let path = self.path.transform(&to_canvas);
         let style = self.style.push(style);
-        
         renderer.draw_path(
             &path,
             &style, 
@@ -332,7 +331,6 @@ impl Artist<Data> for PathPatch<Data> {
         style: &dyn PathOpt,
     ) {
         let path = self.path.transform(&to_canvas);
-
         renderer.draw_path(
             &path,
             style, 
@@ -432,10 +430,6 @@ impl Wedge {
             path: None,
         }
     }
-
-    //pub fn color(&mut self, color: Color) {
-    //    self.color = Some(color);
-    //}
 }
 
 impl PatchTrait<Data> for Wedge {
@@ -443,7 +437,6 @@ impl PatchTrait<Data> for Wedge {
         if self.path.is_none() {
             let wedge = paths::wedge(self.angle);
             
-            //println!("Wedge {:?}", wedge.codes());
             let transform = Affine2d::eye()
                 .scale(self.radius, self.radius)
                 .translate(self.center.x(), self.center.y());
@@ -477,6 +470,7 @@ impl Artist<Data> for Wedge {
     ) {
         if let Some(path) = &self.path {
             let path = path.transform(to_canvas);
+
             renderer.draw_path(&path, style, clip).unwrap();
         }
     }

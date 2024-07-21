@@ -46,7 +46,7 @@ impl Legend {
         self.pos = pos;
     }
 
-    pub(crate) fn update_handlers(&mut self, data: &DataBox) {
+    pub(crate) fn update_handlers(&mut self, data: &mut DataBox) {
         let handlers = data.get_handlers();
         self.handlers = handlers;
     }

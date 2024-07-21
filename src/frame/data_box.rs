@@ -272,7 +272,7 @@ impl DataBox {
         self.artists.artist_mut(id)
     }
 
-    pub(crate) fn get_handlers(&self) -> Vec<LegendHandler> {
+    pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
         self.artists.get_handlers()
     }
 }

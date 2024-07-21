@@ -1,4 +1,4 @@
-use std::{alloc, any::TypeId, marker::PhantomData, ptr::{NonNull, self}, mem::{ManuallyDrop, self}};
+use std::{any::Any, marker::PhantomData};
 
 use essay_graphics::api::{Coord, Bounds, driver::Renderer, Canvas, PathOpt, Clip, Point};
 
@@ -7,16 +7,18 @@ use crate::{artist::{Artist, StyleCycle, PlotArtist, ToCanvas}, graph::Config};
 use super::{legend::LegendHandler, ArtistId, Data};
 
 pub(crate) struct PlotContainer {
-    ptrs: Vec<PlotPtr<Data>>,
-    artists: Vec<Box<dyn ArtistHandleTrait<Data>>>,
+    // ptrs: Vec<PlotPtr<Data>>,
+    artist_any: Vec<Box<dyn Any + Send>>,
+    artist_handles: Vec<Box<dyn ArtistHandleTrait<Data>>>,
     cycle: StyleCycle,
 }
 
 impl PlotContainer {
     pub(crate) fn new(cfg: &Config) -> Self {
         let container = Self {
-            ptrs: Vec::new(),
-            artists: Vec::new(),
+            // ptrs: Vec::new(),
+            artist_any: Vec::new(),
+            artist_handles: Vec::new(),
             cycle: StyleCycle::from_config(cfg, "frame.cycle"),
         };
 
@@ -27,12 +29,14 @@ impl PlotContainer {
     where
         A: PlotArtist + 'static
     {
-        let id = ArtistId::new_data(self.ptrs.len());
+        let id = ArtistId::new_data(self.artist_any.len());
+        //let id = ArtistId::new_data(self.ptrs.len());
 
-        let plot = PlotPtr::new(id, artist);
-        self.ptrs.push(plot);
+        //let plot = PlotPtr::new(id, artist);
+        // self.ptrs.push(plot);
+        self.artist_any.push(Box::new(artist));
 
-        self.artists.push(Box::new(ArtistHandle::<Data, A>::new(id)));
+        self.artist_handles.push(Box::new(ArtistHandle::<Data, A>::new()));
 
         id
     }
@@ -46,36 +50,42 @@ impl PlotContainer {
     }
 
     fn _deref<A: Artist<Data> + 'static>(&self, id: ArtistId) -> &A {
-        unsafe { self.ptrs[id.index()]._deref() }
+        // unsafe { self.ptrs[id.index()]._deref() }
+        self.artist_any[id.index()].downcast_ref().unwrap()
     }
 
-    fn deref_mut<A: Artist<Data> + 'static>(&self, id: ArtistId) -> &mut A {
-        unsafe { self.ptrs[id.index()].deref_mut() }
+    fn deref_mut<A: Artist<Data> + 'static>(&mut self, id: ArtistId) -> &mut A {
+        // unsafe { self.ptrs[id.index()].deref_mut() }
+        self.artist_any[id.index()].downcast_mut().unwrap()
     }
 
     //pub(crate) fn style_mut(&mut self, id: ArtistId) -> &mut PathStyle {
     //    self.artists[id.index()].style_mut()
     //}
 
-    pub(crate) fn _artist<A>(&self, id: ArtistId) -> &A
+    pub(crate) fn _artist<A>(&self, _id: ArtistId) -> &A
     where
         A: Artist<Data> + 'static
     {
-        unsafe { self.ptrs[id.index()]._deref() }
+        todo!();
+        // unsafe { self.ptrs[id.index()]._deref() }
     }
 
     pub(crate) fn artist_mut<A>(&mut self, id: ArtistId) -> &mut A
     where
         A: Artist<Data> + 'static
     {
-        unsafe { self.ptrs[id.index()].deref_mut() }
+        // unsafe { self.ptrs[id.index()].deref_mut() }
+        self.deref_mut(id)
     }
 
-    pub(crate) fn get_handlers(&self) -> Vec<LegendHandler> {
+    pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
         let mut vec = Vec::<LegendHandler>::new();
 
-        for artist in &self.artists {
-            match artist.get_legend(self) {
+        for (i, handle) in self.artist_handles.iter().enumerate() {
+            let artist_any = &mut self.artist_any[i];
+
+            match handle.get_legend(artist_any) {
                 Some(handler) => vec.push(handler),
                 None => {},
             };
@@ -87,19 +97,23 @@ impl PlotContainer {
 
 impl Artist<Data> for PlotContainer {
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        for artist in &self.artists {
-            artist.resize(self, renderer, pos);
+        for (i, handle) in self.artist_handles.iter().enumerate() {
+            let artist_any = &mut self.artist_any[i];
+
+            handle.resize(artist_any, renderer, pos);
         }
     }
     
     fn bounds(&mut self) -> Bounds<Data> {
         let mut bounds = Bounds::none();
 
-        for artist in &self.artists {
+        for (i, handle) in self.artist_handles.iter().enumerate() {
+            let artist_any = &mut self.artist_any[i];
+
             bounds = if bounds.is_none() {
-                artist.get_extent(self)
+                handle.get_extent(artist_any)
             } else {
-                let extent = artist.get_extent(self);
+                let extent = handle.get_extent(artist_any);
                 if extent.is_none() { bounds } else { bounds.union(&extent) }
             }
         }
@@ -118,10 +132,11 @@ impl Artist<Data> for PlotContainer {
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
-        for (i, artist) in self.artists.iter().enumerate() {
+        // self.artist_handles[0].draw(self, renderer, to_canvas, clip, style);
+        for (i, handle) in self.artist_handles.iter().enumerate() {
             let style = self.cycle.push(style, i);
 
-            artist.draw(self, renderer, to_canvas, clip, &style);
+            handle.draw(&mut self.artist_any[i], renderer, to_canvas, clip, &style);
         }
     }
 }
@@ -131,13 +146,13 @@ trait ArtistHandleTrait<M: Coord> : Send {
 
     //fn style_mut(&mut self) -> &mut PathStyle;
 
-    fn resize(&self, container: &PlotContainer, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
-    fn get_extent(&self, container: &PlotContainer) -> Bounds<M>;
-    fn get_legend(&self, container: &PlotContainer) -> Option<LegendHandler>;
+    fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
+    fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<M>;
+    fn get_legend(&self, any: &mut Box<dyn Any + Send>) -> Option<LegendHandler>;
 
     fn draw(
         &self, 
-        container: &PlotContainer,
+        artist_any: &mut Box<dyn Any + Send>,
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
         clip: &Clip,
@@ -146,14 +161,12 @@ trait ArtistHandleTrait<M: Coord> : Send {
 }
 
 struct ArtistHandle<M: Coord, A: Artist<M>> {
-    id: ArtistId,
-    marker: PhantomData<(M, A)>,
+    marker: PhantomData<fn(M, A)>,
 }
 
 impl<M: Coord, A: Artist<M>> ArtistHandle<M, A> {
-    fn new(id: ArtistId) -> Self {
+    fn new() -> Self {
         Self {
-            id,
             marker: PhantomData,
         }
     }
@@ -171,32 +184,36 @@ where
     //    &mut self.style
     //}
 
-    fn resize(&self, container: &PlotContainer, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        container.deref_mut::<A>(self.id).resize(renderer, pos);
+    fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        any.downcast_mut::<A>().unwrap().resize(renderer, pos);
     }
 
-    fn get_extent(&self, container: &PlotContainer) -> Bounds<Data> {
-        container.deref_mut::<A>(self.id).bounds()
+    fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<Data> {
+        any.downcast_mut::<A>().unwrap().bounds()
+        // container.deref_mut::<A>(self.id).bounds()
     }
 
     fn draw(
         &self, 
-        container: &PlotContainer,
+        artist_any: &mut Box<dyn Any + Send + 'static>,
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
-        container.deref_mut::<A>(self.id).draw(renderer, to_canvas, clip, style)
+        let artist = artist_any.downcast_mut::<A>().unwrap();
+        artist.draw(renderer, to_canvas, clip, style)
+        //container.deref_mut::<A>(self.id).draw(renderer, to_canvas, clip, style)
     }
 
-    fn get_legend(&self, container: &PlotContainer) -> Option<LegendHandler> {
-        container.deref_mut::<A>(self.id).get_legend()
+    fn get_legend(&self, any: &mut Box<dyn Any + Send>) -> Option<LegendHandler> {
+        let artist = any.downcast_mut::<A>().unwrap();
+        artist.get_legend()
     }
 }
 
 // TODO: replace with downcast crate
-
+/*
 pub(crate) struct PlotPtr<M: Coord> {
     type_id: TypeId, 
     marker: PhantomData<M>,
@@ -250,3 +267,4 @@ impl<M: Coord> PlotPtr<M> {
 
 // TODO: replace with downcast
 unsafe impl<M: Coord> Send for PlotPtr<M> {}
+*/

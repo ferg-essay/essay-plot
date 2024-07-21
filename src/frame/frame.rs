@@ -346,7 +346,7 @@ impl Drawable for Frame {
             self.top.resize(renderer, &pos);
             self.right.resize(renderer, &pos);
 
-            self.legend.update_handlers(&self.data);
+            self.legend.update_handlers(&mut self.data);
             self.legend.resize(renderer, &pos);
         } else if self.data.get_pos().contains(event.point()) {
             if self.data.event(renderer, event) {

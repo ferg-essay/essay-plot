@@ -57,7 +57,7 @@ impl<A: PlotArtist> IntoArtist for A {
 pub struct ArtistHandle<A: Artist<Data>> {
     view: View<Frame>,
     id: ArtistId,
-    marker: PhantomData<A>
+    marker: PhantomData<fn(A)>
 }
 
 impl<A: Artist<Data> + 'static> ArtistHandle<A> {

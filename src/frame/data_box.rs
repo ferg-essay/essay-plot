@@ -254,17 +254,6 @@ impl DataBox {
         &self.to_canvas
     }
 
-    //pub(crate) fn style_mut(&mut self, id: ArtistId) -> &mut PathStyle {
-    //    self.artists.style_mut(id)
-    //}
-
-    pub(crate) fn _artist<A>(&self, id: ArtistId) -> &A
-    where
-        A: Artist<Data> + 'static
-    {
-        self.artists._artist(id)
-    }
-
     pub(crate) fn artist_mut<A>(&mut self, id: ArtistId) -> &mut A
     where
         A: Artist<Data> + 'static

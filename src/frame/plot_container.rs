@@ -7,7 +7,6 @@ use crate::{artist::{Artist, StyleCycle, PlotArtist, ToCanvas}, graph::Config};
 use super::{legend::LegendHandler, ArtistId, Data};
 
 pub(crate) struct PlotContainer {
-    // ptrs: Vec<PlotPtr<Data>>,
     artist_any: Vec<Box<dyn Any + Send>>,
     artist_handles: Vec<Box<dyn ArtistHandleTrait<Data>>>,
     cycle: StyleCycle,
@@ -16,7 +15,6 @@ pub(crate) struct PlotContainer {
 impl PlotContainer {
     pub(crate) fn new(cfg: &Config) -> Self {
         let container = Self {
-            // ptrs: Vec::new(),
             artist_any: Vec::new(),
             artist_handles: Vec::new(),
             cycle: StyleCycle::from_config(cfg, "frame.cycle"),
@@ -55,27 +53,13 @@ impl PlotContainer {
     }
 
     fn deref_mut<A: Artist<Data> + 'static>(&mut self, id: ArtistId) -> &mut A {
-        // unsafe { self.ptrs[id.index()].deref_mut() }
         self.artist_any[id.index()].downcast_mut().unwrap()
-    }
-
-    //pub(crate) fn style_mut(&mut self, id: ArtistId) -> &mut PathStyle {
-    //    self.artists[id.index()].style_mut()
-    //}
-
-    pub(crate) fn _artist<A>(&self, _id: ArtistId) -> &A
-    where
-        A: Artist<Data> + 'static
-    {
-        todo!();
-        // unsafe { self.ptrs[id.index()]._deref() }
     }
 
     pub(crate) fn artist_mut<A>(&mut self, id: ArtistId) -> &mut A
     where
         A: Artist<Data> + 'static
     {
-        // unsafe { self.ptrs[id.index()].deref_mut() }
         self.deref_mut(id)
     }
 
@@ -132,7 +116,6 @@ impl Artist<Data> for PlotContainer {
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
-        // self.artist_handles[0].draw(self, renderer, to_canvas, clip, style);
         for (i, handle) in self.artist_handles.iter().enumerate() {
             let style = self.cycle.push(style, i);
 
@@ -142,10 +125,6 @@ impl Artist<Data> for PlotContainer {
 }
 
 trait ArtistHandleTrait<M: Coord> : Send {
-    // fn id(&self) -> ArtistId;
-
-    //fn style_mut(&mut self) -> &mut PathStyle;
-
     fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
     fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<M>;
     fn get_legend(&self, any: &mut Box<dyn Any + Send>) -> Option<LegendHandler>;
@@ -176,21 +155,12 @@ impl<A: Artist<Data>> ArtistHandleTrait<Data> for ArtistHandle<Data, A>
 where
     A: PlotArtist + 'static,
 {
-    //fn id(&self) -> ArtistId {
-    //    self.id
-    //}
-
-    //fn style_mut(&mut self) -> &mut PathStyle {
-    //    &mut self.style
-    //}
-
     fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         any.downcast_mut::<A>().unwrap().resize(renderer, pos);
     }
 
     fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<Data> {
         any.downcast_mut::<A>().unwrap().bounds()
-        // container.deref_mut::<A>(self.id).bounds()
     }
 
     fn draw(
@@ -203,7 +173,6 @@ where
     ) {
         let artist = artist_any.downcast_mut::<A>().unwrap();
         artist.draw(renderer, to_canvas, clip, style)
-        //container.deref_mut::<A>(self.id).draw(renderer, to_canvas, clip, style)
     }
 
     fn get_legend(&self, any: &mut Box<dyn Any + Send>) -> Option<LegendHandler> {
@@ -211,60 +180,3 @@ where
         artist.get_legend()
     }
 }
-
-// TODO: replace with downcast crate
-/*
-pub(crate) struct PlotPtr<M: Coord> {
-    type_id: TypeId, 
-    marker: PhantomData<M>,
-    data: NonNull<u8>,
-}
-
-impl<M: Coord> PlotPtr<M> {
-    pub(crate) fn new<A>(_id: ArtistId, artist: A) -> Self
-    where
-        A: Artist<M> + 'static
-    {
-        let layout = alloc::Layout::new::<A>();
-        let data = unsafe { alloc::alloc(layout) };
-        let mut value = ManuallyDrop::new(artist);
-        let source: NonNull<u8> = NonNull::from(&mut *value).cast();
-
-        let src = source.as_ptr();
-        let count = mem::size_of::<A>();
-
-        // TODO: drop
-
-        unsafe {
-            ptr::copy_nonoverlapping::<u8>(src, data, count);
-        }
-
-        Self {
-            type_id: TypeId::of::<A>(),
-            data: NonNull::new(data).unwrap(),
-            marker: PhantomData,
-        }
-    }
-
-    pub unsafe fn _deref<A>(&self) -> &A
-    where
-        A: Artist<M> + 'static
-    {
-        assert_eq!(self.type_id, TypeId::of::<A>());
-
-        &*self.data.as_ptr().cast::<A>()
-    }
-
-    pub unsafe fn deref_mut<A>(&self) -> &mut A 
-    where
-        A: Artist<M> + 'static
-    {
-        assert_eq!(self.type_id, TypeId::of::<A>());
-
-        &mut *self.data.as_ptr().cast::<A>()
-    }
-}
-
-// TODO: replace with downcast
-unsafe impl<M: Coord> Send for PlotPtr<M> {}
-*/

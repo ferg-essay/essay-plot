@@ -1,9 +1,8 @@
-use essay_plot::{prelude::*, plot::grid_color, artist::{Shading, patch::{Patch, self}}, frame::{AspectMode, Data}};
-use essay_tensor::init::{linspace, meshgrid};
+use essay_plot::{prelude::*, artist::patch::{Patch, self}, frame::Data};
 
 fn main() { 
     let mut figure = Figure::new();
-    let mut graph = figure.new_graph(());
+    let mut graph = figure.graph(());
 
     let path = Path::<Data>::new(vec![
         PathCode::MoveTo(Point(1., 1.)),
@@ -17,7 +16,7 @@ fn main() {
     //graph.artist(patch).color("teal").edge_color("black");
 
     // TODO: triangulation bug
-    let patch = patch::arrow((6., 1.), (-0.707, 0.707));
+    //let patch = patch::arrow((6., 1.), (-0.707, 0.707));
     //graph.artist(patch).color("black");
 
     graph.aspect(1.);

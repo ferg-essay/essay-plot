@@ -1,4 +1,4 @@
-use essay_graphics::layout::{Grid, Layout};
+use essay_graphics::layout::Layout;
 use essay_graphics::wgpu::WgpuBackend;
 
 use essay_graphics::api::{
@@ -6,20 +6,16 @@ use essay_graphics::api::{
     Bounds, Point,
 };
 
-use crate::frame::Frame;
 use crate::graph::Graph; // , frame::{Layout, LayoutArc}};
 
-use super::config::read_config;
-use super::ConfigArc;
+use super::graph::GraphBuilder;
 
 pub struct Figure {
     size: (f32, f32),
     dpi: f32,
 
     device: Box<dyn Backend>,
-    // inner: FigureInner,
-    config: ConfigArc,
-    layout: Layout,
+    graphs: GraphBuilder,
 }
 
 impl Figure {
@@ -28,17 +24,15 @@ impl Figure {
             // inner: Arc::new(Mutex::new(FigureInner::new())),
             // inner: FigureInner::new(),
             device: Box::new(WgpuBackend::new()),
-            config: read_config().into_arc(),
-
-            layout: Layout::new(),
+            graphs: GraphBuilder::new(Layout::new()),
 
             size: (6.4, 4.8),
             dpi: 200.,
         }
     }
 
-    pub fn new_graph(&mut self, pos: impl Into<Bounds<Grid>>) -> Graph {
-        Graph::new(self.layout.add_view(pos, Frame::new(&self.config)))
+    pub fn graph(&mut self, pos: impl Into<Bounds<Layout>>) -> Graph {
+        self.graphs.graph(pos)
     }
 
     pub fn poly_graphs<'a, R: PolyRow<'a>>(&'a mut self, _layout: R) -> R::Item {
@@ -48,7 +42,7 @@ impl Figure {
     }
 
     pub fn show(self) {
-        let layout = self.layout;
+        let layout = self.graphs.into_layout();
         let mut device = self.device;
 
         device.main_loop(Box::new(layout)).unwrap();
@@ -66,7 +60,7 @@ impl Figure {
         self.dpi
     }
 
-    pub fn save(&mut self, _path: impl AsRef<std::path::Path>, dpi: f32) {
+    pub fn save(&mut self, _path: impl AsRef<std::path::Path>, _dpi: f32) {
         todo!();
         /*
         crate::wgpu::draw_hardcopy(
@@ -153,7 +147,7 @@ impl<'a> PolyCol<'a> for [usize; 1] {
     fn axes(figure: &'a mut Figure, layout: Self, row: usize, col: &mut Counter) -> Self::Item {
         let cols = layout[0];
 
-        let axes = figure.new_graph(Bounds::new(
+        let axes = figure.graph(Bounds::new(
             Point(col.0 as f32, row as f32), 
             Point((col.0 + cols) as f32, row as f32),
         ));
@@ -170,7 +164,7 @@ impl<'a> PolyCol<'a> for [usize; 2] {
     fn axes(figure: &'a mut Figure, layout: Self, row: usize, col: &mut Counter) -> Self::Item {
         let cols = layout[0];
 
-        let axes = figure.new_graph(Bounds::new(
+        let axes = figure.graph(Bounds::new(
             Point(col.0 as f32, row as f32), 
             Point((col.0 + cols) as f32, row as f32),
         ));

@@ -2,13 +2,13 @@
 macro_rules! frame_option_struct {
     ($name: ident, $ty: ident, $getter: ident) => {
         pub struct $name {
-            view: essay_graphics::layout::ViewHandle<$crate::frame::Frame>,
+            view: essay_graphics::layout::View<$crate::frame::Frame>,
             artist: $crate::frame::FrameArtist,
         }
         
         impl $name {
             pub(crate) fn new(
-                view: &essay_graphics::layout::ViewHandle<$crate::frame::Frame>, 
+                view: &essay_graphics::layout::View<$crate::frame::Frame>, 
                 artist: $crate::frame::FrameArtist,
             ) -> Self {
                 Self {

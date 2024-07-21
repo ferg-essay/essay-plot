@@ -2,7 +2,7 @@ use std::{marker::PhantomData, ops::Deref};
 
 use essay_graphics::{api::{
     driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Coord, PathOpt
-}, layout::ViewHandle};
+}, layout::View};
 
 use crate::{frame::{ArtistId, Data, Frame, LegendHandler}, graph::ConfigArc};
 
@@ -55,14 +55,14 @@ impl<A: PlotArtist> IntoArtist for A {
 //}
 
 pub struct ArtistHandle<A: Artist<Data>> {
-    view: ViewHandle<Frame>,
+    view: View<Frame>,
     id: ArtistId,
     marker: PhantomData<A>
 }
 
 impl<A: Artist<Data> + 'static> ArtistHandle<A> {
     pub(crate) fn new(
-        view: ViewHandle<Frame>, 
+        view: View<Frame>, 
         id: ArtistId
     ) -> Self {
         Self {

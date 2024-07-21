@@ -2,9 +2,9 @@ use std::f32::consts::PI;
 
 use essay_graphics::{
     api::{
-        driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Color, PathOpt, Point, VertAlign 
+        driver::{Drawable, Renderer}, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Color, PathOpt, Point, VertAlign 
     }, 
-    layout::{ViewHandle, ViewTrait}
+    layout::View
 };
 
 use crate::{
@@ -286,7 +286,7 @@ impl Frame {
     }
 }
 
-impl ViewTrait for Frame {
+impl Drawable for Frame {
     fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
         if let CanvasEvent::Resize(pos) = event {
             let pos = Bounds::from([
@@ -385,8 +385,6 @@ impl ViewTrait for Frame {
         self.legend.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
     }
 }
-//impl Coord for Figure {}
-
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum FrameArtist {
@@ -676,12 +674,12 @@ impl Artist<Canvas> for RightFrame {
 }
 
 pub struct FrameTextOpt {
-    view: ViewHandle<Frame>,
+    view: View<Frame>,
     artist: FrameArtist,
 }
 
 impl FrameTextOpt {
-    pub(crate) fn new(view: ViewHandle<Frame>, artist: FrameArtist) -> Self {
+    pub(crate) fn new(view: View<Frame>, artist: FrameArtist) -> Self {
         Self {
             view,
             artist,

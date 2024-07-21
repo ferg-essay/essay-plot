@@ -1,13 +1,15 @@
-use essay_plot::{artist::{patch::PathPatch, paths, DrawStyle, IntoMarker, Markers}, frame::Data, graph::{Graph, PlotOpt}, plot::{bar, contour, fill_between, grid_color, matshow, plot, stem, tricontour, triplot}, prelude::*};
-use essay_plot::api::{Point, Color, PathCode, Path, JoinStyle, CapStyle, LineStyle, Angle};
-use essay_tensor::{prelude::*, init::{linspace, meshgrid, meshgrid_ij}, tensor::TensorVec};
+use essay_plot::{
+    prelude::*,
+    artist::{patch::PathPatch, paths}, frame::Data, graph::{Graph, PlotOpt}, 
+};
+use essay_plot::api::{Point, Color, PathCode, Path, Angle};
 
 
 fn main() {
     //let mut gui = WgpuBackend::new();
 
     let mut figure = Figure::new();
-    let mut graph = figure.new_graph([1., 1.]);
+    let mut graph = figure.graph([1., 1.]);
 
     let test = Tests::WEDGE;
 

@@ -3,7 +3,7 @@ use path_opt::Hatch;
 
 fn main() { 
     let mut figure = Figure::new();
-    let mut graph = figure.new_graph(());
+    let mut graph = figure.graph(());
 
     let patch = Patch::new(Path::move_to(0., 0.)
         .line_to(1., 0.)

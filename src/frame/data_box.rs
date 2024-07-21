@@ -2,7 +2,7 @@ use core::fmt;
 
 use essay_graphics::{api::{
     driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Coord, PathOpt, Point
-}, layout::ViewHandle};
+}, layout::View};
 
 use crate::{artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, graph::{Config, ConfigArc}};
 
@@ -97,7 +97,7 @@ impl DataBox {
         &mut self, 
         artist: A,
         config: &ConfigArc,
-        view: ViewHandle<Frame>,
+        view: View<Frame>,
     ) -> A::Opt {
         //let mut artist = artist;
 

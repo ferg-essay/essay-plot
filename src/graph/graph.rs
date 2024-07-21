@@ -1,13 +1,46 @@
 use core::fmt;
 
-use essay_graphics::layout::ViewHandle;
+use essay_graphics::{api::Bounds, layout::{Layout, View}};
 
 use crate::{
     artist::{Artist, IntoArtist, PlotArtist},
     frame::{AspectMode, AxisOpt, Data, Frame, FrameArtist, FrameTextOpt}
 };
 
-use super::{style::PlotOptHandle, PlotOpt};
+use super::{config::read_config, style::PlotOptHandle, ConfigArc, PlotOpt};
+
+pub struct GraphBuilder {
+    config: ConfigArc,
+    layout: Layout,
+}
+
+impl GraphBuilder {
+    pub fn new(layout: Layout) -> Self {
+        Self {
+            config: read_config().into_arc(),
+
+            layout,
+        }
+    }
+
+    pub fn graph(&mut self, pos: impl Into<Bounds<Layout>>) -> Graph {
+        Graph::new(self.layout.add_view(pos, Frame::new(&self.config)))
+    }
+
+    #[inline]
+    pub fn get_layout(&self) -> &Layout {
+        &self.layout
+    }
+
+    #[inline]
+    pub fn get_layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
+    }
+
+    pub fn into_layout(self) -> Layout {
+        self.layout
+    }
+}
 
 #[derive(Clone)]
 pub struct Graph {
@@ -15,7 +48,7 @@ pub struct Graph {
     //frame_id: FrameId,
 
     //layout: LayoutArc,
-    view: ViewHandle<Frame>,
+    view: View<Frame>,
 }
 
 impl Graph {
@@ -32,7 +65,7 @@ impl Graph {
         graph
     }
     */
-    pub(crate) fn new(view: ViewHandle<Frame>) -> Self {
+    pub(crate) fn new(view: View<Frame>) -> Self {
         let mut graph = Self {
             view
         };

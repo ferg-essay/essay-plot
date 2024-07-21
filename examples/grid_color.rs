@@ -9,9 +9,9 @@ fn main() {
     let z = &x.sin() + &y.sin();
 
     let mut figure = Figure::new();
-    let mut graph1 = figure.new_graph(());
+    let mut graph1 = figure.graph(());
     graph1.colorbar();
-    let mut graph2 = figure.new_graph(());
+    let mut graph2 = figure.graph(());
 
     grid_color(&mut graph1, &z)
         .shading(Shading::Flat)

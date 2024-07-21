@@ -1,11 +1,11 @@
-use essay_plot::{prelude::*, graph::{Graph, PlotOpt}};
-use essay_tensor::{init::linspace, tensor::TensorVec};
+use essay_plot::prelude::*;
+use essay_tensor::init::linspace;
 
 fn main() {
     //let mut gui = WgpuBackend::new();
 
     let mut figure = Figure::new();
-    let mut graph = figure.new_graph([1., 1.]);
+    let mut graph = figure.graph([1., 1.]);
 
     //let x = linspace(0., 2. * PI, 30);
     //let y = x.sin();

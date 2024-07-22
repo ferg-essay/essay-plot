@@ -1,6 +1,10 @@
 use core::fmt;
 
-use essay_graphics::{api::Bounds, layout::{Layout, View}};
+use essay_graphics::{
+    api::{Bounds, driver::Drawable},
+    layout::{Layout, View}, 
+    wgpu::PlotRenderer
+};
 
 use crate::{
     artist::{Artist, IntoArtist, PlotArtist},
@@ -39,6 +43,14 @@ impl GraphBuilder {
 
     pub fn into_layout(self) -> Layout {
         self.layout
+    }
+    
+    pub fn event(
+        &mut self, 
+        renderer: &mut PlotRenderer, 
+        event: &essay_graphics::prelude::CanvasEvent
+    ) {
+        self.layout.event(renderer, event)
     }
 }
 

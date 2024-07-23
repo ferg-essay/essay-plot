@@ -1,18 +1,15 @@
-mod style;
-mod config;
-mod figure;
-pub mod chart;
-mod legend;
-mod artist_id;
-mod plot_container;
-mod tick_formatter;
 mod axis;
-mod tick_locator;
+mod config;
 mod data_box;
+mod figure;
 mod frame;
+mod chart;
+mod legend;
+mod tick_formatter;
+mod tick_locator;
+mod style;
 
-
-pub use chart::Chart;
+pub use chart::{Chart, IntoArtist};
 
 pub use figure::Figure;
 
@@ -24,20 +21,14 @@ pub use style::PlotOpt;
 
 pub use tick_locator::IndexLocator;
 
-pub use plot_container::ArtistView;
-
 pub use axis::AxisOpt;
 
 pub use data_box::{
-    Data, AspectMode,
+    Data, AspectMode, ArtistView,
 };
 
 pub use frame::{
     Frame, FrameArtist, FrameTextOpt,
-};
-
-pub use artist_id::{
-    ArtistId, ArtistEnum,
 };
 
 pub use legend::{

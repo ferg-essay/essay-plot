@@ -1,4 +1,5 @@
 use core::fmt;
+use std::{any::Any, marker::PhantomData};
 
 use essay_graphics::{
     api::{
@@ -8,13 +9,13 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, PathStyle, PlotArtist, ToCanvas}, 
+    artist::{Artist, PathStyle, PlotArtist, StyleCycle, ToCanvas}, 
     chart::{Config, ConfigArc}
 };
 
-use super::{plot_container::PlotContainer, ArtistId, Frame, LegendHandler};
+use super::{Frame, LegendHandler};
 
-pub struct DataBox {
+pub(crate) struct DataBox {
     pos_canvas: Bounds<Canvas>,
 
     data_bounds: Bounds<Data>,
@@ -31,10 +32,12 @@ pub struct DataBox {
     aspect_mode: AspectMode,
     is_flip_y: bool,
 
-    artists: PlotContainer,
+    // artists: PlotContainer,
+    artist_items: Vec<ArtistItem>,
 
     to_canvas: Affine2d,
     style: PathStyle,
+    cycle: StyleCycle,
 
     _is_stale: bool,
 }
@@ -56,9 +59,11 @@ impl DataBox {
             aspect_mode: AspectMode::BoundingBox,
             is_flip_y: false,
 
-            artists: PlotContainer::new(cfg),
+            // artists: PlotContainer::new(cfg),
+            artist_items: Vec::new(),
 
             style: PathStyle::default(),
+            cycle: StyleCycle::from_config(cfg, "frame.cycle"),
 
             to_canvas: Affine2d::eye(),
             _is_stale: true,
@@ -99,20 +104,25 @@ impl DataBox {
         self
     }
 
-    pub fn add_artist<A: PlotArtist + 'static>(
+    pub(crate) fn add_artist<A: PlotArtist + 'static>(
         &mut self, 
         artist: A,
         config: &ConfigArc,
         view: View<Frame>,
     ) -> A::Opt {
-        //let mut artist = artist;
+        let id = self.artist_items.len();
+        let view = ArtistView::new(view.clone(), id);
 
-        //let bounds = artist.get_extent();
+        let mut artist = artist;
 
-        //self.add_data_bounds(&bounds);
-        //self.add_view_bounds(&bounds);
+        let opt = artist.config(config, view);
 
-        self.artists.add_artist(&view, config, artist)
+        self.artist_items.push(ArtistItem {
+            any: Box::new(artist),
+            handle: Box::new(ArtistHandle::<Data, A>::new()),
+        });
+
+        opt
     }
 
     ///
@@ -256,6 +266,7 @@ impl DataBox {
         &self.to_canvas
     }
 
+    /*
     pub(crate) fn artist<A>(&self, id: ArtistId) -> &A
     where
         A: Artist<Data> + 'static
@@ -269,9 +280,42 @@ impl DataBox {
     {
         self.artists.artist_mut(id)
     }
+    */
 
     pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
-        self.artists.get_legend_handlers()
+        let mut vec = Vec::<LegendHandler>::new();
+
+        for item in &mut self.artist_items {
+            match item.get_legend() {
+                Some(handler) => vec.push(handler),
+                None => {},
+            };
+        }
+
+        vec
+    }
+
+    // pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
+    //     self.artists.get_legend_handlers()
+    // }
+    
+    fn bounds(&mut self) -> Bounds<Data> {
+        let mut bounds = Bounds::none();
+
+        for item in &mut self.artist_items {
+            bounds = if bounds.is_none() {
+                item.get_extent()
+            } else {
+                let extent = item.get_extent();
+                if extent.is_none() { bounds } else { bounds.union(&extent) }
+            }
+        }
+
+        if bounds.is_none() {
+            Bounds::new(Point(0., 0.), Point(1., 1.))
+        } else {
+            bounds
+        }
     }
 }
 
@@ -279,9 +323,13 @@ impl Artist<Canvas> for DataBox {
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.set_pos(pos);
         
-        self.artists.resize(renderer, pos);
+        for item in &mut self.artist_items {
+            item.resize(renderer, pos);
+        }
 
-        self.data_bounds = self.artists.bounds();
+        // self.artists.resize(renderer, pos);
+
+        self.data_bounds = self.bounds();
     
         self.update_view();
         self.set_pos(pos); // TODO: cleanup order
@@ -304,7 +352,11 @@ impl Artist<Canvas> for DataBox {
         let style = self.style.push(style);
         let clip = Clip::Bounds(self.pos_canvas.p0(), self.pos_canvas.p1());
 
-        self.artists.draw(renderer, to_canvas, &clip, &style);
+        for (i, item) in self.artist_items.iter_mut().enumerate() {
+            let style = self.cycle.push(&style, i);
+
+            item.draw(renderer, to_canvas, &clip, &style);
+        }
 
         //renderer.flush(&clip);
         renderer.flush(&Clip::None);
@@ -367,7 +419,7 @@ impl Artist<Canvas> for DataBox {
 
 impl fmt::Debug for DataBox {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "DataBox({},{},{}x{})",
+        write!(f, "DataBox({},{}; {}x{})",
             self.view_bounds.xmin(),
             self.view_bounds.ymin(),
             self.view_bounds.width(),
@@ -378,6 +430,139 @@ impl fmt::Debug for DataBox {
 pub enum AspectMode {
     BoundingBox,
     View
+}
+
+struct ArtistItem {
+    any: Box<dyn Any + Send>,
+    handle: Box<dyn ArtistHandleTrait<Data>>,
+}
+
+impl ArtistItem {
+    #[inline]
+    fn deref<A: PlotArtist + 'static>(&self) -> &A {
+        self.any.downcast_ref().unwrap()
+    }
+
+    #[inline]
+    fn deref_mut<A: PlotArtist + 'static>(&mut self) -> &mut A {
+        self.any.downcast_mut().unwrap()
+    }
+
+    #[inline]
+    fn get_extent(&mut self) -> Bounds<Data> {
+        self.handle.get_extent(&mut self.any)
+    }
+
+    #[inline]
+    fn get_legend(&mut self) -> Option<LegendHandler> {
+        self.handle.get_legend(&mut self.any)
+    }
+
+    #[inline]
+    fn draw(
+        &mut self, 
+        renderer: &mut dyn Renderer, 
+        to_canvas: &ToCanvas,
+        clip: &Clip,
+        style: &dyn PathOpt) {
+        self.handle.draw(&mut self.any, renderer, to_canvas, clip, style);
+    }
+
+    #[inline]
+    fn resize(
+        &mut self, 
+        renderer: &mut dyn Renderer, 
+        pos: &Bounds<Canvas>) {
+        self.handle.resize(&mut self.any, renderer, pos);
+    }
+}
+
+pub struct ArtistView<A: PlotArtist> {
+    view: View<Frame>,
+    id: usize,
+    marker: PhantomData<fn(A)>
+}
+
+impl<A: PlotArtist + 'static> ArtistView<A> {
+    pub(crate) fn new(
+        view: View<Frame>, 
+        id: usize,
+    ) -> Self {
+        Self {
+            view,
+            id,
+            marker: Default::default(),
+        }
+    }
+
+    pub fn read<R>(&self, fun: impl FnOnce(&A) -> R) -> R {
+        self.view.read(|f| {
+            fun(f.data().artist_items[self.id].deref())
+        })
+    }
+
+    pub fn write<R>(&mut self, fun: impl FnOnce(&mut A) -> R) -> R {
+        self.view.write(|f| {
+            fun(f.data_mut().artist_items[self.id].deref_mut())
+        })
+    }
+}
+
+trait ArtistHandleTrait<M: Coord> : Send {
+    fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
+    fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<M>;
+    fn get_legend(&self, any: &mut Box<dyn Any + Send>) -> Option<LegendHandler>;
+
+    fn draw(
+        &self, 
+        artist_any: &mut Box<dyn Any + Send>,
+        renderer: &mut dyn Renderer,
+        to_canvas: &ToCanvas,
+        clip: &Clip,
+        style: &dyn PathOpt,
+    );
+}
+
+struct ArtistHandle<M: Coord, A: Artist<M>> {
+    marker: PhantomData<fn(M, A)>,
+}
+
+impl<M: Coord, A: Artist<M>> ArtistHandle<M, A> {
+    fn new() -> Self {
+        Self {
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<A: Artist<Data>> ArtistHandleTrait<Data> for ArtistHandle<Data, A>
+where
+    A: PlotArtist + 'static,
+{
+    fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        any.downcast_mut::<A>().unwrap().resize(renderer, pos);
+    }
+
+    fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<Data> {
+        any.downcast_mut::<A>().unwrap().bounds()
+    }
+
+    fn draw(
+        &self, 
+        artist_any: &mut Box<dyn Any + Send + 'static>,
+        renderer: &mut dyn Renderer,
+        to_canvas: &ToCanvas,
+        clip: &Clip,
+        style: &dyn PathOpt,
+    ) {
+        let artist = artist_any.downcast_mut::<A>().unwrap();
+        artist.draw(renderer, to_canvas, clip, style)
+    }
+
+    fn get_legend(&self, any: &mut Box<dyn Any + Send>) -> Option<LegendHandler> {
+        let artist = any.downcast_mut::<A>().unwrap();
+        artist.get_legend()
+    }
 }
 
 ///

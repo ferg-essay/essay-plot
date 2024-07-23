@@ -1,11 +1,10 @@
 use essay_graphics::{
-    api::{renderer::Drawable, Bounds, Event},
+    api::Bounds,
     layout::{Layout, View}, 
-    wgpu::PlotRenderer
 };
 
 use crate::{
-    artist::{Artist, IntoArtist, PlotArtist},
+    artist::{Artist, PlotArtist},
     chart::{AspectMode, AxisOpt, Data, Frame, FrameArtist, FrameTextOpt}
 };
 
@@ -29,26 +28,8 @@ impl ChartBuilder {
         Chart::new(self.layout.view(pos, Frame::new(&self.config)))
     }
 
-    #[inline]
-    pub fn get_layout(&self) -> &Layout {
-        &self.layout
-    }
-
-    #[inline]
-    pub fn get_layout_mut(&mut self) -> &mut Layout {
-        &mut self.layout
-    }
-
     pub fn into_layout(self) -> Layout {
         self.layout
-    }
-    
-    pub fn event(
-        &mut self, 
-        renderer: &mut PlotRenderer, 
-        event: &Event
-    ) {
-        self.layout.event(renderer, event)
     }
 }
 
@@ -178,5 +159,19 @@ impl Chart {
 
             f.data_mut().add_artist(artist, &config, view_clone)
         })
+    }
+}
+
+pub trait IntoArtist {
+    type Artist : PlotArtist;
+
+    fn into_artist(self) -> Self::Artist;
+}
+
+impl<A: PlotArtist> IntoArtist for A {
+    type Artist = Self;
+
+    fn into_artist(self) -> Self::Artist {
+        self
     }
 }

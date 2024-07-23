@@ -2,12 +2,10 @@ use essay_graphics::api::{renderer::Renderer, Affine2d, Bounds, Canvas, CapStyle
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{
-    chart::{ConfigArc, Data, LegendHandler}, 
-    artist::{Norm, Norms}, 
-    data_artist_option_struct
+    artist::{Norm, Norms}, chart::{ArtistView, ConfigArc, Data, LegendHandler}, data_artist_option_struct
 };
 
-use super::{Artist, ArtistHandle, ColorMap, ColorMaps, PathStyle, PlotArtist, ToCanvas};
+use super::{Artist, ColorMap, ColorMaps, PathStyle, PlotArtist, ToCanvas};
 
 pub enum Shading {
     Flat,
@@ -208,7 +206,7 @@ impl Artist<Data> for GridColor {
 impl PlotArtist for GridColor {
     type Opt = GridColorOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistHandle<GridColor>) -> Self::Opt {
+    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistView<GridColor>) -> Self::Opt {
         // self.style = PathStyle::from_config(cfg, "color_grid");
 
         GridColorOpt::new(artist)

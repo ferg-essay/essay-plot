@@ -1,9 +1,9 @@
 use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, renderer::Renderer};
 use essay_tensor::{Tensor, init::linspace};
 
-use crate::{chart::{Data, LegendHandler, ConfigArc}, data_artist_option_struct, path_style_options};
+use crate::{chart::{ArtistView, ConfigArc, Data, LegendHandler}, data_artist_option_struct, path_style_options};
 
-use super::{artist::ArtistHandle, paths, Artist, PathStyle, PlotArtist, ToCanvas};
+use super::{paths, Artist, PathStyle, PlotArtist, ToCanvas};
 
 pub struct Bar {
     height: Tensor,
@@ -157,7 +157,7 @@ impl Artist<Data> for Bar {
 impl PlotArtist for Bar {
     type Opt = BarOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, view: ArtistHandle<Bar>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, view: ArtistView<Bar>) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "bar");
 
         BarOpt::new(view)

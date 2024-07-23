@@ -6,11 +6,11 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    chart::{Data, LegendHandler, ConfigArc},
+    chart::{ArtistView, ConfigArc, Data, LegendHandler},
     data_artist_option_struct, path_style_options, transform_options
 };
 
-use super::{paths, Artist, ArtistHandle, IntoArtist, PathStyle, PlotArtist, ToCanvas};
+use super::{paths, Artist, IntoArtist, PathStyle, PlotArtist, ToCanvas};
 
 pub trait PatchTrait<M: Coord> : Send {
     fn get_path(&mut self) -> &Path<M>;
@@ -78,7 +78,7 @@ impl Artist<Data> for Patch {
 impl PlotArtist for Patch {
     type Opt = PatchOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistHandle<Patch>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<Patch>) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "patch");
 
         PatchOpt::new(artist)

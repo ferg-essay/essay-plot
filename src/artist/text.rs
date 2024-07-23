@@ -6,11 +6,11 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    chart::{ConfigArc, Data, LegendHandler}, 
+    chart::{ArtistView, ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct, path_style_options
 };
 
-use super::{artist::ToCanvas, Artist, ArtistHandle, PathStyle, PlotArtist};
+use super::{artist::ToCanvas, Artist, PathStyle, PlotArtist};
 
 pub struct TextCanvas {
     pos: Bounds<Canvas>,
@@ -240,7 +240,7 @@ impl Artist<Data> for Text {
 impl PlotArtist for Text {
     type Opt = TextOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistHandle<Text>) -> Self::Opt {
+    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistView<Text>) -> Self::Opt {
         // self.style = PathStyle::from_config(cfg, "text");
 
         TextOpt::new(artist)

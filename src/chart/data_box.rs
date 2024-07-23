@@ -8,7 +8,7 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, 
+    artist::{Artist, PathStyle, PlotArtist, ToCanvas}, 
     chart::{Config, ConfigArc}
 };
 
@@ -112,11 +112,7 @@ impl DataBox {
         //self.add_data_bounds(&bounds);
         //self.add_view_bounds(&bounds);
 
-        let id = self.artists.add_artist(artist);
-
-        let artist_view = ArtistHandle::<A>::new(view, id);
-
-        self.artist_mut::<A>(id).config(config, artist_view)
+        self.artists.add_artist(&view, config, artist)
     }
 
     ///
@@ -260,6 +256,13 @@ impl DataBox {
         &self.to_canvas
     }
 
+    pub(crate) fn artist<A>(&self, id: ArtistId) -> &A
+    where
+        A: Artist<Data> + 'static
+    {
+        self.artists.artist(id)
+    }
+
     pub(crate) fn artist_mut<A>(&mut self, id: ArtistId) -> &mut A
     where
         A: Artist<Data> + 'static
@@ -268,7 +271,7 @@ impl DataBox {
     }
 
     pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
-        self.artists.get_handlers()
+        self.artists.get_legend_handlers()
     }
 }
 

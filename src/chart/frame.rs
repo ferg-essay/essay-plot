@@ -175,7 +175,7 @@ impl Frame {
         self
     }
 
-    pub(crate) fn _data(&self) -> &DataBox {
+    pub(crate) fn data(&self) -> &DataBox {
         &self.data
     }
 

@@ -4,11 +4,8 @@ use essay_tensor::Tensor;
 use crate::{
     artist::{
         paths::{self}, 
-        Artist, ArtistHandle, Markers, PathCollection, PathStyle, PlotArtist, ToCanvas
-    }, 
-    data_artist_option_struct, 
-    path_style_options,
-    chart::{Data, LegendHandler, ConfigArc, Chart}, 
+        Artist, Markers, PathCollection, PathStyle, PlotArtist, ToCanvas
+    }, chart::{ArtistView, Chart, ConfigArc, Data, LegendHandler}, data_artist_option_struct, path_style_options 
 };
 
 pub fn scatter(
@@ -116,7 +113,7 @@ impl PlotArtist for ScatterPlot {
     fn config(
         &mut self, 
         cfg: &ConfigArc, 
-        artist: ArtistHandle<ScatterPlot>,
+        artist: ArtistView<ScatterPlot>,
     ) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "scatter");
 

@@ -4,7 +4,7 @@ use essay_graphics::{api::{
     renderer::Renderer, Affine2d, Bounds, Canvas, Event, Clip, Coord, PathOpt
 }, layout::View};
 
-use crate::chart::{ArtistId, Data, Frame, LegendHandler, ConfigArc};
+use crate::chart::{ArtistId, ArtistView, ConfigArc, Data, Frame, LegendHandler};
 
 pub trait Artist<M: Coord> : Send {
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
@@ -31,7 +31,7 @@ pub trait PlotArtist : Artist<Data> + Sized {
     fn config(
         &mut self, 
         cfg: &ConfigArc, 
-        view: ArtistHandle<Self>,
+        view: ArtistView<Self>,
     ) -> Self::Opt;
 
     fn get_legend(&self) -> Option<LegendHandler>;
@@ -48,34 +48,6 @@ impl<A: PlotArtist> IntoArtist for A {
 
     fn into_artist(self) -> Self::Artist {
         self
-    }
-}
-
-//pub trait SimpleArtist<M: Coord> : Artist<M> {
-//}
-
-pub struct ArtistHandle<A: Artist<Data>> {
-    view: View<Frame>,
-    id: ArtistId,
-    marker: PhantomData<fn(A)>
-}
-
-impl<A: Artist<Data> + 'static> ArtistHandle<A> {
-    pub(crate) fn new(
-        view: View<Frame>, 
-        id: ArtistId
-    ) -> Self {
-        Self {
-            view,
-            id,
-            marker: Default::default(),
-        }
-    }
-
-    pub fn write<R>(&mut self, fun: impl FnOnce(&mut A) -> R) -> R {
-        self.view.write(|f| {
-            fun(f.data_mut().artist_mut(self.id))
-        })
     }
 }
 

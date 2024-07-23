@@ -2,9 +2,7 @@ use essay_graphics::api::{renderer::Renderer, Bounds, Canvas, Clip, PathOpt};
 use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 
 use crate::{
-    artist::{Artist, ArtistHandle, ColorMap, ColorMaps, GridColor, Norm, Norms, PlotArtist, Shading, ToCanvas}, 
-    data_artist_option_struct, 
-    chart::{Data, LegendHandler, ConfigArc, Chart}
+    artist::{Artist, ColorMap, ColorMaps, GridColor, Norm, Norms, PlotArtist, Shading, ToCanvas}, chart::{ArtistView, Chart, ConfigArc, Data, LegendHandler}, data_artist_option_struct
 };
 
 pub fn specgram(
@@ -129,7 +127,7 @@ impl Artist<Data> for SpecGram {
 impl PlotArtist for SpecGram {
     type Opt = SpecGramOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistHandle<SpecGram>) -> Self::Opt {
+    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistView<SpecGram>) -> Self::Opt {
         SpecGramOpt::new(artist)
     }
 

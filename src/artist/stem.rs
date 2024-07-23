@@ -8,12 +8,12 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    artist::{PathStyle, Markers}, 
-    chart::{ConfigArc, Data, LegendHandler}, 
+    artist::{Markers, PathStyle}, 
+    chart::{ArtistView, ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct, path_style_options
 };
 
-use super::{Artist, PlotArtist, ArtistHandle, PathCollection, ToCanvas};
+use super::{Artist, PlotArtist, PathCollection, ToCanvas};
 
 pub struct Stem {
     xy: Tensor,
@@ -124,7 +124,7 @@ impl Artist<Data> for Stem {
 impl PlotArtist for Stem {
     type Opt = StemOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistHandle<Stem>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<Stem>) -> Self::Opt {
         self.line_style = PathStyle::from_config(cfg, "stem.lines");
         self.baseline_style = PathStyle::from_config(cfg, "stem.lines");
         self.marker_style = PathStyle::from_config(cfg, "stem.marker");

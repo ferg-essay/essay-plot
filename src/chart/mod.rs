@@ -24,6 +24,8 @@ pub use style::PlotOpt;
 
 pub use tick_locator::IndexLocator;
 
+pub use plot_container::ArtistView;
+
 pub use axis::AxisOpt;
 
 pub use data_box::{

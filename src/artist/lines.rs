@@ -8,12 +8,12 @@ use essay_tensor::Tensor;
 
 use crate::{
     artist::PathStyle, 
-    chart::{Data, LegendHandler}, 
-    data_artist_option_struct, path_style_options, chart::ConfigArc
+    chart::{ArtistView, ConfigArc, Data, LegendHandler}, 
+    data_artist_option_struct, path_style_options
 };
 
 use super::{
-    Artist, PlotArtist, ArtistHandle, 
+    Artist, PlotArtist, 
     markers::{MarkerStyle, IntoMarker}, 
     PathCollection, ToCanvas
 };
@@ -205,7 +205,7 @@ impl Artist<Data> for Lines2d {
 impl PlotArtist for Lines2d {
     type Opt = LinesOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistHandle<Lines2d>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<Lines2d>) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "lines");
 
         LinesOpt::new(artist)

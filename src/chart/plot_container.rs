@@ -1,10 +1,10 @@
 use std::{any::Any, marker::PhantomData};
 
-use essay_graphics::api::{Coord, Bounds, renderer::Renderer, Canvas, PathOpt, Clip, Point};
+use essay_graphics::{api::{renderer::Renderer, Bounds, Canvas, Clip, Coord, PathOpt, Point}, layout::View};
 
 use crate::{artist::{Artist, StyleCycle, PlotArtist, ToCanvas}, chart::Config};
 
-use super::{legend::LegendHandler, ArtistId, Data};
+use super::{legend::LegendHandler, ArtistId, ConfigArc, Data, Frame};
 
 pub(crate) struct PlotContainer {
     artist_any: Vec<Box<dyn Any + Send>>,
@@ -23,20 +23,20 @@ impl PlotContainer {
         container
     }
 
-    pub(crate) fn add_artist<A>(&mut self, artist: A) -> ArtistId
+    pub(crate) fn add_artist<A>(&mut self, view: &View<Frame>, config: &ConfigArc, mut artist: A) -> A::Opt
     where
         A: PlotArtist + 'static
     {
         let id = ArtistId::new_data(self.artist_any.len());
-        //let id = ArtistId::new_data(self.ptrs.len());
+        let view = ArtistView::new(view.clone(), id);
 
-        //let plot = PlotPtr::new(id, artist);
-        // self.ptrs.push(plot);
+        let opt = artist.config(config, view);
+
         self.artist_any.push(Box::new(artist));
 
         self.artist_handles.push(Box::new(ArtistHandle::<Data, A>::new()));
 
-        id
+        opt
     }
 
     pub(crate) fn _cycle(&self) -> &StyleCycle {
@@ -52,18 +52,21 @@ impl PlotContainer {
         self.artist_any[id.index()].downcast_ref().unwrap()
     }
 
-    fn deref_mut<A: Artist<Data> + 'static>(&mut self, id: ArtistId) -> &mut A {
-        self.artist_any[id.index()].downcast_mut().unwrap()
+    pub(crate) fn artist<A>(&self, id: ArtistId) -> &A
+    where
+        A: Artist<Data> + 'static
+    {
+        self.artist_any[id.index()].downcast_ref().unwrap()
     }
 
     pub(crate) fn artist_mut<A>(&mut self, id: ArtistId) -> &mut A
     where
         A: Artist<Data> + 'static
     {
-        self.deref_mut(id)
+        self.artist_any[id.index()].downcast_mut().unwrap()
     }
 
-    pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
+    pub(crate) fn get_legend_handlers(&mut self) -> Vec<LegendHandler> {
         let mut vec = Vec::<LegendHandler>::new();
 
         for (i, handle) in self.artist_handles.iter().enumerate() {
@@ -123,6 +126,44 @@ impl Artist<Data> for PlotContainer {
         }
     }
 }
+
+pub struct ArtistView<A: PlotArtist> {
+    view: View<Frame>,
+    id: ArtistId,
+    marker: PhantomData<fn(A)>
+}
+
+impl<A: PlotArtist + 'static> ArtistView<A> {
+    pub(crate) fn new(
+        view: View<Frame>, 
+        id: ArtistId
+    ) -> Self {
+        Self {
+            view,
+            id,
+            marker: Default::default(),
+        }
+    }
+
+    pub fn read<R>(&self, fun: impl FnOnce(&A) -> R) -> R {
+        self.view.read(|f| {
+            fun(f.data().artist(self.id))
+        })
+    }
+
+    pub fn write<R>(&mut self, fun: impl FnOnce(&mut A) -> R) -> R {
+        self.view.write(|f| {
+            fun(f.data_mut().artist_mut(self.id))
+        })
+    }
+}
+/*
+impl<A: PlotArtist + 'static> Clone for ArtistView<A> {
+    fn clone(&self) -> Self {
+        Self { view: self.view.clone(), id: self.id.clone(), marker: self.marker.clone() }
+    }
+}
+    */
 
 trait ArtistHandleTrait<M: Coord> : Send {
     fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);

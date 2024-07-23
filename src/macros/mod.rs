@@ -28,12 +28,12 @@ macro_rules! frame_option_struct {
 macro_rules! data_artist_option_struct {
     ($name: ident, $ty: ty) => {
         pub struct $name {
-            artist: $crate::artist::ArtistHandle<$ty>,
+            artist: $crate::chart::ArtistView<$ty>,
         }
         
         impl $name {
             pub(crate) fn new(
-                artist: $crate::artist::ArtistHandle<$ty>,
+                artist: $crate::chart::ArtistView<$ty>,
             ) -> Self {
                 Self {
                     artist: artist,

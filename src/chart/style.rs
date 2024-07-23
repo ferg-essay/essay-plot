@@ -1,11 +1,13 @@
 use essay_graphics::api::{Coord, Canvas, Bounds, renderer::Renderer, Clip, PathOpt};
 
 use crate::{
-    artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, 
+    artist::{Artist, PathStyle, PlotArtist, ToCanvas}, 
     chart::{Data, LegendHandler}, 
     data_artist_option_struct, 
     path_style_options
 };
+
+use super::ArtistView;
 
 data_artist_option_struct!(PlotOpt, PlotOptHandle<Data>);
 
@@ -58,7 +60,7 @@ impl PlotArtist for PlotOptHandle<Data> {
     fn config(
         &mut self, 
         cfg: &super::ConfigArc, 
-        artist: ArtistHandle<PlotOptHandle<Data>>,
+        artist: ArtistView<PlotOptHandle<Data>>,
     ) -> Self::Opt {
         self.style = PathStyle::from_config(cfg, "artist");
 

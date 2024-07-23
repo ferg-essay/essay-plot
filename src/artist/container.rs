@@ -3,9 +3,9 @@ use essay_graphics::api::{
     renderer::Renderer, Clip
 };
 
-use crate::{chart::{ConfigArc, Data, LegendHandler}, data_artist_option_struct};
+use crate::{chart::{ArtistView, ConfigArc, Data, LegendHandler}, data_artist_option_struct};
 
-use super::{Artist, ArtistHandle, PathStyle, PlotArtist, StyleCycle, ToCanvas};
+use super::{Artist, PathStyle, PlotArtist, StyleCycle, ToCanvas};
 
 pub struct Container<M: Coord> {
     artists: Vec<Box<dyn Artist<M>>>,
@@ -68,7 +68,7 @@ impl<M: Coord> Artist<M> for Container<M> {
 impl PlotArtist for Container<Data> {
     type Opt = ContainerOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistHandle<Container<Data>>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<Container<Data>>) -> Self::Opt {
         self.cycle = StyleCycle::from_config(cfg, "container.cycle");
 
         ContainerOpt::new(artist)

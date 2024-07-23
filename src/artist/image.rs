@@ -2,8 +2,9 @@ use essay_graphics::api::renderer::Renderer;
 use essay_graphics::api::{Canvas, Bounds, Point, Clip, PathOpt};
 use essay_tensor::Tensor;
 
+use crate::chart::ArtistView;
 use crate::{
-    artist::{Norms, Norm, Artist, ArtistHandle, ColorMap, ColorMaps, PlotArtist, ToCanvas},
+    artist::{Norms, Norm, Artist, ColorMap, ColorMaps, PlotArtist, ToCanvas},
     chart::{ConfigArc, LegendHandler, Data},
     data_artist_option_struct,
 };
@@ -100,7 +101,7 @@ impl Artist<Data> for Image {
 impl PlotArtist for Image {
     type Opt = ImageOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistHandle<Image>) -> Self::Opt {
+    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistView<Image>) -> Self::Opt {
         ImageOpt::new(artist)
     }
 

@@ -213,10 +213,12 @@ impl Graph {
     {
         let artist = artist.into_artist();
 
+        let view_clone = self.view.clone();
+
         self.view.write(|f| {
             let config = f.config().clone();
 
-            f.data_mut().add_artist(artist, &config, self.view.clone())
+            f.data_mut().add_artist(artist, &config, view_clone)
         })
 
         /*

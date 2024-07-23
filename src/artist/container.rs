@@ -3,9 +3,9 @@ use essay_graphics::api::{
     renderer::Renderer, Clip
 };
 
-use crate::{chart::{ArtistView, ConfigArc, Data, LegendHandler}, data_artist_option_struct};
+use crate::{chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, data_artist_option_struct};
 
-use super::{Artist, PathStyle, PlotArtist, StyleCycle, ToCanvas};
+use super::{Artist, PathStyle, StyleCycle, ToCanvas};
 
 pub struct Container<M: Coord> {
     artists: Vec<Box<dyn Artist<M>>>,

@@ -4,8 +4,8 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, PlotArtist},
-    chart::{AspectMode, AxisOpt, Data, Frame, FrameArtist, FrameTextOpt}
+    artist::Artist,
+    chart::{AspectMode, AxisOpt, Data, Frame, FrameArtist, FrameTextOpt, PlotArtist}
 };
 
 use super::{config::read_config, style::PlotOptHandle, ConfigArc, PlotOpt};

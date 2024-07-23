@@ -25,18 +25,6 @@ pub trait Artist<M: Coord> : Send {
     }
 }
 
-pub trait PlotArtist : Artist<Data> + Sized {
-    type Opt;
-    
-    fn config(
-        &mut self, 
-        cfg: &ConfigArc, 
-        view: ArtistView<Self>,
-    ) -> Self::Opt;
-
-    fn get_legend(&self) -> Option<LegendHandler>;
-}
-
 pub struct ToCanvas {
     pos_frame: Bounds<Canvas>,
     to_canvas: Affine2d,

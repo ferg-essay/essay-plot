@@ -9,11 +9,11 @@ use essay_graphics::api::{
 
 use crate::{
     artist::{Markers, PathStyle}, 
-    chart::{ArtistView, ConfigArc, Data, LegendHandler}, 
+    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
     data_artist_option_struct, path_style_options
 };
 
-use super::{Artist, PlotArtist, PathCollection, ToCanvas};
+use super::{Artist, PathCollection, ToCanvas};
 
 pub struct Stem {
     xy: Tensor,

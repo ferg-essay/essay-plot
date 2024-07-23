@@ -8,14 +8,13 @@ use essay_tensor::Tensor;
 
 use crate::{
     artist::PathStyle, 
-    chart::{ArtistView, ConfigArc, Data, LegendHandler}, 
+    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
     data_artist_option_struct, path_style_options
 };
 
 use super::{
-    Artist, PlotArtist, 
     markers::{MarkerStyle, IntoMarker}, 
-    PathCollection, ToCanvas
+    Artist, PathCollection, ToCanvas
 };
 
 #[derive(Clone, PartialEq, Debug)]

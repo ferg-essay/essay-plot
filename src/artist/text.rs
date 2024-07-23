@@ -6,11 +6,11 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    chart::{ArtistView, ConfigArc, Data, LegendHandler}, 
+    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
     data_artist_option_struct, path_style_options
 };
 
-use super::{artist::ToCanvas, Artist, PathStyle, PlotArtist};
+use super::{artist::ToCanvas, Artist, PathStyle};
 
 pub struct TextCanvas {
     pos: Bounds<Canvas>,

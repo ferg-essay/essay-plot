@@ -1,8 +1,8 @@
 use essay_graphics::api::{Coord, Canvas, Bounds, renderer::Renderer, Clip, PathOpt};
 
 use crate::{
-    artist::{Artist, PathStyle, PlotArtist, ToCanvas}, 
-    chart::{Data, LegendHandler}, 
+    artist::{Artist, PathStyle, ToCanvas}, 
+    chart::{Data, LegendHandler, PlotArtist}, 
     data_artist_option_struct, 
     path_style_options
 };

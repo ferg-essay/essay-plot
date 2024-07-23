@@ -6,11 +6,11 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    chart::{ArtistView, ConfigArc, Data, IntoArtist, LegendHandler},
+    chart::{ArtistView, ConfigArc, Data, IntoArtist, LegendHandler, PlotArtist},
     data_artist_option_struct, path_style_options, transform_options
 };
 
-use super::{paths, Artist, PathStyle, PlotArtist, ToCanvas};
+use super::{paths, Artist, PathStyle, ToCanvas};
 
 pub trait PatchTrait<M: Coord> : Send {
     fn get_path(&mut self) -> &Path<M>;

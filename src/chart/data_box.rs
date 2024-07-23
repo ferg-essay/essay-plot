@@ -9,7 +9,7 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, PathStyle, PlotArtist, StyleCycle, ToCanvas}, 
+    artist::{Artist, PathStyle, StyleCycle, ToCanvas}, 
     chart::{Config, ConfigArc}
 };
 
@@ -563,6 +563,18 @@ where
         let artist = any.downcast_mut::<A>().unwrap();
         artist.get_legend()
     }
+}
+
+pub trait PlotArtist : Artist<Data> + Sized {
+    type Opt;
+    
+    fn config(
+        &mut self, 
+        cfg: &ConfigArc, 
+        view: ArtistView<Self>,
+    ) -> Self::Opt;
+
+    fn get_legend(&self) -> Option<LegendHandler>;
 }
 
 ///

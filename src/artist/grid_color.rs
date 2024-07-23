@@ -2,10 +2,12 @@ use essay_graphics::api::{renderer::Renderer, Affine2d, Bounds, Canvas, CapStyle
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{
-    artist::{Norm, Norms}, chart::{ArtistView, ConfigArc, Data, LegendHandler}, data_artist_option_struct
+    artist::{Norm, Norms}, 
+    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    data_artist_option_struct
 };
 
-use super::{Artist, ColorMap, ColorMaps, PathStyle, PlotArtist, ToCanvas};
+use super::{Artist, ColorMap, ColorMaps, PathStyle, ToCanvas};
 
 pub enum Shading {
     Flat,

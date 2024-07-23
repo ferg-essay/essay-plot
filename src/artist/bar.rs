@@ -1,9 +1,12 @@
 use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, renderer::Renderer};
 use essay_tensor::{Tensor, init::linspace};
 
-use crate::{chart::{ArtistView, ConfigArc, Data, LegendHandler}, data_artist_option_struct, path_style_options};
+use crate::{
+    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    data_artist_option_struct, path_style_options
+};
 
-use super::{paths, Artist, PathStyle, PlotArtist, ToCanvas};
+use super::{paths, Artist, PathStyle, ToCanvas};
 
 pub struct Bar {
     height: Tensor,

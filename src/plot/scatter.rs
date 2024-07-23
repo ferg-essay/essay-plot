@@ -4,8 +4,9 @@ use essay_tensor::Tensor;
 use crate::{
     artist::{
         paths::{self}, 
-        Artist, Markers, PathCollection, PathStyle, PlotArtist, ToCanvas
-    }, chart::{ArtistView, Chart, ConfigArc, Data, LegendHandler}, data_artist_option_struct, path_style_options 
+        Artist, Markers, PathCollection, PathStyle, ToCanvas
+    }, chart::{ArtistView, Chart, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    data_artist_option_struct, path_style_options 
 };
 
 pub fn scatter(

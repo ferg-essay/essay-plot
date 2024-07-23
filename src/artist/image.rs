@@ -4,8 +4,8 @@ use essay_tensor::Tensor;
 
 use crate::chart::ArtistView;
 use crate::{
-    artist::{Norms, Norm, Artist, ColorMap, ColorMaps, PlotArtist, ToCanvas},
-    chart::{ConfigArc, LegendHandler, Data},
+    artist::{Norms, Norm, Artist, ColorMap, ColorMaps, ToCanvas},
+    chart::{ConfigArc, LegendHandler, Data, PlotArtist},
     data_artist_option_struct,
 };
 

@@ -2,7 +2,7 @@ use core::fmt;
 
 use essay_graphics::api::{
     PathOpt, Point, Affine2d, Bounds, Canvas, Path, Angle,
-    driver::Renderer, Coord, Clip
+    renderer::Renderer, Coord, Clip
 };
 
 use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options, transform_options};

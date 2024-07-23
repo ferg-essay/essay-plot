@@ -1,6 +1,6 @@
 use essay_graphics::api::{
     Bounds, Coord, Canvas, PathOpt,
-    driver::Renderer, Clip
+    renderer::Renderer, Clip
 };
 
 use crate::{graph::ConfigArc, frame::{Data, LegendHandler}, data_artist_option_struct};

@@ -4,7 +4,7 @@ use essay_tensor::{Tensor, array::Axis};
 
 use essay_graphics::api::{
     Bounds, Point, Canvas, Path, PathCode, PathOpt,
-    driver::Renderer, Clip
+    renderer::Renderer, Clip
 };
 
 use crate::{

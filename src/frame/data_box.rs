@@ -1,7 +1,7 @@
 use core::fmt;
 
 use essay_graphics::{api::{
-    driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Coord, PathOpt, Point
+    renderer::Renderer, Affine2d, Bounds, Canvas, Event, Clip, Coord, PathOpt, Point
 }, layout::View};
 
 use crate::{artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, graph::{Config, ConfigArc}};
@@ -307,15 +307,15 @@ impl Artist<Canvas> for DataBox {
     }
 
     // true if request redraw
-    fn event(&mut self, _renderer: &mut dyn Renderer, event: &CanvasEvent) -> bool {
+    fn event(&mut self, _renderer: &mut dyn Renderer, event: &Event) -> bool {
         match event {
-            CanvasEvent::ResetView(_) => {
+            Event::ResetView(_) => {
                 //self.update_view();
                 self._is_stale = true;
                 self.pan_zoom_bounds = None;
                 true
             }
-            CanvasEvent::Pan(_p_start, p_last, p_now) => {
+            Event::Pan(_p_start, p_last, p_now) => {
                 let to_data = self.pos_canvas.affine_to(&self.get_view_bounds());
                 let p0 = to_data.transform_point(*p_last);
                 let p1 = to_data.transform_point(*p_now);
@@ -337,7 +337,7 @@ impl Artist<Canvas> for DataBox {
 
                 true
             },
-            CanvasEvent::ZoomBounds(p_start, p_now) => {
+            Event::ZoomBounds(p_start, p_now) => {
                 if self.pos_canvas.contains(*p_now) {
                     let to_data = self.pos_canvas.affine_to(&self.get_view_bounds());
                     let p0 = to_data.transform_point(*p_start);

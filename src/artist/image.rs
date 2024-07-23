@@ -1,4 +1,4 @@
-use essay_graphics::api::driver::Renderer;
+use essay_graphics::api::renderer::Renderer;
 use essay_graphics::api::{Canvas, Bounds, Point, Clip, PathOpt};
 use essay_tensor::Tensor;
 

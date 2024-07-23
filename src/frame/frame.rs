@@ -2,7 +2,8 @@ use std::f32::consts::PI;
 
 use essay_graphics::{
     api::{
-        driver::{Drawable, Renderer}, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Color, PathOpt, Point, VertAlign 
+        renderer::{Drawable, Renderer}, 
+        Affine2d, Bounds, Canvas, Event, Clip, Color, PathOpt, Point, VertAlign 
     }, 
     layout::View
 };
@@ -139,10 +140,10 @@ impl Frame {
         let title = self.title.bounds();
 
         // title exists outside the pos bounds
-        self.title.set_pos([
+        self.title.set_pos((
             pos.xmin(), pos.ymax(), 
             pos.xmax(), pos.ymax() + title.height()
-        ]); 
+        )); 
 
         let pos_data = Bounds::<Canvas>::new(
             Point(pos.xmin(), pos.ymin()), 
@@ -233,7 +234,7 @@ impl Frame {
         self.right.colorbar();
     }
 
-    pub(crate) fn _event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
+    pub(crate) fn _event(&mut self, renderer: &mut dyn Renderer, event: &Event) {
         if self.data.get_pos().contains(event.point()) {
             if self.data.event(renderer, event) {
                 self.left.update_axis(&self.data);
@@ -287,14 +288,14 @@ impl Frame {
 }
 
 impl Drawable for Frame {
-    fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) {
-        if let CanvasEvent::Resize(pos) = event {
-            let pos = Bounds::from([
+    fn event(&mut self, renderer: &mut dyn Renderer, event: &Event) {
+        if let Event::Resize(pos) = event {
+            let pos = Bounds::from((
                 pos.xmin() + pos.width() * self.margins.left,
                 pos.ymin() + pos.height() * self.margins.top,
                 pos.xmin() + pos.width() * self.margins.right,
                 pos.ymin() + pos.height() * self.margins.bottom,
-            ]);
+            ));
 
             self.pos = pos.clone();
 
@@ -303,10 +304,10 @@ impl Drawable for Frame {
             // title exists outside the pos bounds
             self.title.resize(
                 renderer,
-                &Bounds::from([
+                &Bounds::from((
                     pos.xmin(), pos.ymax(), 
                     pos.xmax(), pos.ymax() + title.height()
-                ])
+                ))
             );
 
             let pos_data = Bounds::<Canvas>::new(

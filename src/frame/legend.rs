@@ -1,5 +1,5 @@
 use essay_graphics::api::{
-    Bounds, Canvas, Clip, PathOpt, driver::Renderer, 
+    Bounds, Canvas, Clip, PathOpt, renderer::Renderer, 
     PathCode, Path, Point, TextStyle, VertAlign, HorizAlign
 };
 

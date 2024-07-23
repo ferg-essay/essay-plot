@@ -1,7 +1,7 @@
 use std::{marker::PhantomData, ops::Deref};
 
 use essay_graphics::{api::{
-    driver::Renderer, Affine2d, Bounds, Canvas, CanvasEvent, Clip, Coord, PathOpt
+    renderer::Renderer, Affine2d, Bounds, Canvas, Event, Clip, Coord, PathOpt
 }, layout::View};
 
 use crate::{frame::{ArtistId, Data, Frame, LegendHandler}, graph::ConfigArc};
@@ -20,7 +20,7 @@ pub trait Artist<M: Coord> : Send {
     );
 
     #[allow(unused_variables)]
-    fn event(&mut self, renderer: &mut dyn Renderer, event: &CanvasEvent) -> bool {
+    fn event(&mut self, renderer: &mut dyn Renderer, event: &Event) -> bool {
         false
     }
 }

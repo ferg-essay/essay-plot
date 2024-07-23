@@ -2,7 +2,7 @@ use essay_graphics::layout::Layout;
 use essay_graphics::wgpu::WgpuBackend;
 
 use essay_graphics::api::{
-    driver::Backend,
+    renderer::Backend,
     Bounds, Point,
 };
 

@@ -1,6 +1,6 @@
 use std::{any::Any, marker::PhantomData};
 
-use essay_graphics::api::{Coord, Bounds, driver::Renderer, Canvas, PathOpt, Clip, Point};
+use essay_graphics::api::{Coord, Bounds, renderer::Renderer, Canvas, PathOpt, Clip, Point};
 
 use crate::{artist::{Artist, StyleCycle, PlotArtist, ToCanvas}, graph::Config};
 

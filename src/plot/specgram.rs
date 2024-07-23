@@ -1,4 +1,4 @@
-use essay_graphics::api::{driver::Renderer, Bounds, Canvas, Clip, PathOpt};
+use essay_graphics::api::{renderer::Renderer, Bounds, Canvas, Clip, PathOpt};
 use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 
 use crate::{artist::{Artist, ArtistHandle, ColorMap, ColorMaps, GridColor, Norm, Norms, PlotArtist, Shading, ToCanvas}, data_artist_option_struct, frame::{Data, LegendHandler}, graph::{ConfigArc, Graph}};

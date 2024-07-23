@@ -1,10 +1,17 @@
-use essay_graphics::api::{TextStyle, Canvas, driver::Renderer, Clip, PathOpt, VertAlign, Point, Path, HorizAlign, Bounds, PathCode};
+use essay_graphics::api::{
+    TextStyle, Canvas, renderer::Renderer, Clip, PathOpt, VertAlign, Point, Path, HorizAlign, Bounds, PathCode
+};
 
-use crate::{artist::{PathStyle, TextCanvas, Artist, patch::CanvasPatch, paths, ToCanvas}, graph::Config, frame_option_struct, path_style_options};
+use crate::{
+    artist::{PathStyle, TextCanvas, Artist, patch::CanvasPatch, paths, ToCanvas}, 
+    graph::Config, frame_option_struct, path_style_options
+};
 
 use super::{
     data_box::DataBox,
-    tick_locator::{MaxNLocator, TickLocator}, FrameArtist, tick_formatter::{TickFormatter, Formatter},
+    tick_formatter::{TickFormatter, Formatter},
+    tick_locator::{MaxNLocator, TickLocator}, 
+    FrameArtist, 
 };
 
 pub struct Axis {

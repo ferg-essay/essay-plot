@@ -1,4 +1,4 @@
-use essay_graphics::api::{Coord, Canvas, Bounds, driver::Renderer, Clip, PathOpt};
+use essay_graphics::api::{Coord, Canvas, Bounds, renderer::Renderer, Clip, PathOpt};
 
 use crate::{
     artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, data_artist_option_struct, frame::{Data, LegendHandler}, path_style_options

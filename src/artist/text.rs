@@ -1,7 +1,7 @@
 use essay_graphics::api::{
     Bounds, Point, Canvas,
     PathOpt,
-    driver::Renderer, 
+    renderer::Renderer, 
     TextStyle, Clip, FontFamily, FontStyle,
 };
 

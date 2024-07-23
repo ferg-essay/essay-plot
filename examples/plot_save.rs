@@ -45,11 +45,11 @@ fn main_grid() {
 
 fn main_plot2() {
     let mut figure = Figure::new();
-    let mut graph1 = figure.graph([0., 0., 0.9, 0.9]);
-    let mut graph2 = figure.graph([1.1, 0., 2., 0.9]);
+    let mut graph1 = figure.graph((0., 0., 0.9, 0.9));
+    let mut graph2 = figure.graph((1.1, 0., 2., 0.9));
 
-    let mut graph3 = figure.graph([0., 1.1, 0.9, 2.]);
-    let mut graph4 = figure.graph([1.1, 1.1, 2., 2.]);
+    let mut graph3 = figure.graph((0., 1.1, 0.9, 2.));
+    let mut graph4 = figure.graph((1.1, 1.1, 2., 2.));
 
     let x = linspace(0., 1., 10);
     let odor = tf32!([

@@ -1,7 +1,7 @@
 use core::fmt;
 
 use essay_graphics::{
-    api::{Bounds, driver::Drawable},
+    api::{renderer::Drawable, Bounds, Event},
     layout::{Layout, View}, 
     wgpu::PlotRenderer
 };
@@ -28,7 +28,7 @@ impl GraphBuilder {
     }
 
     pub fn graph(&mut self, pos: impl Into<Bounds<Layout>>) -> Graph {
-        Graph::new(self.layout.add_view(pos, Frame::new(&self.config)))
+        Graph::new(self.layout.view(pos, Frame::new(&self.config)))
     }
 
     #[inline]
@@ -48,7 +48,7 @@ impl GraphBuilder {
     pub fn event(
         &mut self, 
         renderer: &mut PlotRenderer, 
-        event: &essay_graphics::prelude::CanvasEvent
+        event: &Event
     ) {
         self.layout.event(renderer, event)
     }
@@ -243,15 +243,5 @@ impl Graph {
                 .config(&config, plot_id)
                 */
         // })
-    }
-}
-
-impl fmt::Debug for Graph {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // let pos = self.layout.read(|l| l.frame(self.frame_id).pos().clone());
-
-        write!(f, "Graph[{:?}]",
-            self.view,
-        )
     }
 }

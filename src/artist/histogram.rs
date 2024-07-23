@@ -1,7 +1,10 @@
-use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, driver::Renderer};
+use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, renderer::Renderer};
 use essay_tensor::Tensor;
 
-use crate::{frame::{Data, LegendHandler}, graph::ConfigArc, data_artist_option_struct, path_style_options};
+use crate::{
+    frame::{Data, LegendHandler}, 
+    graph::ConfigArc, data_artist_option_struct, path_style_options
+};
 
 use super::{paths, Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas};
 

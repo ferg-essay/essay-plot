@@ -1,4 +1,4 @@
-use essay_graphics::api::{affine2d, driver::Renderer, Bounds, Canvas, Clip, JoinStyle, Path, PathOpt};
+use essay_graphics::api::{affine2d, renderer::Renderer, Bounds, Canvas, Clip, JoinStyle, Path, PathOpt};
 use essay_tensor::Tensor;
 
 use crate::{

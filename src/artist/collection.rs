@@ -1,7 +1,7 @@
 use core::fmt;
 
 use essay_tensor::Tensor;
-use essay_graphics::api::{Bounds, Path, PathOpt, Canvas, driver::Renderer, Clip};
+use essay_graphics::api::{Bounds, Path, PathOpt, Canvas, renderer::Renderer, Clip};
 
 use crate::{frame::Data, artist::PathStyle};
 

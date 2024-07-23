@@ -5,7 +5,7 @@ use essay_graphics::api::{
 
 use crate::{artist::{Artist, PathStyle, StyleCycle, ToCanvas}, chart::Config};
 
-use super::data_box::DataBox;
+use super::data_frame::DataFrame;
 
 pub struct Legend {
     pos: Bounds<Canvas>,
@@ -46,7 +46,7 @@ impl Legend {
         self.pos = pos;
     }
 
-    pub(crate) fn update_handlers(&mut self, data: &mut DataBox) {
+    pub(crate) fn update_handlers(&mut self, data: &mut DataFrame) {
         let handlers = data.get_handlers();
         self.handlers = handlers;
     }

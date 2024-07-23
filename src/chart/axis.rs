@@ -8,7 +8,7 @@ use crate::{
 };
 
 use super::{
-    data_box::DataBox,
+    data_frame::DataFrame,
     tick_formatter::{TickFormatter, Formatter},
     tick_locator::{MaxNLocator, TickLocator}, 
     FrameArtist, 
@@ -129,7 +129,7 @@ impl XAxis {
         x_axis
     }
 
-    pub fn update_axis(&mut self, data: &DataBox) {
+    pub fn update_axis(&mut self, data: &DataFrame) {
         self.major_ticks = Vec::new();
         self.major_labels = Vec::new();
 
@@ -150,7 +150,7 @@ impl XAxis {
         }
     }
 
-    pub fn x_ticks(&self, data: &DataBox) -> Vec<(f32, f32)> {
+    pub fn x_ticks(&self, data: &DataFrame) -> Vec<(f32, f32)> {
         let c_width = data.get_pos().width();
 
         let view = data.get_view_bounds();
@@ -177,7 +177,7 @@ impl XAxis {
     pub(crate) fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        data: &DataBox,
+        data: &DataFrame,
         to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
@@ -213,7 +213,7 @@ impl XAxis {
     fn draw_ticks(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        data: &DataBox,
+        data: &DataFrame,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
@@ -306,7 +306,7 @@ impl YAxis {
         y_axis
     }
 
-    pub fn update_axis(&mut self, data: &DataBox) {
+    pub fn update_axis(&mut self, data: &DataFrame) {
         self.major_ticks = Vec::new();
         self.major_labels = Vec::new();
 
@@ -328,7 +328,7 @@ impl YAxis {
         }
     }
 
-    pub fn y_ticks(&self, data: &DataBox) -> Vec<(f32, f32)> {
+    pub fn y_ticks(&self, data: &DataFrame) -> Vec<(f32, f32)> {
         let v_height = data.get_view_bounds().height();
         let c_height = data.get_pos().height();
 
@@ -355,7 +355,7 @@ impl YAxis {
     pub(crate) fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        data: &DataBox,
+        data: &DataFrame,
         to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
@@ -394,7 +394,7 @@ impl YAxis {
     fn draw_ticks(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        data: &DataBox,
+        data: &DataFrame,
         clip: &Clip,
         style: &dyn PathOpt,
     ) {

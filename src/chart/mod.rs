@@ -1,6 +1,6 @@
 mod axis;
 mod config;
-mod data_box;
+mod data_frame;
 mod figure;
 mod frame;
 mod chart;
@@ -23,13 +23,14 @@ pub use tick_locator::IndexLocator;
 
 pub use axis::AxisOpt;
 
-pub use data_box::{
+pub use data_frame::{
     Data, AspectMode, ArtistView, PlotArtist,
 };
 
 pub use frame::{
-    Frame, FrameArtist, FrameTextOpt,
+    FrameArtist, FrameTextOpt,
 };
+pub(crate) use frame::ChartFrame;
 
 pub use legend::{
     Legend, LegendHandler,

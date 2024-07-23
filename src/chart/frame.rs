@@ -15,9 +15,9 @@ use crate::{
     chart::{Config, ConfigArc}
 };
 
-use super::{data_box::DataBox, axis::{Axis, AxisTicks, XAxis, YAxis}, legend::Legend};
+use super::{data_frame::DataFrame, axis::{Axis, AxisTicks, XAxis, YAxis}, legend::Legend};
 
-pub struct Frame {
+pub(crate) struct ChartFrame {
     pos: Bounds<Canvas>,
 
     config: ConfigArc,
@@ -32,7 +32,7 @@ pub struct Frame {
     path_style: PathStyle,
     // prop_cycle
 
-    data: DataBox,
+    data: DataFrame,
 
     title: TextCanvas,
 
@@ -68,14 +68,14 @@ pub struct Frame {
     // zorder
 }
 
-impl Frame {
+impl ChartFrame {
     pub(crate) fn new(cfg: &ConfigArc) -> Self {
         Self {
             config: cfg.clone(),
 
             pos: Bounds::none(),
 
-            data: DataBox::new(cfg),
+            data: DataFrame::new(cfg),
 
             title: TextCanvas::new(),
 
@@ -175,11 +175,11 @@ impl Frame {
         self
     }
 
-    pub(crate) fn data(&self) -> &DataBox {
+    pub(crate) fn data(&self) -> &DataFrame {
         &self.data
     }
 
-    pub(crate) fn data_mut(&mut self) -> &mut DataBox {
+    pub(crate) fn data_mut(&mut self) -> &mut DataFrame {
         &mut self.data
     }
 
@@ -287,7 +287,7 @@ impl Frame {
     }
 }
 
-impl Drawable for Frame {
+impl Drawable for ChartFrame {
     fn event(&mut self, renderer: &mut dyn Renderer, event: &Event) {
         if let Event::Resize(pos) = event {
             let pos = Bounds::from((
@@ -496,14 +496,14 @@ impl BottomFrame {
         frame
     }
 
-    pub fn update_axis(&mut self, data: &DataBox) {
+    pub fn update_axis(&mut self, data: &DataFrame) {
         self.x_axis.update_axis(data); 
     }
 
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        data: &DataBox,
+        data: &DataFrame,
         to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
@@ -563,14 +563,14 @@ impl LeftFrame {
         frame
     }
 
-    pub fn update_axis(&mut self, data: &DataBox) {
+    pub fn update_axis(&mut self, data: &DataFrame) {
         self.y_axis.update_axis(data);
     }
 
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        data: &DataBox,
+        data: &DataFrame,
         to_canvas: &ToCanvas,
         clip: &Clip,
         style: &dyn PathOpt,
@@ -675,12 +675,12 @@ impl Artist<Canvas> for RightFrame {
 }
 
 pub struct FrameTextOpt {
-    view: View<Frame>,
+    view: View<ChartFrame>,
     artist: FrameArtist,
 }
 
 impl FrameTextOpt {
-    pub(crate) fn new(view: View<Frame>, artist: FrameArtist) -> Self {
+    pub(crate) fn new(view: View<ChartFrame>, artist: FrameArtist) -> Self {
         Self {
             view,
             artist,

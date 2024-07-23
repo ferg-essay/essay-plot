@@ -13,9 +13,9 @@ use crate::{
     chart::{Config, ConfigArc}
 };
 
-use super::{Frame, LegendHandler};
+use super::{ChartFrame, LegendHandler};
 
-pub(crate) struct DataBox {
+pub(crate) struct DataFrame {
     pos_canvas: Bounds<Canvas>,
 
     data_bounds: Bounds<Data>,
@@ -42,7 +42,7 @@ pub(crate) struct DataBox {
     _is_stale: bool,
 }
 
-impl DataBox {
+impl DataFrame {
     pub fn new(cfg: &Config) -> Self {
         Self {
             pos_canvas: Bounds::none(),
@@ -108,7 +108,7 @@ impl DataBox {
         &mut self, 
         artist: A,
         config: &ConfigArc,
-        view: View<Frame>,
+        view: View<ChartFrame>,
     ) -> A::Opt {
         let id = self.artist_items.len();
         let view = ArtistView::new(view.clone(), id);
@@ -319,7 +319,7 @@ impl DataBox {
     }
 }
 
-impl Artist<Canvas> for DataBox {
+impl Artist<Canvas> for DataFrame {
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.set_pos(pos);
         
@@ -417,7 +417,7 @@ impl Artist<Canvas> for DataBox {
 }
 
 
-impl fmt::Debug for DataBox {
+impl fmt::Debug for DataFrame {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "DataBox({},{}; {}x{})",
             self.view_bounds.xmin(),
@@ -478,14 +478,14 @@ impl ArtistItem {
 }
 
 pub struct ArtistView<A: PlotArtist> {
-    view: View<Frame>,
+    view: View<ChartFrame>,
     id: usize,
     marker: PhantomData<fn(A)>
 }
 
 impl<A: PlotArtist + 'static> ArtistView<A> {
     pub(crate) fn new(
-        view: View<Frame>, 
+        view: View<ChartFrame>, 
         id: usize,
     ) -> Self {
         Self {

@@ -5,7 +5,7 @@ use essay_graphics::{
 
 use crate::{
     artist::Artist,
-    chart::{AspectMode, AxisOpt, Data, Frame, FrameArtist, FrameTextOpt, PlotArtist}
+    chart::{AspectMode, AxisOpt, Data, ChartFrame, FrameArtist, FrameTextOpt, PlotArtist}
 };
 
 use super::{config::read_config, style::PlotOptHandle, ConfigArc, PlotOpt};
@@ -25,7 +25,7 @@ impl ChartBuilder {
     }
 
     pub fn chart(&mut self, pos: impl Into<Bounds<Layout>>) -> Chart {
-        Chart::new(self.layout.view(pos, Frame::new(&self.config)))
+        Chart::new(self.layout.view(pos, ChartFrame::new(&self.config)))
     }
 
     pub fn into_layout(self) -> Layout {
@@ -35,11 +35,11 @@ impl ChartBuilder {
 
 #[derive(Clone)]
 pub struct Chart {
-    view: View<Frame>,
+    view: View<ChartFrame>,
 }
 
 impl Chart {
-    pub(crate) fn new(view: View<Frame>) -> Self {
+    pub(crate) fn new(view: View<ChartFrame>) -> Self {
         let mut chart = Self {
             view
         };

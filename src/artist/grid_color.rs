@@ -153,21 +153,6 @@ impl GridColor {
 
 impl Artist<Data> for GridColor {
     fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-        if self.is_stale {
-            self.is_stale = false;
-
-            let mut xy = TensorVec::<[f32; 2]>::new();
-            let (rows, cols) = (self.data.rows(), self.data.cols());
-
-            for j in 0..rows {
-                for i in 0..cols {
-                    xy.push([i as f32, j as f32]);
-                }
-            }
-
-            self.xy = xy.into_tensor();
-            self.norm.set_bounds(&self.data);
-        }
     }
     
     fn bounds(&mut self) -> Bounds<Data> {
@@ -189,6 +174,22 @@ impl Artist<Data> for GridColor {
         clip: &Clip,
         style: &dyn PathOpt,
     ) {
+        if self.is_stale {
+            self.is_stale = false;
+
+            let mut xy = TensorVec::<[f32; 2]>::new();
+            let (rows, cols) = (self.data.rows(), self.data.cols());
+
+            for j in 0..rows {
+                for i in 0..cols {
+                    xy.push([i as f32, j as f32]);
+                }
+            }
+
+            self.xy = xy.into_tensor();
+            self.norm.set_bounds(&self.data);
+        }
+
         match self.shading {
             Shading::Gouraud => {
                 self.draw_gouraud_shading(renderer, to_canvas, clip, style);

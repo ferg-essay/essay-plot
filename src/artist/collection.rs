@@ -3,7 +3,7 @@ use core::fmt;
 use essay_tensor::Tensor;
 use essay_graphics::api::{Bounds, Path, PathOpt, Canvas, renderer::Renderer, Clip};
 
-use crate::{frame::Data, artist::PathStyle};
+use crate::{chart::Data, artist::PathStyle};
 
 use super::{Artist, ToCanvas};
 

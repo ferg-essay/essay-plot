@@ -3,7 +3,6 @@ pub mod contour;
 pub mod macros;
 pub mod chart;
 pub mod artist;
-pub mod frame;
 pub mod plot;
 
 pub mod api {

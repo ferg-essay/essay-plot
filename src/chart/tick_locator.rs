@@ -265,7 +265,7 @@ fn scale_range(vmin: f32, vmax: f32, n_bins: usize) -> (f32, f32) {
 mod test {
     use essay_tensor::tf32;
 
-    use crate::frame::tick_locator::TickLocator;
+    use crate::chart::tick_locator::TickLocator;
 
     use super::MaxNLocator;
 

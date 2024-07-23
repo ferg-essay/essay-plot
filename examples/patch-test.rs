@@ -1,8 +1,8 @@
-use essay_plot::{prelude::*, artist::patch::{Patch, self}, frame::Data};
+use essay_plot::{prelude::*, artist::patch::{Patch, self}, chart::Data};
 
 fn main() { 
     let mut figure = Figure::new();
-    let mut graph = figure.chart(());
+    let mut chart = figure.chart(());
 
     let path = Path::<Data>::new(vec![
         PathCode::MoveTo(Point(1., 1.)),
@@ -11,7 +11,7 @@ fn main() {
         PathCode::LineTo(Point(7.7, 10.)),
         PathCode::ClosePoly(Point(0., 2.)),
     ]);
-    graph.artist(Patch::new(path)).color("teal").edge_color("black");
+    chart.artist(Patch::new(path)).color("teal").edge_color("black");
     //let patch = patch::arrow((4., 1.), (0.707, 0.707));
     //graph.artist(patch).color("teal").edge_color("black");
 
@@ -19,9 +19,9 @@ fn main() {
     //let patch = patch::arrow((6., 1.), (-0.707, 0.707));
     //graph.artist(patch).color("black");
 
-    graph.aspect(1.);
-    graph.xlim(0., 20.);
-    graph.ylim(0., 20.);
+    chart.aspect(1.);
+    chart.xlim(0., 20.);
+    chart.ylim(0., 20.);
     //graph.aspect_mode(AspectMode::View);
 
     figure.show();

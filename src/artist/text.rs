@@ -5,7 +5,10 @@ use essay_graphics::api::{
     TextStyle, Clip, FontFamily, FontStyle,
 };
 
-use crate::{frame::Data, chart::ConfigArc, data_artist_option_struct, path_style_options};
+use crate::{
+    chart::{ConfigArc, Data, LegendHandler}, 
+    data_artist_option_struct, path_style_options
+};
 
 use super::{artist::ToCanvas, Artist, ArtistHandle, PathStyle, PlotArtist};
 
@@ -243,7 +246,7 @@ impl PlotArtist for Text {
         TextOpt::new(artist)
     }
 
-    fn get_legend(&self) -> Option<crate::frame::LegendHandler> {
+    fn get_legend(&self) -> Option<LegendHandler> {
         None
     }
 }

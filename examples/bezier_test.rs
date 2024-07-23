@@ -1,6 +1,7 @@
 use essay_plot::{
     prelude::*,
-    artist::{patch::PathPatch, paths}, frame::Data, chart::{Chart, PlotOpt}, 
+    artist::{patch::PathPatch, paths}, 
+    chart::{Chart, Data, PlotOpt}, 
 };
 use essay_plot::api::{Point, Color, PathCode, Path, Angle};
 

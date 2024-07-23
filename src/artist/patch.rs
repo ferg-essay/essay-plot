@@ -5,7 +5,10 @@ use essay_graphics::api::{
     renderer::Renderer, Coord, Clip
 };
 
-use crate::{frame::{Data, LegendHandler}, chart::ConfigArc, data_artist_option_struct, path_style_options, transform_options};
+use crate::{
+    chart::{Data, LegendHandler, ConfigArc},
+    data_artist_option_struct, path_style_options, transform_options
+};
 
 use super::{paths, Artist, ArtistHandle, IntoArtist, PathStyle, PlotArtist, ToCanvas};
 

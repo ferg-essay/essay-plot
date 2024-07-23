@@ -8,7 +8,7 @@ use essay_tensor::Tensor;
 
 use crate::{
     artist::PathStyle, 
-    frame::{Data, LegendHandler}, 
+    chart::{Data, LegendHandler}, 
     data_artist_option_struct, path_style_options, chart::ConfigArc
 };
 

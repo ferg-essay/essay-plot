@@ -2,12 +2,11 @@ use essay_graphics::api::renderer::Renderer;
 use essay_graphics::api::{Canvas, Bounds, Point, Clip, PathOpt};
 use essay_tensor::Tensor;
 
-use crate::data_artist_option_struct;
-use crate::frame::LegendHandler;
-use crate::chart::ConfigArc;
-use crate::{frame::Data, artist::{Norms, Norm}};
-
-use super::{Artist, ArtistHandle, ColorMap, ColorMaps, PlotArtist, ToCanvas};
+use crate::{
+    artist::{Norms, Norm, Artist, ArtistHandle, ColorMap, ColorMaps, PlotArtist, ToCanvas},
+    chart::{ConfigArc, LegendHandler, Data},
+    data_artist_option_struct,
+};
 
 pub struct Image {
     data: Tensor,

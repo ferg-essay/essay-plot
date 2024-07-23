@@ -1,7 +1,7 @@
 use essay_graphics::api::{Point, Canvas, Bounds, renderer::Renderer, Clip, PathOpt, Color, CapStyle};
 use essay_tensor::{Tensor, init::linspace, tf32};
 
-use crate::frame::Data;
+use crate::chart::Data;
 
 use super::{Artist, grid_color::GridColor, paths, PathStyle, ToCanvas};
 

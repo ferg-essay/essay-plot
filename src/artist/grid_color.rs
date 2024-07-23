@@ -2,9 +2,9 @@ use essay_graphics::api::{renderer::Renderer, Affine2d, Bounds, Canvas, CapStyle
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{
-    frame::{Data, LegendHandler}, 
+    chart::{ConfigArc, Data, LegendHandler}, 
     artist::{Norm, Norms}, 
-    chart::ConfigArc, data_artist_option_struct
+    data_artist_option_struct
 };
 
 use super::{Artist, ArtistHandle, ColorMap, ColorMaps, PathStyle, PlotArtist, ToCanvas};

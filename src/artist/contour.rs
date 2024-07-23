@@ -1,7 +1,7 @@
 use essay_graphics::api::{Canvas, Bounds, Point, Clip, PathOpt, Path, renderer::Renderer};
 use essay_tensor::{Tensor, tensor::TensorVec, math::normalize_unit};
 
-use crate::{frame::Data, contour::ContourGenerator};
+use crate::{chart::Data, contour::ContourGenerator};
 
 use super::{Artist, ColorMap, ColorMaps, PathStyle, ToCanvas};
 

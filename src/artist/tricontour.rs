@@ -1,7 +1,7 @@
 use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, renderer::Renderer};
 use essay_tensor::{Tensor, math::normalize_unit};
 
-use crate::{frame::Data, contour::TriContourGenerator, tri::Triangulation};
+use crate::{chart::Data, contour::TriContourGenerator, tri::Triangulation};
 
 use super::{Artist, PathStyle, ToCanvas};
 

@@ -1,7 +1,10 @@
 use essay_graphics::api::{Coord, Canvas, Bounds, renderer::Renderer, Clip, PathOpt};
 
 use crate::{
-    artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, data_artist_option_struct, frame::{Data, LegendHandler}, path_style_options
+    artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, 
+    chart::{Data, LegendHandler}, 
+    data_artist_option_struct, 
+    path_style_options
 };
 
 data_artist_option_struct!(PlotOpt, PlotOptHandle<Data>);

@@ -6,7 +6,7 @@ use essay_graphics::{
 
 use crate::{
     artist::{Artist, IntoArtist, PlotArtist},
-    frame::{AspectMode, AxisOpt, Data, Frame, FrameArtist, FrameTextOpt}
+    chart::{AspectMode, AxisOpt, Data, Frame, FrameArtist, FrameTextOpt}
 };
 
 use super::{config::read_config, style::PlotOptHandle, ConfigArc, PlotOpt};

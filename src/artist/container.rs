@@ -3,7 +3,7 @@ use essay_graphics::api::{
     renderer::Renderer, Clip
 };
 
-use crate::{chart::ConfigArc, frame::{Data, LegendHandler}, data_artist_option_struct};
+use crate::{chart::{ConfigArc, Data, LegendHandler}, data_artist_option_struct};
 
 use super::{Artist, ArtistHandle, PathStyle, PlotArtist, StyleCycle, ToCanvas};
 

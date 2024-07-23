@@ -2,8 +2,8 @@ use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, renderer::Rendere
 use essay_tensor::Tensor;
 
 use crate::{
-    frame::{Data, LegendHandler}, 
-    chart::ConfigArc, data_artist_option_struct, path_style_options
+    chart::{Data, LegendHandler, ConfigArc}, 
+    data_artist_option_struct, path_style_options
 };
 
 use super::{paths, Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas};

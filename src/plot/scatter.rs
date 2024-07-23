@@ -8,8 +8,7 @@ use crate::{
     }, 
     data_artist_option_struct, 
     path_style_options,
-    frame::{Data, LegendHandler}, 
-    chart::{ConfigArc, Chart}, 
+    chart::{Data, LegendHandler, ConfigArc, Chart}, 
 };
 
 pub fn scatter(

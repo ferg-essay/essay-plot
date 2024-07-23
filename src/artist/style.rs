@@ -2,7 +2,7 @@ use core::fmt;
 
 use essay_graphics::api::{path_opt::Hatch, CapStyle, Color, JoinStyle, LineStyle, PathOpt, TextureId};
 
-use crate::graph::Config;
+use crate::chart::Config;
 
 use super::Markers;
 

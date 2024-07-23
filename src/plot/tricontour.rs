@@ -1,9 +1,9 @@
 use essay_tensor::Tensor;
 
-use crate::{graph::Graph, artist::TriContour, tri::Triangulation};
+use crate::{chart::Chart, artist::TriContour, tri::Triangulation};
 
 pub fn tricontour(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     tri: impl Into<Triangulation>,
     data: impl Into<Tensor>,
 ) {

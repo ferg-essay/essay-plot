@@ -4,7 +4,7 @@ use essay_tensor::Tensor;
 
 use crate::data_artist_option_struct;
 use crate::frame::LegendHandler;
-use crate::graph::ConfigArc;
+use crate::chart::ConfigArc;
 use crate::{frame::Data, artist::{Norms, Norm}};
 
 use super::{Artist, ArtistHandle, ColorMap, ColorMaps, PlotArtist, ToCanvas};

@@ -3,7 +3,7 @@ use essay_tensor::Tensor;
 
 use crate::{
     frame::{Data, LegendHandler}, 
-    graph::ConfigArc, data_artist_option_struct, path_style_options
+    chart::ConfigArc, data_artist_option_struct, path_style_options
 };
 
 use super::{paths, Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas};

@@ -10,7 +10,7 @@ use essay_graphics::api::{
 use crate::{
     artist::{PathStyle, Markers}, 
     frame::{Data, LegendHandler}, 
-    graph::ConfigArc,
+    chart::ConfigArc,
     data_artist_option_struct, path_style_options
 };
 

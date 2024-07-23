@@ -1,6 +1,6 @@
 use essay_plot::{
     prelude::*, artist::patch::PathPatch, 
-    graph::{Graph, PlotOpt}
+    chart::{Chart, PlotOpt}
 };
 use essay_plot::api::{Point, PathCode, Path};
 use essay_tensor::init::linspace;
@@ -9,7 +9,7 @@ fn main() {
     //let mut gui = WgpuBackend::new();
 
     let mut figure = Figure::new();
-    let mut graph = figure.graph([1., 1.]);
+    let mut graph = figure.chart([1., 1.]);
 
     //let x = linspace(0., 2. * PI, 30);
     //let y = x.sin();
@@ -157,7 +157,7 @@ fn main() {
 }
 
 pub fn plot_quad(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     p0: impl Into<Point>,
     p1: impl Into<Point>,
     p2: impl Into<Point>,
@@ -172,7 +172,7 @@ pub fn plot_quad(
 }
 
 pub fn plot_line(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     p0: impl Into<Point>,
     p1: impl Into<Point>,
     p2: impl Into<Point>,

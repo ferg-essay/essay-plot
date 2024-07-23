@@ -1,10 +1,10 @@
 use essay_graphics::api::{Angle, Point};
 use essay_tensor::Tensor;
 
-use crate::{artist::{patch, Container, ContainerOpt}, graph::Graph};
+use crate::{artist::{patch, Container, ContainerOpt}, chart::Chart};
 
 pub fn pie(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     x: impl Into<Tensor>, 
 ) -> ContainerOpt {
     let x = x.into();

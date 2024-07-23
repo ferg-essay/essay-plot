@@ -1,9 +1,9 @@
 use essay_tensor::Tensor;
 
-use crate::{artist::{Image, ImageOpt}, graph::Graph};
+use crate::{artist::{Image, ImageOpt}, chart::Chart};
 
 pub fn image(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     data: impl Into<Tensor>,
 ) -> ImageOpt {
     let image = Image::new(data);

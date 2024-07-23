@@ -1,9 +1,9 @@
 use essay_tensor::{init::linspace, Tensor};
 
-use crate::{artist::{Lines2d, LinesOpt}, graph::Graph};
+use crate::{artist::{Lines2d, LinesOpt}, chart::Chart};
 
 pub fn plot(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     x: impl Into<Tensor>, 
     y: impl Into<Tensor>, 
 ) -> LinesOpt {
@@ -14,7 +14,7 @@ pub fn plot(
 }
 
 pub fn plot_y(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     y: impl Into<Tensor>, 
 ) -> LinesOpt {
     let y = y.into();

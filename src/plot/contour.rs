@@ -1,9 +1,9 @@
 use essay_tensor::Tensor;
 
-use crate::{graph::Graph, artist::{Contour}};
+use crate::{chart::Chart, artist::{Contour}};
 
 pub fn contour(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     data: impl Into<Tensor>,
 ) {
     let contour = Contour::new(data);

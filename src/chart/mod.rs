@@ -1,15 +1,11 @@
 mod style;
 mod config;
 mod figure;
-pub mod graph;
+pub mod chart;
 
-pub use graph::{
-    Graph,
-};
+pub use chart::Chart;
 
-pub use figure::{
-    Figure, GraphId,
-};
+pub use figure::Figure;
 
 pub use config::{
     Config, ConfigArc,

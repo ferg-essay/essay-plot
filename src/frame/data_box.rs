@@ -4,7 +4,7 @@ use essay_graphics::{api::{
     renderer::Renderer, Affine2d, Bounds, Canvas, Event, Clip, Coord, PathOpt, Point
 }, layout::View};
 
-use crate::{artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, graph::{Config, ConfigArc}};
+use crate::{artist::{Artist, ArtistHandle, PathStyle, PlotArtist, ToCanvas}, chart::{Config, ConfigArc}};
 
 use super::{plot_container::PlotContainer, ArtistId, Frame, LegendHandler};
 

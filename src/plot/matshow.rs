@@ -1,9 +1,9 @@
 use essay_tensor::Tensor;
 
-use crate::{graph::Graph, artist::Image};
+use crate::{chart::Chart, artist::Image};
 
 pub fn matshow(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     data: impl Into<Tensor>,
 ) {
     let matplot = Image::new(data);

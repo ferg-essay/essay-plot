@@ -1,5 +1,3 @@
-use core::fmt;
-
 use essay_graphics::{
     api::{renderer::Drawable, Bounds, Event},
     layout::{Layout, View}, 
@@ -13,12 +11,12 @@ use crate::{
 
 use super::{config::read_config, style::PlotOptHandle, ConfigArc, PlotOpt};
 
-pub struct GraphBuilder {
+pub struct ChartBuilder {
     config: ConfigArc,
     layout: Layout,
 }
 
-impl GraphBuilder {
+impl ChartBuilder {
     pub fn new(layout: Layout) -> Self {
         Self {
             config: read_config().into_arc(),
@@ -27,8 +25,8 @@ impl GraphBuilder {
         }
     }
 
-    pub fn graph(&mut self, pos: impl Into<Bounds<Layout>>) -> Graph {
-        Graph::new(self.layout.view(pos, Frame::new(&self.config)))
+    pub fn chart(&mut self, pos: impl Into<Bounds<Layout>>) -> Chart {
+        Chart::new(self.layout.view(pos, Frame::new(&self.config)))
     }
 
     #[inline]
@@ -55,54 +53,23 @@ impl GraphBuilder {
 }
 
 #[derive(Clone)]
-pub struct Graph {
-    //id: GraphId,
-    //frame_id: FrameId,
-
-    //layout: LayoutArc,
+pub struct Chart {
     view: View<Frame>,
 }
 
-impl Graph {
-    /*
-    pub(crate) fn new(id: GraphId, frame_id: FrameId, layout: LayoutArc) -> Self {
-        let mut graph = Self {
-            id,
-            frame_id, 
-            layout,
-        };
-
-        graph.default_properties();
-
-        graph
-    }
-    */
+impl Chart {
     pub(crate) fn new(view: View<Frame>) -> Self {
-        let mut graph = Self {
+        let mut chart = Self {
             view
         };
 
-        graph.default_properties();
+        chart.default_properties();
 
-        graph
+        chart
     }
-
-    /*
-    #[inline]
-    pub fn id(&self) -> GraphId {
-        self.id
-    }
-
-    #[inline]
-    pub fn frame_id(&self) -> FrameId {
-        self.frame_id
-    }
-    */
 
     fn text_opt(&self, artist: FrameArtist) -> FrameTextOpt {
         FrameTextOpt::new(self.view.clone(), artist)
-        // let layout = self.layout.clone();
-        // self.layout.read(|l| l.frame(self.frame_id).text_opt(layout, artist))
     }
 
     pub fn title(&mut self, label: &str) -> FrameTextOpt {
@@ -195,15 +162,6 @@ impl Graph {
         self.artist(PlotOptHandle::new(artist))
     }
 
-    /*
-    pub fn artist<'a, A>(
-        &mut self, 
-        artist: A,
-    ) -> A::Opt 
-    where
-        A: PlotArtist<Data> + 'static
-    */
-
     pub fn artist<'a, A>(
         &mut self, 
         artist: A,
@@ -220,28 +178,5 @@ impl Graph {
 
             f.data_mut().add_artist(artist, &config, view_clone)
         })
-
-        /*
-        let plot_id = PlotId::new(
-            self.view.clone(),
-            id
-        );
-
-        self.view.write(|frame| {
-            let config = frame.config().clone();
-
-            frame.data_mut()
-                .artist_mut::<A::Artist>(id)
-                .config(&config, plot_id)
-                */
-
-                /*
-            layout
-                .frame_mut(id.frame())
-                .data_mut()
-                .artist_mut::<A::Artist>(id)
-                .config(&config, plot_id)
-                */
-        // })
     }
 }

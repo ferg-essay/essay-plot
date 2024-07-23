@@ -6,44 +6,42 @@ use essay_graphics::api::{
     Bounds, Point,
 };
 
-use crate::graph::Graph; // , frame::{Layout, LayoutArc}};
+use crate::chart::Chart; // , frame::{Layout, LayoutArc}};
 
-use super::graph::GraphBuilder;
+use super::chart::ChartBuilder;
 
 pub struct Figure {
     size: (f32, f32),
     dpi: f32,
 
-    device: Box<dyn Backend>,
-    graphs: GraphBuilder,
+    backend: Box<dyn Backend>,
+    charts: ChartBuilder,
 }
 
 impl Figure {
     pub fn new() -> Self {
         Self {
-            // inner: Arc::new(Mutex::new(FigureInner::new())),
-            // inner: FigureInner::new(),
-            device: Box::new(WgpuBackend::new()),
-            graphs: GraphBuilder::new(Layout::new()),
+            backend: Box::new(WgpuBackend::new()),
+            charts: ChartBuilder::new(Layout::new()),
 
             size: (6.4, 4.8),
             dpi: 200.,
         }
     }
 
-    pub fn graph(&mut self, pos: impl Into<Bounds<Layout>>) -> Graph {
-        self.graphs.graph(pos)
+    pub fn chart(&mut self, pos: impl Into<Bounds<Layout>>) -> Chart {
+        self.charts.chart(pos)
     }
 
-    pub fn poly_graphs<'a, R: PolyRow<'a>>(&'a mut self, _layout: R) -> R::Item {
+    pub fn poly_charts<'a, R: PolyRow<'a>>(&'a mut self, _layout: R) -> R::Item {
         todo!()
         //let mut row = 0;
         //R::axes(self, layout, &mut row)
     }
 
     pub fn show(self) {
-        let layout = self.graphs.into_layout();
-        let mut device = self.device;
+        let layout = self.charts.into_layout();
+        let mut device = self.backend;
 
         device.main_loop(Box::new(layout)).unwrap();
     }
@@ -75,9 +73,9 @@ impl Figure {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct GraphId(usize);
+pub struct ChartId(usize);
 
-impl GraphId {
+impl ChartId {
     #[inline]
     pub fn index(&self) -> usize {
         self.0
@@ -97,7 +95,7 @@ pub trait PolyCol<'a> {
 }
 
 impl<'a> PolyRow<'a> for [usize; 0] {
-    type Item = GraphId;
+    type Item = ChartId;
 
     fn axes(figure: &'a mut Figure, _layout: Self, row: &mut Counter) -> Self::Item {
         PolyRow::axes(figure, [1, 1], row)
@@ -105,7 +103,7 @@ impl<'a> PolyRow<'a> for [usize; 0] {
 }
 
 impl<'a> PolyRow<'a> for [usize; 1] {
-    type Item = GraphId;
+    type Item = ChartId;
 
     fn axes(figure: &'a mut Figure, layout: Self, row: &mut Counter) -> Self::Item {
         PolyRow::axes(figure, [layout[0], 1], row)
@@ -113,7 +111,7 @@ impl<'a> PolyRow<'a> for [usize; 1] {
 }
 
 impl<'a> PolyRow<'a> for [usize; 2] {
-    type Item = GraphId;
+    type Item = ChartId;
 
     fn axes(_figure: &'a mut Figure, _layout: Self, _row: &mut Counter) -> Self::Item {
         todo!()
@@ -134,7 +132,7 @@ impl<'a> PolyRow<'a> for [usize; 2] {
 }
 
 impl<'a> PolyCol<'a> for [usize; 0] {
-    type Item = Graph;
+    type Item = Chart;
 
     fn axes(figure: &'a mut Figure, _layout: Self, row: usize, col: &mut Counter) -> Self::Item {
         PolyCol::axes(figure, [1], row, col)
@@ -142,12 +140,12 @@ impl<'a> PolyCol<'a> for [usize; 0] {
 }
 
 impl<'a> PolyCol<'a> for [usize; 1] {
-    type Item = Graph;
+    type Item = Chart;
 
     fn axes(figure: &'a mut Figure, layout: Self, row: usize, col: &mut Counter) -> Self::Item {
         let cols = layout[0];
 
-        let axes = figure.graph(Bounds::new(
+        let axes = figure.chart(Bounds::new(
             Point(col.0 as f32, row as f32), 
             Point((col.0 + cols) as f32, row as f32),
         ));
@@ -159,12 +157,12 @@ impl<'a> PolyCol<'a> for [usize; 1] {
 }
 
 impl<'a> PolyCol<'a> for [usize; 2] {
-    type Item = Graph;
+    type Item = Chart;
 
     fn axes(figure: &'a mut Figure, layout: Self, row: usize, col: &mut Counter) -> Self::Item {
         let cols = layout[0];
 
-        let axes = figure.graph(Bounds::new(
+        let axes = figure.chart(Bounds::new(
             Point(col.0 as f32, row as f32), 
             Point((col.0 + cols) as f32, row as f32),
         ));

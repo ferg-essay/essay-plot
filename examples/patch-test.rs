@@ -2,7 +2,7 @@ use essay_plot::{prelude::*, artist::patch::{Patch, self}, frame::Data};
 
 fn main() { 
     let mut figure = Figure::new();
-    let mut graph = figure.graph(());
+    let mut graph = figure.chart(());
 
     let path = Path::<Data>::new(vec![
         PathCode::MoveTo(Point(1., 1.)),

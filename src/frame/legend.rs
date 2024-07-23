@@ -3,7 +3,7 @@ use essay_graphics::api::{
     PathCode, Path, Point, TextStyle, VertAlign, HorizAlign
 };
 
-use crate::{artist::{Artist, PathStyle, StyleCycle, ToCanvas}, graph::Config};
+use crate::{artist::{Artist, PathStyle, StyleCycle, ToCanvas}, chart::Config};
 
 use super::data_box::DataBox;
 

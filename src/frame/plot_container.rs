@@ -2,7 +2,7 @@ use std::{any::Any, marker::PhantomData};
 
 use essay_graphics::api::{Coord, Bounds, renderer::Renderer, Canvas, PathOpt, Clip, Point};
 
-use crate::{artist::{Artist, StyleCycle, PlotArtist, ToCanvas}, graph::Config};
+use crate::{artist::{Artist, StyleCycle, PlotArtist, ToCanvas}, chart::Config};
 
 use super::{legend::LegendHandler, ArtistId, Data};
 

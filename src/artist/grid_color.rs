@@ -4,7 +4,7 @@ use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 use crate::{
     frame::{Data, LegendHandler}, 
     artist::{Norm, Norms}, 
-    graph::ConfigArc, data_artist_option_struct
+    chart::ConfigArc, data_artist_option_struct
 };
 
 use super::{Artist, ArtistHandle, ColorMap, ColorMaps, PathStyle, PlotArtist, ToCanvas};

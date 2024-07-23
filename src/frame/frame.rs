@@ -12,7 +12,7 @@ use crate::{
     artist::{
         patch::CanvasPatch, paths, Artist, Colorbar, PathStyle, TextCanvas, ToCanvas
     }, 
-    graph::{Config, ConfigArc}
+    chart::{Config, ConfigArc}
 };
 
 use super::{data_box::DataBox, axis::{Axis, AxisTicks, XAxis, YAxis}, legend::Legend};

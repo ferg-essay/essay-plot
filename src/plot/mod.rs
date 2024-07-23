@@ -1,6 +1,6 @@
 use essay_graphics::api::Point;
 use essay_tensor::Tensor;
-use crate::{artist::{ContainerOpt, ImageOpt, LinesOpt, TextOpt}, graph::Graph};
+use crate::{artist::{ContainerOpt, ImageOpt, LinesOpt, TextOpt}, chart::Chart};
 
 mod bar;
 mod contour;
@@ -51,7 +51,7 @@ pub use triplot::triplot;
 
 use self::specgram::SpecGramOpt;
 
-impl Graph {
+impl Chart {
     pub fn image(
         &mut self, 
         y: impl Into<Tensor>,

@@ -1,9 +1,9 @@
 use essay_tensor::Tensor;
 
-use crate::{graph::Graph, artist::{Histogram, HistogramOpt}};
+use crate::{chart::Chart, artist::{Histogram, HistogramOpt}};
 
 pub fn hist(
-    graph: &mut Graph,
+    graph: &mut Chart,
     data: impl Into<Tensor>,
 ) -> HistogramOpt {
     let histogram = Histogram::new(data);
@@ -11,7 +11,7 @@ pub fn hist(
     graph.artist(histogram)
 }
 
-impl Graph {
+impl Chart {
     pub fn hist(&mut self, data: impl Into<Tensor>) -> HistogramOpt {
         hist(self, data)
     }

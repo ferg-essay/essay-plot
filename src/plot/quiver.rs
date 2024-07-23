@@ -1,9 +1,9 @@
 use essay_tensor::Tensor;
 
-use crate::{graph::Graph, artist::{Quiver, QuiverOpt}};
+use crate::{chart::Chart, artist::{Quiver, QuiverOpt}};
 
 pub fn quiver(
-    graph: &mut Graph,
+    graph: &mut Chart,
     x: impl Into<Tensor>,
     y: impl Into<Tensor>,
     u: impl Into<Tensor>,
@@ -14,7 +14,7 @@ pub fn quiver(
     graph.artist(quiver)
 }
 
-impl Graph {
+impl Chart {
     pub fn quiver(
         &mut self, 
         x: impl Into<Tensor>,

@@ -1,9 +1,9 @@
 use essay_tensor::Tensor;
 
-use crate::{graph::Graph, artist::{Bar, BarOpt}};
+use crate::{chart::Chart, artist::{Bar, BarOpt}};
 
 pub fn bar(
-    graph: &mut Graph,
+    graph: &mut Chart,
     data: impl Into<Tensor>,
 ) -> BarOpt {
     let bar = Bar::new(data);
@@ -11,7 +11,7 @@ pub fn bar(
     graph.artist(bar)
 }
 
-impl Graph {
+impl Chart {
     pub fn bar(&mut self, data: impl Into<Tensor>) -> BarOpt {
         bar(self, data)
     }

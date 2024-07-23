@@ -1,6 +1,6 @@
 use essay_plot::{
     prelude::*,
-    artist::{patch::PathPatch, paths}, frame::Data, graph::{Graph, PlotOpt}, 
+    artist::{patch::PathPatch, paths}, frame::Data, chart::{Chart, PlotOpt}, 
 };
 use essay_plot::api::{Point, Color, PathCode, Path, Angle};
 
@@ -9,7 +9,7 @@ fn main() {
     //let mut gui = WgpuBackend::new();
 
     let mut figure = Figure::new();
-    let mut graph = figure.graph([1., 1.]);
+    let mut graph = figure.chart([1., 1.]);
 
     let test = Tests::WEDGE;
 
@@ -167,7 +167,7 @@ impl Tests {
 }
 
 pub fn bezier3(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     p0: impl Into<Point>,
     p1: impl Into<Point>,
     p2: impl Into<Point>,
@@ -178,7 +178,7 @@ pub fn bezier3(
 }
 
 pub fn bezier2(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     p0: impl Into<Point>,
     p1: impl Into<Point>,
     p2: impl Into<Point>,
@@ -190,7 +190,7 @@ pub fn bezier2(
 }
 
 pub fn bezier2_poly(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     p0: impl Into<Point>,
     p1: impl Into<Point>,
     p2: impl Into<Point>,
@@ -205,7 +205,7 @@ pub fn bezier2_poly(
 }
 
 pub fn plot_quad(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     p0: impl Into<Point>,
     p1: impl Into<Point>,
     p2: impl Into<Point>,
@@ -220,7 +220,7 @@ pub fn plot_quad(
 }
 
 pub fn plot_line(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     p0: impl Into<Point>,
     p1: impl Into<Point>,
     p2: impl Into<Point>,

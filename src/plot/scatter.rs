@@ -9,11 +9,11 @@ use crate::{
     data_artist_option_struct, 
     path_style_options,
     frame::{Data, LegendHandler}, 
-    graph::{ConfigArc, Graph}, 
+    chart::{ConfigArc, Chart}, 
 };
 
 pub fn scatter(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     x: impl Into<Tensor>, 
     y: impl Into<Tensor>, 
 ) -> ScatterOpt {

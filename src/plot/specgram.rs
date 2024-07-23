@@ -1,10 +1,10 @@
 use essay_graphics::api::{renderer::Renderer, Bounds, Canvas, Clip, PathOpt};
 use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 
-use crate::{artist::{Artist, ArtistHandle, ColorMap, ColorMaps, GridColor, Norm, Norms, PlotArtist, Shading, ToCanvas}, data_artist_option_struct, frame::{Data, LegendHandler}, graph::{ConfigArc, Graph}};
+use crate::{artist::{Artist, ArtistHandle, ColorMap, ColorMaps, GridColor, Norm, Norms, PlotArtist, Shading, ToCanvas}, data_artist_option_struct, frame::{Data, LegendHandler}, chart::{ConfigArc, Chart}};
 
 pub fn specgram(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     y: impl Into<Tensor>, 
 ) -> SpecGramOpt {
     let y = y.into();

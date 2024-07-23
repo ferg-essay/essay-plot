@@ -5,7 +5,7 @@ use essay_graphics::api::{
     TextStyle, Clip, FontFamily, FontStyle,
 };
 
-use crate::{frame::Data, graph::ConfigArc, data_artist_option_struct, path_style_options};
+use crate::{frame::Data, chart::ConfigArc, data_artist_option_struct, path_style_options};
 
 use super::{artist::ToCanvas, Artist, ArtistHandle, PathStyle, PlotArtist};
 

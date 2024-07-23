@@ -1,7 +1,7 @@
 pub mod tri;
 pub mod contour;
 pub mod macros;
-pub mod graph;
+pub mod chart;
 pub mod artist;
 pub mod frame;
 pub mod plot;
@@ -15,7 +15,7 @@ pub mod wgpu {
 }
 
 pub mod prelude {
-    pub use crate::graph::Figure;
+    pub use crate::chart::Figure;
     // pub use crate::plot::{Plot, PlotOpt};
 
     pub use crate::api::*;

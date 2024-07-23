@@ -1,9 +1,9 @@
 use essay_tensor::Tensor;
 
-use crate::{artist::{Stem, StemOpt}, graph::{Graph}};
+use crate::{artist::{Stem, StemOpt}, chart::{Chart}};
 
 pub fn stem(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     x: impl Into<Tensor>, 
     y: impl Into<Tensor>, 
 ) -> StemOpt {

@@ -3,11 +3,11 @@ use essay_tensor::Tensor;
 
 use crate::{
     artist::patch::PathPatch, 
-    graph::{Graph, PlotOpt}, 
+    chart::{Chart, PlotOpt}, 
 };
 
 pub fn fill_between(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     x: impl Into<Tensor>, 
     y1: impl Into<Tensor>, 
     y2: impl Into<Tensor>, 

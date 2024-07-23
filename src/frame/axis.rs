@@ -4,7 +4,7 @@ use essay_graphics::api::{
 
 use crate::{
     artist::{PathStyle, TextCanvas, Artist, patch::CanvasPatch, paths, ToCanvas}, 
-    graph::Config, frame_option_struct, path_style_options
+    chart::Config, frame_option_struct, path_style_options
 };
 
 use super::{

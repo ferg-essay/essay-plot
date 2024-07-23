@@ -1,9 +1,9 @@
 use essay_tensor::Tensor;
 
-use crate::{graph::Graph, artist::TriPlot};
+use crate::{chart::Chart, artist::TriPlot};
 
 pub fn triplot(
-    graph: &mut Graph, 
+    graph: &mut Chart, 
     data: impl Into<Tensor>,
 ) {
     let triplot = TriPlot::new(data);

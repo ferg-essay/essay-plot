@@ -1,9 +1,9 @@
 use essay_tensor::Tensor;
 
-use crate::{graph::Graph, artist::{GridColor, GridColorOpt}};
+use crate::{chart::Chart, artist::{GridColor, GridColorOpt}};
 
 pub fn grid_color(
-    graph: &mut Graph,
+    graph: &mut Chart,
     data: impl Into<Tensor>,
 ) -> GridColorOpt {
     let colormesh = GridColor::new(data);
@@ -11,7 +11,7 @@ pub fn grid_color(
     graph.artist(colormesh)
 }
 
-impl Graph {
+impl Chart {
     pub fn grid_color(&mut self, data: impl Into<Tensor>) -> GridColorOpt {
         grid_color(self, data)
     }

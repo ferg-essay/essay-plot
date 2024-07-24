@@ -272,18 +272,18 @@ impl ChartFrame {
         self.legend.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
     }
 
-    pub fn title(&mut self, text: &str) -> &mut TextCanvas {
+    pub fn _title(&mut self, text: &str) -> &mut TextCanvas {
         self.title.label(text);
 
         &mut self.title
     }
 
-    pub fn xlabel(&mut self, text: &str) -> &mut TextCanvas {
-        self.bottom.title(text)
+    pub fn _xlabel(&mut self, text: &str) -> &mut TextCanvas {
+        self.bottom._title(text)
     }
 
-    pub fn ylabel(&mut self, text: &str) -> &mut TextCanvas {
-        self.left.label(text)
+    pub fn _ylabel(&mut self, text: &str) -> &mut TextCanvas {
+        self.left._label(text)
     }
 }
 
@@ -519,7 +519,7 @@ impl BottomFrame {
         self.title.draw(renderer, to_canvas, clip, style);
     }
 
-    fn title(&mut self, text: &str) -> &mut TextCanvas {
+    fn _title(&mut self, text: &str) -> &mut TextCanvas {
         self.title.label(text)
     }
 
@@ -586,7 +586,7 @@ impl LeftFrame {
         self.title.draw(renderer, to_canvas, clip, style);
     }
 
-    fn label(&mut self, text: &str) -> &mut TextCanvas {
+    fn _label(&mut self, text: &str) -> &mut TextCanvas {
         self.title.label(text)
     }
 

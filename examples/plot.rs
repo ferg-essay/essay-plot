@@ -5,7 +5,7 @@ fn main() {
     let mut figure = Figure::new();
     let mut chart = figure.chart(());
 
-    chart.title("My Title").color(0x008033).size(18.);
+    chart.title("My Title").color("dark teal").size(18.);
 
     let x = linspace(0., 6.28, 20);
 

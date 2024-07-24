@@ -1,6 +1,5 @@
 use essay_graphics::api::{
-    Bounds, Canvas, Clip, PathOpt, renderer::Renderer, 
-    PathCode, Path, Point, TextStyle, VertAlign, HorizAlign
+    renderer::{Canvas, Renderer}, Bounds, Clip, HorizAlign, Path, PathCode, PathOpt, Point, TextStyle, VertAlign
 };
 
 use crate::{artist::{Artist, PathStyle, StyleCycle, ToCanvas}, chart::Config};

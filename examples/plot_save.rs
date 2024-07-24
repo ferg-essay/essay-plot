@@ -8,8 +8,13 @@ use essay_plot::{
 use essay_tensor::{prelude::*, init::{linspace, meshgrid}};
 
 fn main() {
-//    main_plot();
-    main_plot2();
+    let t = 0;
+    match t {
+        0 => main_plot(),
+        1 => main_plot2(),
+        2 => main_grid(),
+        _ => main_plot(),
+    }
 }
 
 fn main_plot() {
@@ -99,9 +104,6 @@ fn main_plot2() {
 
     graph4.title("Timeout");
     graph4.plot(&x, &odor).label("odor");
-    let failure = tf32!([
-        1., 1., 1., 1.,
-    ]);
     graph4.plot(&x2, &failure2).label("LTD");
 
     let x3 = tf32!([

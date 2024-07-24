@@ -3,8 +3,7 @@ use core::fmt;
 use essay_tensor::{Tensor, array::Axis};
 
 use essay_graphics::api::{
-    Bounds, Point, Canvas, Path, PathCode, PathOpt,
-    renderer::Renderer, Clip
+    renderer::{Canvas, Renderer}, Bounds, Clip, Path, PathCode, PathOpt, Point
 };
 
 use crate::{

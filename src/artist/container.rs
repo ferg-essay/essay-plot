@@ -1,6 +1,5 @@
 use essay_graphics::api::{
-    Bounds, Coord, Canvas, PathOpt,
-    renderer::Renderer, Clip
+    renderer::{Canvas, Renderer}, Bounds, Clip, Coord, PathOpt
 };
 
 use crate::{chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, data_artist_option_struct};

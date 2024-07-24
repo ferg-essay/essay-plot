@@ -1,8 +1,7 @@
 use core::fmt;
 
 use essay_graphics::api::{
-    PathOpt, Point, Affine2d, Bounds, Canvas, Path, Angle,
-    renderer::Renderer, Coord, Clip
+    renderer::{Canvas, Renderer}, Affine2d, Angle, Bounds, Clip, Coord, Path, PathOpt, Point
 };
 
 use crate::{

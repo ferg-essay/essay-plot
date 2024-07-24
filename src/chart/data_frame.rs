@@ -3,7 +3,7 @@ use std::{any::Any, marker::PhantomData};
 
 use essay_graphics::{
     api::{
-        renderer::Renderer, Affine2d, Bounds, Canvas, Event, Clip, Coord, PathOpt, Point
+        renderer::{Canvas, Event, Renderer}, Affine2d, Bounds, Clip, Coord, PathOpt, Point
     }, 
     layout::View
 };

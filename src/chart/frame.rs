@@ -2,8 +2,8 @@ use std::f32::consts::PI;
 
 use essay_graphics::{
     api::{
-        renderer::{Drawable, Renderer}, 
-        Affine2d, Bounds, Canvas, Event, Clip, Color, PathOpt, Point, VertAlign 
+        renderer::{Canvas, Drawable, Event, Renderer}, 
+        Affine2d, Bounds, Clip, Color, PathOpt, Point, VertAlign 
     }, 
     layout::View
 };
@@ -359,7 +359,7 @@ impl Drawable for ChartFrame {
         }
     }
 
-    fn draw(&mut self, renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
+    fn draw(&mut self, renderer: &mut dyn Renderer) {
         let clip = Clip::from(&self.pos);
 
         let frame_to_canvas = ToCanvas::new(

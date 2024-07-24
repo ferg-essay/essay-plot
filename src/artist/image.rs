@@ -1,5 +1,5 @@
-use essay_graphics::api::renderer::Renderer;
-use essay_graphics::api::{Canvas, Bounds, Point, Clip, PathOpt};
+use essay_graphics::api::renderer::{Canvas, Renderer};
+use essay_graphics::api::{Bounds, Point, Clip, PathOpt};
 use essay_tensor::Tensor;
 
 use crate::chart::ArtistView;

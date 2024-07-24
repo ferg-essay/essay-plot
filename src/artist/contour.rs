@@ -1,4 +1,4 @@
-use essay_graphics::api::{Canvas, Bounds, Point, Clip, PathOpt, Path, renderer::Renderer};
+use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, Clip, Path, PathOpt, Point};
 use essay_tensor::{Tensor, tensor::TensorVec, math::normalize_unit};
 
 use crate::{chart::Data, contour::ContourGenerator};

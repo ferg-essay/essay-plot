@@ -1,10 +1,8 @@
 use std::ops::Deref;
 
 use essay_graphics::api::{
-    renderer::Renderer, Affine2d, Bounds, Canvas, Event, Clip, Coord, PathOpt
+    renderer::{Canvas, Event, Renderer}, Affine2d, Bounds, Clip, Coord, PathOpt
 };
-
-use crate::chart::{ArtistView, ConfigArc, Data, LegendHandler};
 
 pub trait Artist<M: Coord> : Send {
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);

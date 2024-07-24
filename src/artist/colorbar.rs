@@ -1,4 +1,4 @@
-use essay_graphics::api::{Point, Canvas, Bounds, renderer::Renderer, Clip, PathOpt, Color, CapStyle};
+use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, CapStyle, Clip, Color, PathOpt, Point};
 use essay_tensor::{Tensor, init::linspace, tf32};
 
 use crate::chart::Data;

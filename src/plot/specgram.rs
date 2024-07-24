@@ -1,4 +1,4 @@
-use essay_graphics::api::{renderer::Renderer, Bounds, Canvas, Clip, PathOpt};
+use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, Clip, PathOpt};
 use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 
 use crate::{

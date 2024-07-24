@@ -1,4 +1,4 @@
-use essay_graphics::api::{Canvas, Bounds, Clip, PathOpt, Path, renderer::Renderer};
+use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, Clip, Path, PathOpt};
 use essay_tensor::Tensor;
 
 use crate::{

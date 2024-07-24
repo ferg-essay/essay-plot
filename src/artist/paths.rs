@@ -1,6 +1,6 @@
 use std::f32::consts::{PI, TAU};
 
-use essay_graphics::api::{Angle, Coord, Path, PathCode, Point, Canvas, Bounds};
+use essay_graphics::api::{renderer::Canvas, Angle, Bounds, Coord, Path, PathCode, Point};
 use essay_tensor::{init::linspace, tensor::TensorVec};
 
 ///

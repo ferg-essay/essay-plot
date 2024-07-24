@@ -1,8 +1,5 @@
 use essay_graphics::api::{
-    Bounds, Point, Canvas,
-    PathOpt,
-    renderer::Renderer, 
-    TextStyle, Clip, FontFamily, FontStyle,
+    renderer::{Canvas, Renderer}, Bounds, Clip, FontFamily, FontStyle, PathOpt, Point, TextStyle
 };
 
 use crate::{
@@ -86,10 +83,12 @@ impl Artist<Canvas> for TextCanvas {
         self.extent.clone()
     }
 
-    fn resize(&mut self, renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.extent = match &self.text {
             None => Bounds::zero(),
             Some(text) => {
+                self.pos = pos.clone();
+
                 let size = match self.text_style.get_size() {
                     Some(size) => *size,
                     None => TextStyle::SIZE_DEFAULT,

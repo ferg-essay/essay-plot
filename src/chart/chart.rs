@@ -28,6 +28,10 @@ impl ChartBuilder {
         Chart::new(self.layout.view(pos, ChartFrame::new(&self.config)))
     }
 
+    pub fn get_layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
+    }
+
     pub fn into_layout(self) -> Layout {
         self.layout
     }

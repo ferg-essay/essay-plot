@@ -3,7 +3,8 @@ use core::fmt;
 use essay_tensor::{Tensor, array::Axis};
 
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer}, Bounds, Clip, Path, PathCode, PathOpt, Point
+    renderer::{Canvas, Renderer, Result}, 
+    Bounds, Path, PathCode, PathOpt, Point
 };
 
 use crate::{
@@ -91,20 +92,19 @@ impl Artist<Data> for Stem {
         &mut self, 
         renderer: &mut dyn Renderer, 
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let line_style = self.line_style.push(style);
 
         for path in &self.paths {
             let path = path.transform(&to_canvas);
-            renderer.draw_path(&path, &line_style, clip).unwrap();
+            renderer.draw_path(&path, &line_style)?;
         }
         
         if let Some(markers) = &mut self.markers {
             let marker_style = self.marker_style.push(style);
 
-            markers.draw(renderer, to_canvas, clip, &marker_style);
+            markers.draw(renderer, to_canvas, &marker_style)?;
         }
 
         let baseline = Path::<Data>::new(vec![
@@ -115,8 +115,7 @@ impl Artist<Data> for Stem {
         let baseline: Path<Canvas> = baseline.transform(&to_canvas);
         let baseline_style = self.baseline_style.push(style);
 
-        renderer.draw_path(&baseline, &baseline_style, clip).unwrap();
-
+        renderer.draw_path(&baseline, &baseline_style)
     }
 }
 
@@ -143,11 +142,11 @@ impl PlotArtist for Stem {
                         [bounds.xmin(), bounds.ymid()],
                         [bounds.xmax(), bounds.ymid()],
                     ]);
+
                     renderer.draw_path(
                         &line,
                         &style.push(parent_style), 
-                        &Clip::None
-                    ).unwrap();
+                    )
                 }))
             },
             None => None,

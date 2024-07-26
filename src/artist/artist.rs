@@ -1,7 +1,8 @@
 use std::ops::Deref;
 
 use essay_graphics::api::{
-    renderer::{Canvas, Event, Renderer}, Affine2d, Bounds, Clip, Coord, PathOpt
+    renderer::{Canvas, Event, Renderer, Result}, 
+    Affine2d, Bounds, Coord, PathOpt
 };
 
 pub trait Artist<M: Coord> : Send {
@@ -13,9 +14,8 @@ pub trait Artist<M: Coord> : Send {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    );
+    ) -> Result<()>;
 
     #[allow(unused_variables)]
     fn event(&mut self, renderer: &mut dyn Renderer, event: &Event) -> bool {

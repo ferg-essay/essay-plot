@@ -1,4 +1,4 @@
-use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, Clip, Path, PathOpt};
+use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
 use essay_tensor::{Tensor, init::linspace};
 
 use crate::{
@@ -145,15 +145,16 @@ impl Artist<Data> for Bar {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let style = self.style.push(style);
 
         for path in &self.paths {
             let c_path: Path<Canvas> = path.transform(to_canvas);
-            renderer.draw_path(&c_path, &style, clip).unwrap();
+            renderer.draw_path(&c_path, &style)?;
         }
+
+        Ok(())
     }
 }
 

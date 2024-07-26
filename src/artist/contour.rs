@@ -1,4 +1,7 @@
-use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, Clip, Path, PathOpt, Point};
+use essay_graphics::api::{
+    renderer::{Canvas, Renderer, Result}, 
+    Bounds, Path, PathOpt, Point
+};
 use essay_tensor::{Tensor, tensor::TensorVec, math::normalize_unit};
 
 use crate::{chart::Data, contour::ContourGenerator};
@@ -102,9 +105,8 @@ impl Artist<Data> for Contour {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         _style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         //let path = Path::<Data>::closed_poly(tf32!([
         //    [0.0, 0.0], [1.0, 0.0], [1.0, 1.0],
         //    [0.0, 1.0]
@@ -134,8 +136,10 @@ impl Artist<Data> for Contour {
             for path in &level.paths {
                 let path : Path<Canvas> = path.transform(&to_canvas);
 
-                renderer.draw_path(&path, &style, clip).unwrap();
+                renderer.draw_path(&path, &style)?;
             }
         }
+
+        Ok(())
     }
 }

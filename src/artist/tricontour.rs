@@ -1,4 +1,4 @@
-use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, Clip, Path, PathOpt};
+use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
 use essay_tensor::{Tensor, math::normalize_unit};
 
 use crate::{chart::Data, contour::TriContourGenerator, tri::Triangulation};
@@ -99,9 +99,8 @@ impl Artist<Data> for TriContour {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         _style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let mut style = PathStyle::new();
 
         style.edge_color("k");
@@ -113,8 +112,10 @@ impl Artist<Data> for TriContour {
             for path in &level.paths {
                 let path : Path<Canvas> = path.transform(&to_canvas);
 
-                renderer.draw_path(&path, &style, clip).unwrap();
+                renderer.draw_path(&path, &style)?;
             }
         }
+
+        Ok(())
     }
 }

@@ -1,5 +1,6 @@
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer}, Bounds, Clip, FontFamily, FontStyle, PathOpt, Point, TextStyle
+    renderer::{Canvas, Renderer, Result}, 
+    Bounds, FontFamily, FontStyle, PathOpt, Point, TextStyle
 };
 
 use crate::{
@@ -108,9 +109,8 @@ impl Artist<Canvas> for TextCanvas {
         &mut self, 
         renderer: &mut dyn Renderer,
         _to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         if let Some(text) = &self.text {
             let style = self.path_style.push(style);
 
@@ -123,10 +123,11 @@ impl Artist<Canvas> for TextCanvas {
                     self.get_angle(),
                     &style,
                     &self.text_style,
-                    clip
-                ).unwrap();
+                )?;
             }
         }
+
+        Ok(())
     }
 }
 
@@ -208,9 +209,8 @@ impl Artist<Data> for Text {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let pos = self.coords.to_canvas(self.pos, &to_canvas);
         let style = self.path_style.push(style);
 
@@ -230,9 +230,10 @@ impl Artist<Data> for Text {
                 0.,
                 &style,
                 &self.text_style,
-                clip
-            ).unwrap();
+            )?;
         }
+
+        Ok(())
     }
 }
 

@@ -1,5 +1,6 @@
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer}, Bounds, Clip, HorizAlign, Path, PathCode, PathOpt, Point, TextStyle, VertAlign
+    renderer::{Canvas, Renderer, Result}, 
+    Bounds, HorizAlign, Path, PathCode, PathOpt, Point, TextStyle, VertAlign
 };
 
 use crate::{
@@ -179,9 +180,8 @@ impl XAxis {
         renderer: &mut dyn Renderer,
         data: &DataFrame,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) -> f32 {
+    ) -> Result<f32> {
         let pos = data.get_pos();
 
         let mut y = if self.is_bottom { pos.ymin() } else { pos.ymax() };
@@ -195,28 +195,28 @@ impl XAxis {
                 (pos.xmax(), y),
             ]);
 
-            patch.draw(renderer, to_canvas, clip, style);
+            patch.draw(renderer, to_canvas, style)?;
         }
 
         // let mut y = data.get_pos().ymin();
 
         if self.axis.is_visible() {
-            self.draw_ticks(renderer, &data, clip, style);
+            self.draw_ticks(renderer, &data, style);
 
             y += sign * renderer.to_px(self.axis.major().get_size());
             y += sign * renderer.to_px(self.axis.major().get_pad());
             y += sign * self.axis.major().get_label_height();
         }
-        y
+
+        Ok(y)
     }
 
     fn draw_ticks(
         &mut self, 
         renderer: &mut dyn Renderer, 
         data: &DataFrame,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let pos = &data.get_pos();
 
         let yv = if self.is_bottom { pos.ymin() } else { pos.ymax() };
@@ -239,7 +239,7 @@ impl XAxis {
                     .line_to(x, pos.ymax())
                     .to_path();
 
-                renderer.draw_path(&grid, &style, clip).unwrap();
+                renderer.draw_path(&grid, &style)?;
             }
 
             // Tick
@@ -250,15 +250,17 @@ impl XAxis {
                 let tick = Path::<Canvas>::move_to(x, y)
                     .line_to(x, y + sign * tick_length).to_path();
 
-                renderer.draw_path(&tick, &style, clip).unwrap();
+                renderer.draw_path(&tick, &style)?;
 
                 y += sign * tick_length;
                 y += sign * renderer.to_px(major.get_pad());
             }
 
             // Label
-            renderer.draw_text(Point(x, y), label, 0., style, major.label_style(), clip).unwrap();
+            renderer.draw_text(Point(x, y), label, 0., style, major.label_style())?;
         }
+
+        Ok(())
     }
 
     pub(crate) fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
@@ -357,9 +359,8 @@ impl YAxis {
         renderer: &mut dyn Renderer,
         data: &DataFrame,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) -> f32 {
+    ) -> Result<f32> {
         let pos = data.get_pos();
 
         let mut x = if self.is_left { pos.xmin() } else { pos.xmax() };
@@ -375,11 +376,11 @@ impl YAxis {
 
             x += sign * line_width;
 
-            patch.draw(renderer, to_canvas, clip, style);
+            patch.draw(renderer, to_canvas, style)?;
         }
 
         if self.axis.is_visible() {
-            self.draw_ticks(renderer, &data, clip, style);
+            self.draw_ticks(renderer, &data, style)?;
 
             let width = self.major_labels.iter().map(|s| s.len()).max().unwrap();
         
@@ -388,16 +389,15 @@ impl YAxis {
             x += sign * 0.5 * width as f32 * self.axis.major().get_label_height();
         }
 
-        x
+        Ok(x)
     }
 
     fn draw_ticks(
         &mut self, 
         renderer: &mut dyn Renderer, 
         data: &DataFrame,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let pos = &data.get_pos();
 
         let xv = if self.is_left { pos.xmin() } else { pos.xmax() };
@@ -420,7 +420,7 @@ impl YAxis {
                     PathCode::LineTo(Point(pos.xmax(), y)),
                 ]);
 
-                renderer.draw_path(&grid, &style, clip).unwrap();
+                renderer.draw_path(&grid, &style)?;
             }
 
             // Tick
@@ -433,15 +433,17 @@ impl YAxis {
                     PathCode::LineTo(Point(x, y)),
                 ]);
 
-                renderer.draw_path(&tick, &style, clip).unwrap();
+                renderer.draw_path(&tick, &style)?;
 
                 x += sign * tick_length;
                 x += sign * renderer.to_px(major.get_pad());
             }
 
             // Label
-            renderer.draw_text(Point(x, y), label, 0., style, major.label_style(), clip).unwrap();
+            renderer.draw_text(Point(x, y), label, 0., style, major.label_style())?;
         }
+
+        Ok(())
     }
 
     pub(crate) fn update(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {

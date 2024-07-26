@@ -3,7 +3,8 @@ use std::{any::Any, marker::PhantomData};
 
 use essay_graphics::{
     api::{
-        renderer::{Canvas, Event, Renderer}, Affine2d, Bounds, Clip, Coord, PathOpt, Point
+        renderer::{Canvas, Event, Renderer, Result}, 
+        Affine2d, Bounds, Coord, PathOpt, Point
     }, 
     layout::View
 };
@@ -343,23 +344,25 @@ impl Artist<Canvas> for DataFrame {
         &mut self, 
         renderer: &mut dyn Renderer, 
         to_canvas: &ToCanvas,
-        _clip: &Clip,
         style: &dyn PathOpt,
-    ) {
-        renderer.flush(&Clip::None);
+    ) -> Result<()> {
+        // TODO: 
+        renderer.flush();
         //let to_canvas = to_canvas.matmul(&self.to_canvas);
         // let to_canvas = &self.to_canvas;
         let style = self.style.push(style);
-        let clip = Clip::Bounds(self.pos_canvas.p0(), self.pos_canvas.p1());
+        // let clip = Clip::Bounds(self.pos_canvas.p0(), self.pos_canvas.p1());
 
         for (i, item) in self.artist_items.iter_mut().enumerate() {
             let style = self.cycle.push(&style, i);
 
-            item.draw(renderer, to_canvas, &clip, &style);
+            item.draw(renderer, to_canvas, &style)?;
         }
 
         //renderer.flush(&clip);
-        renderer.flush(&Clip::None);
+        renderer.flush();
+
+        Ok(())
 
         // TODO: intersect clip
         //for artist in &mut self.artists {
@@ -463,9 +466,8 @@ impl ArtistItem {
         &mut self, 
         renderer: &mut dyn Renderer, 
         to_canvas: &ToCanvas,
-        clip: &Clip,
-        style: &dyn PathOpt) {
-        self.handle.draw(&mut self.any, renderer, to_canvas, clip, style);
+        style: &dyn PathOpt) -> Result<()> {
+        self.handle.draw(&mut self.any, renderer, to_canvas, style)
     }
 
     #[inline]
@@ -518,9 +520,8 @@ trait ArtistHandleTrait<M: Coord> : Send {
         artist_any: &mut Box<dyn Any + Send>,
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    );
+    ) -> Result<()>;
 }
 
 struct ArtistHandle<M: Coord, A: Artist<M>> {
@@ -552,11 +553,10 @@ where
         artist_any: &mut Box<dyn Any + Send + 'static>,
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let artist = artist_any.downcast_mut::<A>().unwrap();
-        artist.draw(renderer, to_canvas, clip, style)
+        artist.draw(renderer, to_canvas, style)
     }
 
     fn get_legend(&self, any: &mut Box<dyn Any + Send>) -> Option<LegendHandler> {

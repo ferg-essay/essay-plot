@@ -1,7 +1,7 @@
 use core::fmt;
 
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer}, Affine2d, Angle, Bounds, Clip, Coord, Path, PathOpt, Point
+    renderer::{Canvas, Renderer, Result}, Affine2d, Angle, Bounds, Coord, Path, PathOpt, Point
 };
 
 use crate::{
@@ -60,17 +60,15 @@ impl Artist<Data> for Patch {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let to_canvas = to_canvas.matmul(&self.transform);
         let path = self.path.transform(&to_canvas);
         let style = self.style.push(style);
         renderer.draw_path(
             &path,
             &style, 
-            clip
-        ).unwrap();
+        )
     }
 }
 
@@ -96,8 +94,7 @@ impl PlotArtist for Patch {
                     renderer.draw_path(
                         &line, 
                         &style.push(top_style), 
-                        &Clip::None
-                    ).unwrap();
+                    )
                 }))
             },
             None => None,
@@ -265,9 +262,8 @@ impl Artist<Canvas> for CanvasPatch {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let to_canvas = to_canvas.matmul(&self.to_canvas);
         let path = self.path.transform(&to_canvas);
         let style = self.style.push(style);
@@ -275,8 +271,7 @@ impl Artist<Canvas> for CanvasPatch {
         renderer.draw_path(
             &path,
             &style, 
-            clip
-        ).unwrap();
+        )
     }
 }
 
@@ -304,16 +299,14 @@ impl Artist<Canvas> for PathPatch<Canvas> {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let path = self.path.transform(&to_canvas);
 
         renderer.draw_path(
             &path,
             style, 
-            clip
-        ).unwrap();
+        )
     }
 }
 
@@ -329,15 +322,13 @@ impl Artist<Data> for PathPatch<Data> {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let path = self.path.transform(&to_canvas);
         renderer.draw_path(
             &path,
             style, 
-            clip
-        ).unwrap();
+        )
     }
 }
 
@@ -394,14 +385,15 @@ impl Artist<Canvas> for Line {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         if let Some(path) = &self.path {
             let path = path.transform(&to_canvas);
 
-            renderer.draw_path(&path, style, clip).unwrap();
+            renderer.draw_path(&path, style)?;
         }
+        
+        Ok(())
     }
 }
 
@@ -467,14 +459,15 @@ impl Artist<Data> for Wedge {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         if let Some(path) = &self.path {
             let path = path.transform(to_canvas);
 
-            renderer.draw_path(&path, style, clip).unwrap();
+            renderer.draw_path(&path, style)?;
         }
+
+        Ok(())
     }
 }
 

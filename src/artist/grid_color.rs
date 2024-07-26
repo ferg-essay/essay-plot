@@ -1,4 +1,7 @@
-use essay_graphics::api::{renderer::{Canvas, Renderer}, Affine2d, Bounds, CapStyle, Clip, Color, JoinStyle, Path, PathOpt, Point};
+use essay_graphics::api::{
+    renderer::{Canvas, Renderer, Result}, 
+    Affine2d, Bounds, CapStyle, Color, JoinStyle, Path, PathOpt, Point
+};
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{
@@ -63,9 +66,8 @@ impl GridColor {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &Affine2d,
-        clip: &Clip,
         _style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let path = Path::<Data>::closed_poly(tf32!([
             [0.0, 0.0], [1.0, 0.0], [1.0, 1.0],
             [0.0, 1.0]
@@ -95,16 +97,15 @@ impl GridColor {
         style.join_style(JoinStyle::Bevel);
         style.cap_style(CapStyle::Butt);
 
-        renderer.draw_markers(&path, &xy, &tf32!(), &colors, &style, clip).unwrap();
+        renderer.draw_markers(&path, &xy, &tf32!(), &colors, &style)
     }
 
     fn draw_gouraud_shading(
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &Affine2d,
-        clip: &Clip,
         _style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let xy = to_canvas.transform(&self.xy);
 
         let norm = normalize_unit(&self.data);
@@ -146,7 +147,7 @@ impl GridColor {
         let colors = colors.into_tensor();
         let triangles = triangles.into_tensor();
 
-        renderer.draw_triangles(vertices, colors, triangles, clip).unwrap();
+        renderer.draw_triangles(vertices, colors, triangles)
     }
 
     pub(crate) fn set_norm(&mut self, min: f32, max: f32) {
@@ -175,9 +176,8 @@ impl Artist<Data> for GridColor {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         if self.is_stale {
             self.is_stale = false;
 
@@ -196,10 +196,10 @@ impl Artist<Data> for GridColor {
 
         match self.shading {
             Shading::Gouraud => {
-                self.draw_gouraud_shading(renderer, to_canvas, clip, style);
+                self.draw_gouraud_shading(renderer, to_canvas, style)
             },
             Shading::Flat => {
-                self.draw_solid_shading(renderer, to_canvas, clip, style);
+                self.draw_solid_shading(renderer, to_canvas, style)
             }
         }
     }

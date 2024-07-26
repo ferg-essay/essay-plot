@@ -1,5 +1,5 @@
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer}, Bounds, Clip, Coord, PathOpt
+    renderer::{Canvas, Renderer, Result}, Bounds, Coord, PathOpt
 };
 
 use crate::{chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, data_artist_option_struct};
@@ -51,16 +51,17 @@ impl<M: Coord> Artist<M> for Container<M> {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let style = self.style.push(style);
 
         for (i, artist) in self.artists.iter_mut().enumerate() {
             let style = self.cycle.push(&style, i);
 
-            artist.draw(renderer, to_canvas, clip, &style);
+            artist.draw(renderer, to_canvas, &style)?;
         }
+
+        Ok(())
     }
 }
 

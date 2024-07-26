@@ -1,4 +1,7 @@
-use essay_graphics::api::{affine2d, renderer::{Canvas, Renderer}, Bounds, Clip, JoinStyle, Path, PathOpt};
+use essay_graphics::api::{affine2d, 
+    renderer::{Canvas, Renderer, Result}, 
+    Bounds, JoinStyle, Path, PathOpt
+};
 use essay_tensor::Tensor;
 
 use crate::{
@@ -99,12 +102,11 @@ impl Artist<Data> for ScatterPlot {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let style = self.style.push(style);
 
-        self.collection.draw(renderer, to_canvas, clip, &style)
+        self.collection.draw(renderer, to_canvas, &style)
     }
 }
 

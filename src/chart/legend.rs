@@ -1,5 +1,6 @@
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer}, Bounds, Clip, HorizAlign, Path, PathCode, PathOpt, Point, TextStyle, VertAlign
+    renderer::{Canvas, Renderer, Result}, 
+    Bounds, HorizAlign, Path, PathCode, PathOpt, Point, TextStyle, VertAlign
 };
 
 use crate::{artist::{Artist, PathStyle, StyleCycle, ToCanvas}, chart::Config};
@@ -69,11 +70,10 @@ impl Artist<Canvas> for Legend {
         &mut self, 
         renderer: &mut dyn Renderer,
         _to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         if self.handlers.len() == 0 {
-            return;
+            return Ok(());
         }
 
         let n_chars = match self.handlers.iter().map(|h| h.get_label().len()).max() {
@@ -104,7 +104,7 @@ impl Artist<Canvas> for Legend {
             PathCode::ClosePoly(Point(x0 + w, y0)),
         ]);
 
-        renderer.draw_path(&path, &self.path_style, clip).unwrap();
+        renderer.draw_path(&path, &self.path_style)?;
 
         let x_symbol = x0 + margin;
         let x_t = x_symbol + rect_width + pad_x;
@@ -117,8 +117,7 @@ impl Artist<Canvas> for Legend {
                 0.,
                 style,
                 &self.text_style,
-                clip
-            ).unwrap();
+            )?;
 
             let rect = Bounds::<Canvas>::new(
                 Point(x_symbol, y), 
@@ -128,20 +127,22 @@ impl Artist<Canvas> for Legend {
             let style = self.style_cycle.push(style, i);
              //let color = self.cycle.
              
-             handler.draw(renderer, &style, &rect);
+             handler.draw(renderer, &style, &rect)?;
         }
+
+        Ok(())
     }
 }
 
 pub struct LegendHandler {
     label: String,
-    draw: Box<dyn Fn(&mut dyn Renderer, &dyn PathOpt, &Bounds<Canvas>) + Send>,
+    draw: Box<dyn Fn(&mut dyn Renderer, &dyn PathOpt, &Bounds<Canvas>) -> Result<()> + Send>,
 }
 
 impl LegendHandler {
     pub fn new(
         label: String,
-        draw: impl Fn(&mut dyn Renderer, &dyn PathOpt, &Bounds<Canvas>) + Send + 'static
+        draw: impl Fn(&mut dyn Renderer, &dyn PathOpt, &Bounds<Canvas>) -> Result<()> + Send + 'static
     ) -> Self {
         Self {
             label,
@@ -158,7 +159,7 @@ impl LegendHandler {
         renderer: &mut dyn Renderer, 
         style: &dyn PathOpt,
         rect: &Bounds<Canvas>
-    ) {
-        (self.draw)(renderer, style, rect);
+    ) -> Result<()> {
+        (self.draw)(renderer, style, rect)
     }
 }

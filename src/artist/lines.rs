@@ -1,7 +1,7 @@
 use core::fmt;
 
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer}, Bounds, Clip, Path, PathCode, PathOpt, Point
+    renderer::{Canvas, Renderer, Result}, Bounds, Path, PathCode, PathOpt, Point
 };
 use essay_tensor::Tensor;
 
@@ -177,26 +177,27 @@ impl Artist<Data> for Lines2d {
         &mut self, 
         renderer: &mut dyn Renderer, 
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         if ! self.is_visible {
-            return;
+            return Ok(());
         }
 
         let path = self.path.transform(&to_canvas);
 
         let style = self.style.push(style);
 
-        renderer.draw_path(&path, &style, clip).unwrap();
+        renderer.draw_path(&path, &style)?;
 
         if let Some(collection) = &mut self.collection {
             if let Some(marker) = &self.marker {
                 let style = marker.get_style().push(&style);
 
-                collection.draw(renderer, to_canvas, clip, &style);
+                collection.draw(renderer, to_canvas, &style)?;
             }
         }
+
+        Ok(())
     }
 }
 
@@ -222,8 +223,7 @@ impl PlotArtist for Lines2d {
                     renderer.draw_path(
                         &line, 
                         &style.push(top_style), 
-                        &Clip::None
-                    ).unwrap();
+                    )
                 }))
             },
             None => None,

@@ -1,4 +1,4 @@
-use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, Clip, PathOpt};
+use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, PathOpt};
 use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 
 use crate::{
@@ -119,10 +119,9 @@ impl Artist<Data> for SpecGram {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
-        self.grid_color.draw(renderer, to_canvas, clip, style);
+    ) -> Result<()> {
+        self.grid_color.draw(renderer, to_canvas, style)
     }
 }
 

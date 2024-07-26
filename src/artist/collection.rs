@@ -1,7 +1,7 @@
 use core::fmt;
 
 use essay_tensor::Tensor;
-use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, Clip, Path, PathOpt};
+use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
 
 use crate::{chart::Data, artist::PathStyle};
 
@@ -50,14 +50,13 @@ impl Artist<Data> for PathCollection {
         &mut self, 
         renderer: &mut dyn Renderer, 
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let xy = to_canvas.transform(&self.xy);
 
         let style = self.style.push(style);
 
-        renderer.draw_markers(&self.path, &xy, &self.scale, &self.color, &style, clip).unwrap();
+        renderer.draw_markers(&self.path, &xy, &self.scale, &self.color, &style)
     }
 }
 

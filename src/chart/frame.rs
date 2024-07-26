@@ -2,8 +2,8 @@ use std::f32::consts::PI;
 
 use essay_graphics::{
     api::{
-        renderer::{self, Canvas, Drawable, Event, Renderer}, 
-        Affine2d, Bounds, Clip, Color, PathOpt, Point, VertAlign 
+        renderer::{Result, Canvas, Drawable, Event, Renderer}, 
+        Affine2d, Bounds, Color, PathOpt, Point, VertAlign 
     }, 
     layout::View
 };
@@ -234,6 +234,7 @@ impl ChartFrame {
         self.right.colorbar();
     }
 
+    /*
     pub(crate) fn _event(&mut self, renderer: &mut dyn Renderer, event: &Event) {
         if self.data.get_pos().contains(event.point()) {
             if self.data.event(renderer, event) {
@@ -285,6 +286,7 @@ impl ChartFrame {
     pub fn _ylabel(&mut self, text: &str) -> &mut TextCanvas {
         self.left._label(text)
     }
+    */
 }
 
 impl Drawable for ChartFrame {
@@ -359,8 +361,8 @@ impl Drawable for ChartFrame {
         }
     }
 
-    fn draw(&mut self, renderer: &mut dyn Renderer) -> renderer::Result<()> {
-        let clip = Clip::from(&self.pos);
+    fn draw(&mut self, renderer: &mut dyn Renderer) -> Result<()> {
+        // let clip = Clip::from(&self.pos);
 
         let frame_to_canvas = ToCanvas::new(
             self.pos.clone(), 
@@ -372,18 +374,18 @@ impl Drawable for ChartFrame {
             self.data.get_canvas_transform().clone()
         );
 
-        self.title.draw(renderer, &to_canvas, &clip, &self.path_style);
+        self.title.draw(renderer, &to_canvas, &self.path_style);
 
-        self.bottom.draw(renderer, &self.data, &frame_to_canvas, &clip, &self.path_style);
-        self.left.draw(renderer, &self.data, &frame_to_canvas, &clip, &self.path_style);
+        self.bottom.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
+        self.left.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
 
-        self.top.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
-        self.right.draw(renderer,  &frame_to_canvas, &clip, &self.path_style);
+        self.top.draw(renderer, &frame_to_canvas, &self.path_style)?;
+        self.right.draw(renderer,  &frame_to_canvas, &self.path_style)?;
 
         // TODO: grid order
-        self.data.draw(renderer, &to_canvas, &clip, &self.path_style);
+        self.data.draw(renderer, &to_canvas, &self.path_style)?;
 
-        self.legend.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
+        self.legend.draw(renderer, &frame_to_canvas, &self.path_style)?;
 
         Ok(())
     }
@@ -461,12 +463,13 @@ impl Artist<Canvas> for TopFrame {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         if let Some(patch) = &mut self.spine {
-            patch.draw(renderer, to_canvas, clip, style);
+            patch.draw(renderer, to_canvas, style)?;
         }
+
+        Ok(())
         
     }
 }
@@ -507,10 +510,9 @@ impl BottomFrame {
         renderer: &mut dyn Renderer,
         data: &DataFrame,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
-        let mut y = self.x_axis.draw(renderer, data, to_canvas, clip, style);
+    ) -> Result<()> {
+        let mut y = self.x_axis.draw(renderer, data, to_canvas, style)?;
         y -= renderer.to_px(self.sizes.label_pad);
 
         self.title.set_pos(Bounds::new(
@@ -518,7 +520,7 @@ impl BottomFrame {
             Point(data.get_pos().xmax(), y),
         ));
     
-        self.title.draw(renderer, to_canvas, clip, style);
+        self.title.draw(renderer, to_canvas, style)
     }
 
     fn _title(&mut self, text: &str) -> &mut TextCanvas {
@@ -574,10 +576,9 @@ impl LeftFrame {
         renderer: &mut dyn Renderer,
         data: &DataFrame,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
-        let mut x = self.y_axis.draw(renderer, data, to_canvas, clip, style);
+    ) -> Result<()> {
+        let mut x = self.y_axis.draw(renderer, data, to_canvas, style)?;
         x -= renderer.to_px(self.sizes.label_pad);
 
         self.title.set_pos(Bounds::new(
@@ -585,7 +586,7 @@ impl LeftFrame {
             Point(x, data.get_pos().ymid()),
         ));
 
-        self.title.draw(renderer, to_canvas, clip, style);
+        self.title.draw(renderer, to_canvas, style)
     }
 
     fn _label(&mut self, text: &str) -> &mut TextCanvas {
@@ -663,16 +664,17 @@ impl Artist<Canvas> for RightFrame {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         if let Some(patch) = &mut self.spine {
-            patch.draw(renderer, to_canvas, clip, style);
+            patch.draw(renderer, to_canvas, style)?;
         }
 
         if let Some(colorbar) = &mut self.colorbar {
-            colorbar.draw(renderer, to_canvas, clip, style);
+            colorbar.draw(renderer, to_canvas, style)?;
         }
+
+        Ok(())
     }
 }
 

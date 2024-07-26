@@ -23,6 +23,15 @@ fn main() {
         }
     }
 
+    let mut chart = figure.chart(((3., 0.), [1., 3.]));
+
+    let t = linspace(0., 6.28, 40);
+    let x = t.sin();
+    let y = (4. * t).cos();
+
+    chart.title("My Title"); // .color(0x008033).size(18.);
+    chart.plot(&x, &y);
+
     figure.show();
 }
 

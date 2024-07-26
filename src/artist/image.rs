@@ -1,5 +1,7 @@
-use essay_graphics::api::renderer::{Canvas, Renderer};
-use essay_graphics::api::{Bounds, Point, Clip, PathOpt};
+use essay_graphics::api::{
+    renderer::{Canvas, Renderer, Result},
+    Bounds, Point, PathOpt
+};
 use essay_tensor::Tensor;
 
 use crate::chart::ArtistView;
@@ -68,9 +70,8 @@ impl Artist<Data> for Image {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         _style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         //let to_canvas = to_canvas.translate(0., self.).scale(1., -1.);
         let extent = self.bounds();
         let bounds = Bounds::new(
@@ -94,7 +95,7 @@ impl Artist<Data> for Image {
         // todo [width, height, 4]
         let colors = Tensor::from(colors).reshape([self.data.rows(), self.data.cols(), 4]);
     
-        renderer.draw_image(&bounds, &colors, clip).unwrap();
+        renderer.draw_image(&bounds, &colors)
     }
 }
 

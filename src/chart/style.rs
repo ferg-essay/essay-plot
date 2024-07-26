@@ -1,4 +1,4 @@
-use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, Clip, Coord, PathOpt};
+use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Coord, PathOpt};
 
 use crate::{
     artist::{Artist, PathStyle, ToCanvas}, 
@@ -45,12 +45,11 @@ impl Artist<Data> for PlotOptHandle<Data> {
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let style = self.style.push(style);
 
-        self.artist.draw(renderer, to_canvas, clip, &style);
+        self.artist.draw(renderer, to_canvas, &style)
     }
 }
 

@@ -1,4 +1,7 @@
-use essay_graphics::api::{renderer::{Canvas, Renderer}, Bounds, CapStyle, Clip, Color, PathOpt, Point};
+use essay_graphics::api::{
+    renderer::{Canvas, Renderer, Result}, 
+    Bounds, CapStyle, Color, PathOpt, Point
+};
 use essay_tensor::{Tensor, init::linspace, tf32};
 
 use crate::chart::Data;
@@ -50,9 +53,8 @@ impl Artist<Data> for Colorbar {
         &mut self, 
         renderer: &mut dyn Renderer,
         _to_canvas: &ToCanvas,
-        clip: &Clip,
         style: &dyn PathOpt,
-    ) {
+    ) -> Result<()> {
         let to_canvas = ToCanvas::new(
             self.pos.clone(), 
             self.bounds.affine_to(&self.pos)
@@ -66,7 +68,7 @@ impl Artist<Data> for Colorbar {
         pstyle.cap_style(CapStyle::Projecting);
         pstyle.line_width(0.7);
 
-        self.mesh.draw(renderer, &to_canvas, clip, style);
-        renderer.draw_path(&path, &pstyle, clip).unwrap();
+        self.mesh.draw(renderer, &to_canvas, style);
+        renderer.draw_path(&path, &pstyle)
     }
 }

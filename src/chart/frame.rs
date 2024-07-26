@@ -101,32 +101,9 @@ impl ChartFrame {
         }
     }
 
-    // pub(crate) fn pos(&self) -> &Bounds<Canvas> {
-    //     &self.pos
-    // }
-
     pub(crate) fn config(&self) -> &ConfigArc {
         &self.config
     }
-
-    /*
-    pub(crate) fn _update(&mut self, canvas: &Canvas) {
-        self.title.update(pos, canvas);
-
-        self.data.update(pos, canvas);
-
-        self.bottom.update_axis(&self.data);
-        self.left.update_axis(&self.data);
-
-        self.bottom.update(pos, canvas);
-        self.left.update(pos, canvas);
-        self.top.update(pos, canvas);
-        self.right.update(pos, canvas);
-
-        self.legend.update_handlers(&self.data);
-        self.legend.update(pos, canvas);
-    }
-    */
 
     ///
     /// Sets the device bounds and propagates to children
@@ -183,16 +160,6 @@ impl ChartFrame {
         &mut self.data
     }
 
-    // pub(crate) fn text_opt(&self, layout: LayoutArc, artist: FrameArtist) -> FrameTextOpt {
-    //    match artist {
-    //        FrameArtist::Title => FrameTextOpt::new(layout, self.id, artist),
-    //        FrameArtist::XLabel => FrameTextOpt::new(layout, self.id, artist),
-    //        FrameArtist::YLabel => FrameTextOpt::new(layout, self.id, artist),
-    //
-    //        _ => panic!("Invalid artist {:?}", artist)
-    //    }
-    //}
-
     pub(crate) fn get_text_mut(&mut self, artist: FrameArtist) -> &mut TextCanvas {
         match artist {
             FrameArtist::Title => &mut self.title,
@@ -223,70 +190,9 @@ impl ChartFrame {
         }
     }
 
-    // pub(crate) fn get_data_artist_mut<A>(&mut self, id: ArtistId) -> &mut A
-    // where
-    //    A: Artist<Data> + 'static
-    // {
-    //     self.data_mut().artist_mut(id)
-    // }
-
     pub(crate) fn colorbar(&mut self) {
         self.right.colorbar();
     }
-
-    /*
-    pub(crate) fn _event(&mut self, renderer: &mut dyn Renderer, event: &Event) {
-        if self.data.get_pos().contains(event.point()) {
-            if self.data.event(renderer, event) {
-                self.left.update_axis(&self.data);
-                self.bottom.update_axis(&self.data);
-
-                renderer.request_redraw(&self.pos);
-            };
-        }
-    }
-
-    pub(crate) fn _draw(&mut self, renderer: &mut dyn Renderer) {
-        let clip = Clip::from(&self.pos);
-
-        let frame_to_canvas = ToCanvas::new(
-            self.pos.clone(), 
-            self.to_canvas.clone()
-        );
-
-        let to_canvas = ToCanvas::new(
-            self.pos.clone(), 
-            self.data.get_canvas_transform().clone()
-        );
-
-        self.title.draw(renderer, &to_canvas, &clip, &self.path_style);
-
-        self.bottom.draw(renderer, &self.data, &frame_to_canvas, &clip, &self.path_style);
-        self.left.draw(renderer, &self.data, &frame_to_canvas, &clip, &self.path_style);
-
-        self.top.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
-        self.right.draw(renderer,  &frame_to_canvas, &clip, &self.path_style);
-
-        // TODO: grid order
-        self.data.draw(renderer, &to_canvas, &clip, &self.path_style);
-
-        self.legend.draw(renderer, &frame_to_canvas, &clip, &self.path_style);
-    }
-
-    pub fn _title(&mut self, text: &str) -> &mut TextCanvas {
-        self.title.label(text);
-
-        &mut self.title
-    }
-
-    pub fn _xlabel(&mut self, text: &str) -> &mut TextCanvas {
-        self.bottom._title(text)
-    }
-
-    pub fn _ylabel(&mut self, text: &str) -> &mut TextCanvas {
-        self.left._label(text)
-    }
-    */
 }
 
 impl Drawable for ChartFrame {
@@ -319,7 +225,7 @@ impl Drawable for ChartFrame {
 
             self.data.resize(renderer, &pos_data);
 
-            let pos_data = self.data.get_pos();
+            let pos_data = self.data.get_pos().clone();
 
             let pos_top = Bounds::<Canvas>::new(
                 Point(pos_data.xmin(), pos_data.ymax()),
@@ -341,16 +247,17 @@ impl Drawable for ChartFrame {
 
             // TODO:
             self.bottom.update_axis(&self.data);
-            self.bottom.resize(renderer, &pos);
+            // self.bottom.resize(renderer, &pos);
+            self.bottom.resize(renderer, &pos_data);
 
             self.left.update_axis(&self.data);
-            self.left.resize(renderer, &pos);
+            self.left.resize(renderer, &pos_data);
 
-            self.top.resize(renderer, &pos);
-            self.right.resize(renderer, &pos);
+            self.top.resize(renderer, &pos_data);
+            self.right.resize(renderer, &pos_data);
 
             self.legend.update_handlers(&mut self.data);
-            self.legend.resize(renderer, &pos);
+            self.legend.resize(renderer, &pos_data);
         } else if self.data.get_pos().contains(event.point()) {
             if self.data.event(renderer, event) {
                 self.left.update_axis(&self.data);
@@ -374,7 +281,7 @@ impl Drawable for ChartFrame {
             self.data.get_canvas_transform().clone()
         );
 
-        self.title.draw(renderer, &to_canvas, &self.path_style);
+        self.title.draw(renderer, &to_canvas, &self.path_style)?;
 
         self.bottom.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
         self.left.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
@@ -712,40 +619,6 @@ impl FrameTextOpt {
         self
     }
 }
-/*
-pub struct FrameTextOpt {
-    artist: FrameArtist,
-}
-
-impl FrameTextOpt {
-    fn new(artist: FrameArtist) -> Self {
-        Self {
-            artist,
-        }
-    }
-
-    fn write(&mut self, _fun: impl FnOnce(&mut TextCanvas)) {
-        // self.layout.write(|l| {
-        //     fun(l.frame_mut(self.id).get_text_mut(self.artist))
-        // })
-    }
-
-    pub fn label(&mut self, label: &str) -> &mut Self {
-        self.write(|text| { text.label(label); });
-        self
-    }
-
-    pub fn color(&mut self, color: impl Into<Color>) -> &mut Self {
-        self.write(|text| { text.path_style_mut().color(color); });
-        self
-    }
-
-    pub fn size(&mut self, size: f32) -> &mut Self {
-        self.write(|text| { text.text_style_mut().size(size); });
-        self
-    }
-}
-    */
 
 struct FrameMargins {
     top: f32,

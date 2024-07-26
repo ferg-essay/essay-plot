@@ -201,7 +201,7 @@ impl XAxis {
         // let mut y = data.get_pos().ymin();
 
         if self.axis.is_visible() {
-            self.draw_ticks(renderer, &data, style);
+            self.draw_ticks(renderer, &data, style)?;
 
             y += sign * renderer.to_px(self.axis.major().get_size());
             y += sign * renderer.to_px(self.axis.major().get_pad());

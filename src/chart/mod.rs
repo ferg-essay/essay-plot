@@ -21,10 +21,10 @@ pub use style::PlotOpt;
 
 pub use tick_locator::IndexLocator;
 
-pub use axis::AxisOpt;
+pub use axis::{AxisOpt, ShowGrid};
 
 pub use data_frame::{
-    Data, AspectMode, ArtistView, PlotArtist,
+    Data, Scaling, AspectMode, ArtistView, PlotArtist,
 };
 
 pub use frame::{

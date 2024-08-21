@@ -8,7 +8,7 @@ use crate::{
     chart::{AspectMode, AxisOpt, Data, ChartFrame, FrameArtist, FrameTextOpt, PlotArtist}
 };
 
-use super::{config::read_config, style::PlotOptHandle, ConfigArc, PlotOpt};
+use super::{config::read_config, style::PlotOptHandle, ConfigArc, PlotOpt, Scaling};
 
 pub struct ChartBuilder {
     config: ConfigArc,
@@ -81,6 +81,14 @@ impl Chart {
         let mut opt = self.text_opt(FrameArtist::YLabel);
         opt.label(label);
         opt
+    }
+
+    pub fn scaling(&mut self, scaling: Scaling) -> &mut Self {
+        self.view.write(|f| { 
+            f.data_mut().scaling(scaling); 
+        });
+
+        self
     }
 
     pub fn aspect(&mut self, aspect: f32) -> &mut Self {

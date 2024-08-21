@@ -170,9 +170,11 @@ impl From<Hsva> for Color {
 }
 
 impl From<&Hsva> for Color {
+    #[inline]
     fn from(value: &Hsva) -> Color {
         let Hsva(h, s, v, a) = value;
 
+        /*
         let h = h.clamp(0., 1.);
         let s = s.clamp(0., 1.);
         let v = v.clamp(0., 1.);
@@ -192,8 +194,9 @@ impl From<&Hsva> for Color {
             4 => (t, p, v),
             _ => (v, p, q),
         };
+        */
 
-        Color::from_rgba(r, g, b, a)
+        Color::from_hsva(*h, *s, *v, *a)
     }
 }
 

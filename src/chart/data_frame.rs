@@ -29,6 +29,7 @@ pub(crate) struct DataFrame {
     x_margin: Option<f32>,
     y_margin: Option<f32>,
 
+    scaling: Scaling,
     aspect: Option<f32>,
     aspect_mode: AspectMode,
     is_flip_y: bool,
@@ -56,6 +57,7 @@ impl DataFrame {
             y_lim: None,
             x_margin: cfg.get_as_type("frame", "x_margin"),
             y_margin: cfg.get_as_type("frame", "y_margin"),
+            scaling: Scaling::Auto,
             aspect: None,
             aspect_mode: AspectMode::BoundingBox,
             is_flip_y: false,
@@ -69,6 +71,12 @@ impl DataFrame {
             to_canvas: Affine2d::eye(),
             _is_stale: true,
         }
+    }
+
+    pub fn scaling(&mut self, scaling: Scaling) -> &mut Self {
+        self.scaling = scaling;
+
+        self
     }
 
     pub fn aspect(&mut self, aspect: f32) -> &mut Self {
@@ -156,15 +164,21 @@ impl DataFrame {
         let (mut xmin, mut xmax) = (data.xmin(), data.xmax());
         let (mut ymin, mut ymax) = (data.ymin(), data.ymax());
 
-        if self.aspect.is_none() {
-            if let Some(x_margin) = self.x_margin {
-                xmin -= x_margin * width;
-                xmax += x_margin * width;
+        match self.scaling {
+            Scaling::Auto => {
+                if self.aspect.is_none() {
+                    if let Some(x_margin) = self.x_margin {
+                        xmin -= x_margin * width;
+                        xmax += x_margin * width;
+                    }
+        
+                    if let Some(y_margin) = self.y_margin {
+                        ymin -= y_margin * height;
+                        ymax += y_margin * height;
+                    }
+                }
             }
-
-            if let Some(y_margin) = self.y_margin {
-                ymin -= y_margin * height;
-                ymax += y_margin * height;
+            Scaling::Image => {
             }
         }
 
@@ -577,6 +591,11 @@ pub trait PlotArtist : Artist<Data> + Sized {
     fn get_legend(&self) -> Option<LegendHandler>;
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Scaling {
+    Auto,
+    Image
+}
 ///
 /// Data coordinates
 ///

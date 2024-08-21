@@ -15,7 +15,7 @@ use crate::{
     chart::{Config, ConfigArc}
 };
 
-use super::{data_frame::DataFrame, axis::{Axis, AxisTicks, XAxis, YAxis}, legend::Legend};
+use super::{axis::{Axis, AxisTicks, XAxis, YAxis}, data_frame::DataFrame, legend::Legend};
 
 pub(crate) struct ChartFrame {
     pos: Bounds<Canvas>,
@@ -42,7 +42,6 @@ pub(crate) struct ChartFrame {
     right: RightFrame,
 
     //is_frame_visible: bool,
-
     legend: Legend,
 
     //is_stale: bool, 
@@ -657,3 +656,4 @@ impl FrameMargins {
         }
     }
 }
+

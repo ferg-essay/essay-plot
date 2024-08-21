@@ -68,7 +68,7 @@ impl Artist<Data> for Colorbar {
         pstyle.cap_style(CapStyle::Projecting);
         pstyle.line_width(0.7);
 
-        self.mesh.draw(renderer, &to_canvas, style);
+        self.mesh.draw(renderer, &to_canvas, style)?;
         renderer.draw_path(&path, &pstyle)
     }
 }

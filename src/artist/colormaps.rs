@@ -17,6 +17,8 @@ pub enum ColorMaps {
     RedYellow,
     BlueWhite,
     BlueWhite2,
+
+    VioletWhite,
 }
 
 impl From<ColorMaps> for ColorMap {
@@ -142,18 +144,17 @@ impl From<ColorMaps> for ColorMap {
                 ])
             }
             ColorMaps::BlueWhite | ColorMaps::Default => {
-                // use color temperature (hue) to reinforce transition from
-                // unsaturated/bright to saturated/dark, which distinguishes
-                // quartiles
                 ColorMap::from([
                     // cool, saturated blue to warm, unsaturated blue
-                    (0., Hsv(0.69, 0.92, 0.45)), // "css:midnightblue" bottom 1% distinct
-                    (0.02, Hsv(0.66, 0.98, 0.65)), // "cobalt blue" 
-                    (0.2, Hsv(0.61, 0.99, 0.87)), // "blue",
+                    (0., Hsv(0.69, 0.92, 0.2)), // "css:midnightblue" bottom 1% distinct
+                    (0.1, Hsv(0.66, 0.98, 0.55)), // "cobalt blue" 
+                    (0.2, Hsv(0.61, 0.99, 0.75)), // "blue",
                     (0.5, Hsv(0.56, 0.80, 0.95)), // "css:dodgerblue",
 
-                    (1.0, Hsv(0.25, 0.10, 0.97)), // "css:beige // touch of color between amber and azure
-                ])
+                    //(1.0, Hsv(0.25, 0.10, 0.97)), // "css:beige // touch of color between amber and azure
+                    (0.9, Hsv(0.53, 0.2, 1.0)), // white
+                    (1.0, Hsv(0.53, 0.05, 1.0)), // white
+                    ])
             }
             ColorMaps::BlueWhite2 => {
                 // use color temperature (hue) to reinforce transition from
@@ -167,6 +168,23 @@ impl From<ColorMaps> for ColorMap {
                     (0.5, Hsv(0.56, 0.80, 0.95)), // "css:dodgerblue",
 
                     (1.0, Hsv(0.25, 0.10, 0.97)), // "css:beige // touch of color between amber and azure
+                ])
+            }
+            ColorMaps::VioletWhite => {
+                ColorMap::from([
+                    // violet to white
+                    (0., Hsv(0.69, 0.98, 0.20)), // black-blue
+                    (0.05, Hsv(0.69, 1., 0.5)), // black-blue
+                    (0.20, Hsv(0.80, 1., 0.8)), // violet
+
+                    (0.40, Hsv(0.98, 0.95, 0.8)), // red
+
+                    (0.6, Hsv(0.08, 1., 1.)), // orange
+
+                    (0.8, Hsv(0.16, 0.7, 1.0)), // yellow
+
+                    (0.95, Hsv(0.16, 0.1, 1.0)), // white
+                    (1.0, Hsv(0.16, 0.0, 1.0)), // white
                 ])
             }
 

@@ -11,6 +11,10 @@ lines.cap_style: projecting
 # lines.dashdot_pattern: 6.4, 1.6, 1., 1.6
 # lines.dotted_pattern: 1, 1.65
 
+span.line_width: 1.
+span.color: black
+span.line_style: ":"
+
 patch.line_width: 1.0
 
 font.family: sans-serif

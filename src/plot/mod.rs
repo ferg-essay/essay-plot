@@ -1,6 +1,6 @@
 use essay_graphics::api::Point;
 use essay_tensor::Tensor;
-use crate::{artist::{ContainerOpt, ImageOpt, LinesOpt, TextOpt}, chart::Chart};
+use crate::{artist::{ContainerOpt, HorizontalLineOpt, ImageOpt, LinesOpt, TextOpt}, chart::Chart};
 
 mod bar;
 mod contour;
@@ -13,6 +13,7 @@ mod pie;
 mod plot;
 mod quiver;
 mod scatter;
+mod span;
 mod specgram;
 mod stem;
 mod text;
@@ -37,6 +38,8 @@ pub use plot::{plot, plot_y};
 
 pub use quiver::quiver;
 
+pub use span::hline;
+
 pub use stem::stem;
 
 pub use text::text;
@@ -52,6 +55,13 @@ pub use triplot::triplot;
 use self::specgram::SpecGramOpt;
 
 impl Chart {
+    pub fn hline(
+        &mut self, 
+        y: f32,
+    ) -> HorizontalLineOpt {
+        span::hline(self, y)
+    }
+
     pub fn image(
         &mut self, 
         y: impl Into<Tensor>,
@@ -72,6 +82,13 @@ impl Chart {
         y: impl Into<Tensor>,
     ) -> LinesOpt {
         plot::plot(self, x, y)
+    }
+
+    pub fn plot_xy(
+        &mut self, 
+        values: impl Into<Tensor>,
+    ) -> LinesOpt {
+        plot::plot_xy(self, values)
     }
 
     pub fn plot_y(

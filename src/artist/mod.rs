@@ -1,3 +1,4 @@
+mod artist;
 mod bar;
 mod collection;
 mod colorbar;
@@ -10,18 +11,18 @@ mod color;
 mod grid_color;
 mod histogram;
 mod image;
+mod lines;
+mod markers;
 mod norm;
-mod style;
+pub mod patch;
 mod triplot;
 pub mod paths;
-mod text;
 mod quiver;
+mod span;
 mod stem;
+mod style;
+mod text;
 mod tricontour;
-mod markers;
-pub mod patch;
-mod artist;
-mod lines;
 
 pub use artist::{
     Artist, ToCanvas,
@@ -86,6 +87,10 @@ pub use patch::{
 pub use quiver::{
     Quiver,
     QuiverOpt,
+};
+
+pub use span::{
+    HorizontalLine, HorizontalLineOpt
 };
 
 pub use stem::{

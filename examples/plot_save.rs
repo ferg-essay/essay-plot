@@ -1,9 +1,7 @@
 use std::f32::consts::TAU;
 
 use essay_plot::{
-    prelude::*, 
-    artist::{Shading, DrawStyle}, 
-    plot::grid_color,
+    artist::{DrawStyle, Patch, Shading}, plot::grid_color, prelude::*
 };
 use essay_tensor::{prelude::*, init::{linspace, meshgrid}};
 
@@ -19,16 +17,21 @@ fn main() {
 
 fn main_plot() {
     let mut figure = Figure::new();
-    let mut graph = figure.chart([1., 1.]);
+    let mut chart = figure.chart([1., 1.]);
 
     let x = linspace(0., TAU, 20);
     let y = x.sin();
 
-    graph.title("My Title");
+    chart.title("My Title");
 
-    graph.plot(&x, &y);
+    chart.plot(&x, &y);
+    
+    let patch = Patch::rect((0.5, 0.5), (2., 2.));
+    chart.artist(patch).color("red").edge_color("black");
+    // graph.artist()
 
     figure.save("../test.png", 144.);
+    figure.show();
 }
 
 fn main_grid() { 

@@ -52,6 +52,15 @@ impl Lines2d {
 
         let lines = x.stack([y], -1);
 
+        Self::from_value(lines)
+    }
+
+    pub fn from_value(lines: impl Into<Tensor>) -> Self {
+        let lines = lines.into();
+
+        assert_eq!(lines.rank(), 2);
+        assert_eq!(lines.cols(), 2);
+
         let path = build_path(&lines, &DrawStyle::Default);
 
         Self {

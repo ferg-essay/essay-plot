@@ -238,11 +238,11 @@ impl Drawable for ChartFrame {
             );
             self.right.resize(renderer, &pos_right);
 
-            let pos_canvas = Bounds::<Canvas>::new(
+            let pos_legend = Bounds::<Canvas>::new(
                 Point(pos_data.xmin(), pos_data.ymax()),
                 Point(pos_data.xmin(), pos_data.ymax()),
             );
-            self.legend.resize(renderer, &pos_canvas);
+            self.legend.resize(renderer, &pos_legend);
 
             // TODO:
             self.bottom.update_axis(&self.data);
@@ -256,7 +256,7 @@ impl Drawable for ChartFrame {
             self.right.resize(renderer, &pos_data);
 
             self.legend.update_handlers(&mut self.data);
-            self.legend.resize(renderer, &pos_data);
+            //self.legend.resize(renderer, &pos_data);
         } else if self.data.get_pos().contains(event.point()) {
             if self.data.event(renderer, event) {
                 self.left.update_axis(&self.data);

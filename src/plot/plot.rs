@@ -13,6 +13,16 @@ pub fn plot(
     graph.artist(lines)
 }
 
+pub fn plot_xy(
+    graph: &mut Chart, 
+    values: impl Into<Tensor>, 
+) -> LinesOpt {
+    let lines = Lines2d::from_value(values);
+
+    //self.artist(lines)
+    graph.artist(lines)
+}
+
 pub fn plot_y(
     graph: &mut Chart, 
     y: impl Into<Tensor>, 

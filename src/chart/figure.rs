@@ -1,5 +1,6 @@
+use essay_graphics::api::renderer::Drawable;
 use essay_graphics::layout::Layout;
-use essay_graphics::wgpu::WgpuBackend;
+use essay_graphics::wgpu::{WgpuBackend, WgpuHardcopy};
 
 use essay_graphics::api::{
     renderer::Backend,
@@ -40,28 +41,29 @@ impl Figure {
         device.main_loop(Box::new(layout)).unwrap();
     }
 
+    #[inline]
     pub fn get_width(&self) -> f32 {
         self.size.0
     }
 
+    #[inline]
     pub fn get_height(&self) -> f32 {
         self.size.1
     }
 
+    #[inline]
     pub fn get_dpi(&self) -> f32 {
         self.dpi
     }
 
-    pub fn save(&mut self, _path: impl AsRef<std::path::Path>, _dpi: f32) {
-        todo!();
-        /*
-        crate::wgpu::draw_hardcopy(
-            self.get_width() * dpi,
-            self.get_height() * dpi,
-            dpi,
-            &mut self.layout, 
-            path
-        );
-        */    
+    pub fn save(&mut self, path: impl AsRef<std::path::Path>, dpi: f32) {
+        let width = self.get_width() * dpi;
+        let height = self.get_height() * dpi;
+        let mut hardcopy = WgpuHardcopy::new(width as u32, height as u32);
+        hardcopy.scale_factor(dpi / 100.);
+
+        let surface = hardcopy.add_surface();
+        hardcopy.draw(self.charts.get_layout_mut());
+        hardcopy.save(surface, path, dpi as usize);
     }
 }

@@ -1,5 +1,5 @@
 use essay_graphics::layout::MainLoop;
-use essay_plot::{chart::{Chart, ConfigArc}, prelude::*};
+use essay_plot::chart::{Chart, ConfigArc};
 use essay_tensor::prelude::*;
 
 fn main() { 
@@ -15,5 +15,5 @@ fn main() {
     let bottom = bottom + tf32!([2., 1., 2.]);
     chart.bar([1., 1., 0.]).bottom(&bottom);
 
-    MainLoop::new().show(chart.view().arc().clone());
+    MainLoop::new().show(chart);
 }

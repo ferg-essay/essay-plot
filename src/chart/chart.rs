@@ -1,5 +1,5 @@
 use essay_graphics::{
-    api::Bounds,
+    api::{renderer::{self, Drawable, Event, Renderer}, Bounds},
     layout::{Page, View}, 
 };
 
@@ -192,6 +192,16 @@ impl From<Chart> for View<ChartFrame> {
 impl From<&Chart> for View<ChartFrame> {
     fn from(chart: &Chart) -> Self {
         chart.view.clone()
+    }
+}
+
+impl Drawable for Chart {
+    fn draw(&mut self, renderer: &mut dyn Renderer) -> renderer::Result<()> {
+        self.view.draw(renderer)
+    }
+
+    fn event(&mut self, renderer: &mut dyn Renderer, event: &Event) {
+        self.view.event(renderer, event);
     }
 }
 

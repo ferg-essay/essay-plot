@@ -1,5 +1,4 @@
-use essay_graphics::api::renderer::Drawable;
-use essay_graphics::layout::Layout;
+use essay_graphics::layout::Page;
 use essay_graphics::wgpu::{WgpuBackend, WgpuHardcopy};
 
 use essay_graphics::api::{
@@ -23,19 +22,19 @@ impl Figure {
     pub fn new() -> Self {
         Self {
             backend: Box::new(WgpuBackend::new()),
-            charts: ChartBuilder::new(Layout::new()),
+            charts: ChartBuilder::new(Page::new()),
 
             size: (6.4, 4.8),
             dpi: 200.,
         }
     }
 
-    pub fn chart(&mut self, pos: impl Into<Bounds<Layout>>) -> Chart {
+    pub fn chart(&mut self, pos: impl Into<Bounds<Page>>) -> Chart {
         self.charts.chart(pos)
     }
 
     pub fn show(self) {
-        let layout = self.charts.into_layout();
+        let layout = self.charts.into_page();
         let mut device = self.backend;
 
         device.main_loop(Box::new(layout)).unwrap();
@@ -63,7 +62,7 @@ impl Figure {
         hardcopy.scale_factor(dpi / 100.);
 
         let surface = hardcopy.add_surface();
-        hardcopy.draw(self.charts.get_layout_mut());
+        hardcopy.draw(self.charts.get_page_mut());
         hardcopy.save(surface, path, dpi as usize);
     }
 }

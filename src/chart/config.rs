@@ -201,6 +201,12 @@ impl Deref for ConfigArc {
     }
 }
 
+impl Default for ConfigArc {
+    fn default() -> Self {
+        read_config().into_arc()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::read_config;

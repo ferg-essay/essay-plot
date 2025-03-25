@@ -17,7 +17,7 @@ use crate::{
 
 use super::{axis::{Axis, AxisTicks, XAxis, YAxis}, data_frame::DataFrame, legend::Legend};
 
-pub(crate) struct ChartFrame {
+pub struct ChartFrame {
     pos: Bounds<Canvas>,
 
     config: ConfigArc,
@@ -192,72 +192,75 @@ impl ChartFrame {
     pub(crate) fn colorbar(&mut self) {
         self.right.colorbar();
     }
+
+    fn resize(&mut self, renderer: &mut dyn Renderer) {
+        let pos = renderer.pos();
+
+        let pos = Bounds::from((
+            pos.xmin() + pos.width() * self.margins.left,
+            pos.ymin() + pos.height() * self.margins.top,
+            pos.xmin() + pos.width() * self.margins.right,
+            pos.ymin() + pos.height() * self.margins.bottom,
+        ));
+    
+        self.pos = pos.clone();
+    
+        let title = self.title.bounds();
+    
+        // title exists outside the pos bounds
+        self.title.resize(
+            renderer,
+            &Bounds::from((
+                pos.xmin(), pos.ymax(), 
+                pos.xmax(), pos.ymax() + title.height()
+            ))
+        );
+    
+        let pos_data = Bounds::<Canvas>::new(
+            Point(pos.xmin(), pos.ymin()), 
+            Point(pos.xmax(), pos.ymax()),
+        );
+    
+        self.data.resize(renderer, &pos_data);
+    
+        let pos_data = self.data.get_pos().clone();
+    
+        let pos_top = Bounds::<Canvas>::new(
+            Point(pos_data.xmin(), pos_data.ymax()),
+            Point(pos_data.xmax(), pos_data.ymax()),
+        );
+        self.top.resize(renderer, &pos_top);
+    
+        let pos_right = Bounds::<Canvas>::new(
+            Point(pos_data.xmax(), pos_data.ymin()),
+            Point(pos_data.xmax(), pos_data.ymax()),
+        );
+        self.right.resize(renderer, &pos_right);
+    
+        let pos_legend = Bounds::<Canvas>::new(
+            Point(pos_data.xmin(), pos_data.ymax()),
+            Point(pos_data.xmin(), pos_data.ymax()),
+        );
+        self.legend.resize(renderer, &pos_legend);
+    
+        // TODO:
+        self.bottom.update_axis(&self.data);
+        // self.bottom.resize(renderer, &pos);
+        self.bottom.resize(renderer, &pos_data);
+    
+        self.left.update_axis(&self.data);
+        self.left.resize(renderer, &pos_data);
+    
+        self.top.resize(renderer, &pos_data);
+        self.right.resize(renderer, &pos_data);
+    
+        self.legend.update_handlers(&mut self.data);
+    }
 }
 
 impl Drawable for ChartFrame {
     fn event(&mut self, renderer: &mut dyn Renderer, event: &Event) {
-        if let Event::Resize(pos) = event {
-            let pos = Bounds::from((
-                pos.xmin() + pos.width() * self.margins.left,
-                pos.ymin() + pos.height() * self.margins.top,
-                pos.xmin() + pos.width() * self.margins.right,
-                pos.ymin() + pos.height() * self.margins.bottom,
-            ));
-
-            self.pos = pos.clone();
-
-            let title = self.title.bounds();
-
-            // title exists outside the pos bounds
-            self.title.resize(
-                renderer,
-                &Bounds::from((
-                    pos.xmin(), pos.ymax(), 
-                    pos.xmax(), pos.ymax() + title.height()
-                ))
-            );
-
-            let pos_data = Bounds::<Canvas>::new(
-                Point(pos.xmin(), pos.ymin()), 
-                Point(pos.xmax(), pos.ymax()),
-            );
-
-            self.data.resize(renderer, &pos_data);
-
-            let pos_data = self.data.get_pos().clone();
-
-            let pos_top = Bounds::<Canvas>::new(
-                Point(pos_data.xmin(), pos_data.ymax()),
-                Point(pos_data.xmax(), pos_data.ymax()),
-            );
-            self.top.resize(renderer, &pos_top);
-
-            let pos_right = Bounds::<Canvas>::new(
-                Point(pos_data.xmax(), pos_data.ymin()),
-                Point(pos_data.xmax(), pos_data.ymax()),
-            );
-            self.right.resize(renderer, &pos_right);
-
-            let pos_legend = Bounds::<Canvas>::new(
-                Point(pos_data.xmin(), pos_data.ymax()),
-                Point(pos_data.xmin(), pos_data.ymax()),
-            );
-            self.legend.resize(renderer, &pos_legend);
-
-            // TODO:
-            self.bottom.update_axis(&self.data);
-            // self.bottom.resize(renderer, &pos);
-            self.bottom.resize(renderer, &pos_data);
-
-            self.left.update_axis(&self.data);
-            self.left.resize(renderer, &pos_data);
-
-            self.top.resize(renderer, &pos_data);
-            self.right.resize(renderer, &pos_data);
-
-            self.legend.update_handlers(&mut self.data);
-            //self.legend.resize(renderer, &pos_data);
-        } else if self.data.get_pos().contains(event.point()) {
+        if self.data.get_pos().contains(event.point()) {
             if self.data.event(renderer, event) {
                 self.left.update_axis(&self.data);
                 self.bottom.update_axis(&self.data);
@@ -269,6 +272,9 @@ impl Drawable for ChartFrame {
 
     fn draw(&mut self, renderer: &mut dyn Renderer) -> Result<()> {
         // let clip = Clip::from(&self.pos);
+        if self.pos != *renderer.pos() {
+            self.resize(renderer);
+        }
 
         let frame_to_canvas = ToCanvas::new(
             self.pos.clone(), 

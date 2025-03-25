@@ -1,10 +1,10 @@
-use essay_plot::prelude::*;
+use essay_graphics::layout::MainLoop;
+use essay_plot::{chart::{Chart, ConfigArc}, prelude::*};
 use essay_tensor::prelude::*;
 
 fn main() { 
-
-    let mut figure = Figure::new();
-    let mut chart = figure.chart(());
+    let config = ConfigArc::default();
+    let mut chart = Chart::new(&config);
 
     let bottom = Tensor::zeros([3]);
     chart.bar([1., 2., 3.]).bottom(&bottom);
@@ -15,5 +15,5 @@ fn main() {
     let bottom = bottom + tf32!([2., 1., 2.]);
     chart.bar([1., 1., 0.]).bottom(&bottom);
 
-    figure.show();
+    MainLoop::new().show(chart.view().arc().clone());
 }

@@ -1,6 +1,6 @@
 use essay_graphics::{
     api::Bounds,
-    layout::{Layout, View}, 
+    layout::{Page, View}, 
 };
 
 use crate::{
@@ -8,32 +8,37 @@ use crate::{
     chart::{AspectMode, AxisOpt, Data, ChartFrame, FrameArtist, FrameTextOpt, PlotArtist}
 };
 
-use super::{config::read_config, style::PlotOptHandle, ConfigArc, PlotOpt, Scaling};
+use super::{style::PlotOptHandle, ConfigArc, PlotOpt, Scaling};
 
 pub struct ChartBuilder {
     config: ConfigArc,
-    layout: Layout,
+    page: Page,
 }
 
 impl ChartBuilder {
-    pub fn new(layout: Layout) -> Self {
+    pub fn new(page: Page) -> Self {
         Self {
-            config: read_config().into_arc(),
+            config: ConfigArc::default(),
 
-            layout,
+            page,
         }
     }
 
-    pub fn chart(&mut self, pos: impl Into<Bounds<Layout>>) -> Chart {
-        Chart::new(self.layout.view(pos, ChartFrame::new(&self.config)))
+    pub fn chart(&mut self, pos: impl Into<Bounds<Page>>) -> Chart {
+        // Chart::new(self.page.view(pos, ChartFrame::new(&self.config)))
+        let chart = Chart::new(&self.config);
+
+        self.page.view(pos, &chart);
+
+        chart
     }
 
-    pub fn get_layout_mut(&mut self) -> &mut Layout {
-        &mut self.layout
+    pub fn get_page_mut(&mut self) -> &mut Page {
+        &mut self.page
     }
 
-    pub fn into_layout(self) -> Layout {
-        self.layout
+    pub fn into_page(self) -> Page {
+        self.page
     }
 }
 
@@ -43,14 +48,18 @@ pub struct Chart {
 }
 
 impl Chart {
-    pub(crate) fn new(view: View<ChartFrame>) -> Self {
-        let mut chart = Self {
+    pub fn new(config: &ConfigArc) -> Self {
+        let view = View::from(ChartFrame::new(config));
+        
+        // chart.default_properties();
+
+        Self {
             view
-        };
+        }
+    }
 
-        chart.default_properties();
-
-        chart
+    pub fn view(&self) -> &View<ChartFrame> {
+        &self.view
     }
 
     fn text_opt(&self, artist: FrameArtist) -> FrameTextOpt {
@@ -139,8 +148,8 @@ impl Chart {
         self
     }
 
-    fn default_properties(&mut self) {
-        //self.title.font().size(12.);
+    fn _default_properties(&mut self) {
+        // self.title.font().size(12.);
     }
 
     // TODO: should there be a plain add_artist that doesn't wrap PlotStyle?
@@ -171,6 +180,18 @@ impl Chart {
 
             f.data_mut().add_artist(artist, &config, view_clone)
         })
+    }
+}
+
+impl From<Chart> for View<ChartFrame> {
+    fn from(chart: Chart) -> Self {
+        chart.view.clone()
+    }
+}
+
+impl From<&Chart> for View<ChartFrame> {
+    fn from(chart: &Chart) -> Self {
+        chart.view.clone()
     }
 }
 

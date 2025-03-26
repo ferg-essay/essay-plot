@@ -11,8 +11,10 @@ fn main() {
     let mut figure = Figure::new();
 
     for j in 0..3 {
+        let mut sub_figure = figure.horizontal();
+
         for i in 0..3 {
-            let mut chart = figure.chart(((i as f32, j as f32), [1., 1.]));
+            let mut chart = sub_figure.chart();
 
             let t = linspace(0., 6.28, 40);
             let x = ((i as f32 + 1.) * &t).sin();
@@ -23,7 +25,7 @@ fn main() {
         }
     }
 
-    let mut chart = figure.chart(((3., 0.), [1., 3.]));
+    let mut chart = figure.chart();
 
     let t = linspace(0., 6.28, 40);
     let x = t.sin();

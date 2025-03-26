@@ -4,7 +4,7 @@ use essay_tensor::prelude::*;
 fn main() { 
 
     let mut figure = Figure::new();
-    let mut chart = figure.chart(());
+    let mut chart = figure.chart();
 
     let bottom = Tensor::zeros([3]);
     chart.bar([1., 2., 3.]).bottom(&bottom);

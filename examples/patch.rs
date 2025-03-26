@@ -2,7 +2,7 @@ use essay_plot::{artist::{patch, Patch}, prelude::*};
 
 fn main() { 
     let mut figure = Figure::new();
-    let mut chart = figure.chart(());
+    let mut chart = figure.chart();
 
     let patch = Patch::new(Path::move_to(0., 0.).line_to(1., 0.).close_poly(1., 1.));
     chart.artist(patch).color("purple").edge_color("black").rotate(Angle::Unit(0.1)).scale(2.);

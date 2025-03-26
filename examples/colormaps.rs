@@ -14,7 +14,7 @@ fn main() {
 }
 
 fn draw_grid(figure: &mut Figure, pos: (f32, f32), colormap: ColorMaps) {
-    let mut chart = figure.chart((pos, [1., 1.]));
+    let mut chart = figure.chart();
 
     chart.scaling(Scaling::Image);
     chart.x().visible(false);

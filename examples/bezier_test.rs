@@ -10,7 +10,7 @@ fn main() {
     //let mut gui = WgpuBackend::new();
 
     let mut figure = Figure::new();
-    let mut graph = figure.chart([1., 1.]);
+    let mut graph = figure.chart();
 
     let test = Tests::WEDGE;
 

@@ -17,7 +17,7 @@ fn main() {
 
 fn main_plot() {
     let mut figure = Figure::new();
-    let mut chart = figure.chart([1., 1.]);
+    let mut chart = figure.chart();
 
     let x = linspace(0., TAU, 20);
     let y = x.sin();
@@ -42,8 +42,8 @@ fn main_grid() {
     let z = &x.sin() + &y.sin();
 
     let mut figure = Figure::new();
-    let mut graph1 = figure.chart(());
-    let mut graph2 = figure.chart(());
+    let mut graph1 = figure.chart();
+    let mut graph2 = figure.chart();
 
     grid_color(&mut graph1, &z).shading(Shading::Flat);
     grid_color(&mut graph2, &z).shading(Shading::Gouraud);
@@ -53,11 +53,13 @@ fn main_grid() {
 
 fn main_plot2() {
     let mut figure = Figure::new();
-    let mut graph1 = figure.chart((0., 0., 0.9, 0.9));
-    let mut graph2 = figure.chart((1.1, 0., 2., 0.9));
+    let mut sub_figure = figure.horizontal();
+    let mut graph1 = sub_figure.chart();
+    let mut graph2 = sub_figure.chart();
 
-    let mut graph3 = figure.chart((0., 1.1, 0.9, 2.));
-    let mut graph4 = figure.chart((1.1, 1.1, 2., 2.));
+    let mut sub_figure = figure.horizontal();
+    let mut graph3 = sub_figure.chart();
+    let mut graph4 = sub_figure.chart();
 
     let x = linspace(0., 1., 10);
     let odor = tf32!([

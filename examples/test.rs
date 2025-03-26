@@ -63,7 +63,7 @@ fn add_line(data: &mut Vec<f32>, start: usize, len: usize, w: usize) {
 }
 
 fn draw_grid(figure: &mut Figure, pos: (f32, f32), data: Tensor, colormap: ColorMaps) {
-    let mut chart = figure.chart((pos, [1., 1.]));
+    let mut chart = figure.chart();
 
     chart.scaling(Scaling::Image);
     //chart.x().visible(false);

@@ -3,7 +3,7 @@ use essay_tensor::init::{arange, meshgrid};
 
 fn main() { 
     let mut figure = Figure::new();
-    let mut graph = figure.chart(());
+    let mut graph = figure.chart();
 
     let x = arange(0., 6.28, 0.2);
     let y = arange(0., 6.28, 0.2);

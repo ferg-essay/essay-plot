@@ -1,6 +1,6 @@
 use essay_graphics::{
-    api::{renderer::{self, Drawable, Event, Renderer}, Bounds},
-    layout::{Page, View}, 
+    api::renderer::{self, Drawable, Event, Renderer},
+    layout::{Page, PageBuilder, View}, 
 };
 
 use crate::{
@@ -10,35 +10,31 @@ use crate::{
 
 use super::{style::PlotOptHandle, ConfigArc, PlotOpt, Scaling};
 
-pub struct ChartBuilder {
+pub struct Builder {
     config: ConfigArc,
-    page: Page,
+    page: PageBuilder,
 }
 
-impl ChartBuilder {
-    pub fn new(page: Page) -> Self {
+impl Builder {
+    pub fn new() -> Self {
         Self {
             config: ConfigArc::default(),
 
-            page,
+            page: Page::builder(),
         }
     }
 
-    pub fn chart(&mut self, pos: impl Into<Bounds<Page>>) -> Chart {
+    pub fn chart(&mut self) -> Chart {
         // Chart::new(self.page.view(pos, ChartFrame::new(&self.config)))
         let chart = Chart::new(&self.config);
 
-        self.page.view(pos, &chart);
+        self.page.view(chart.view.clone());
 
         chart
     }
 
-    pub fn get_page_mut(&mut self) -> &mut Page {
-        &mut self.page
-    }
-
     pub fn into_page(self) -> Page {
-        self.page
+        self.page.build()
     }
 }
 
@@ -197,11 +193,11 @@ impl From<&Chart> for View<ChartFrame> {
 
 impl Drawable for Chart {
     fn draw(&mut self, renderer: &mut dyn Renderer) -> renderer::Result<()> {
-        self.view.draw(renderer)
+        self.view.drawable().draw(renderer)
     }
 
     fn event(&mut self, renderer: &mut dyn Renderer, event: &Event) {
-        self.view.event(renderer, event);
+        self.view.drawable().event(renderer, event);
     }
 }
 

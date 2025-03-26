@@ -3,7 +3,7 @@ use essay_tensor::init::linspace;
 
 fn main() {
     let mut figure = Figure::new();
-    let mut graph = figure.chart([1., 1.]);
+    let mut graph = figure.chart();
 
     let x = linspace(0., 6.28, 20);
     let y = x.sin();

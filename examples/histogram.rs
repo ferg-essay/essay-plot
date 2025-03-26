@@ -5,7 +5,7 @@ fn main() {
     let data = Tensor::random_normal([128], ());
 
     let mut figure = Figure::new();
-    let mut graph = figure.chart(());
+    let mut graph = figure.chart();
 
     graph.hist(data);
 

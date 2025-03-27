@@ -46,6 +46,14 @@ macro_rules! data_artist_option_struct {
                 self.artist.write(|artist| fun(artist))
             }
         }
+
+        impl Clone for $name {
+            fn clone(&self) -> Self {
+                Self {
+                    artist: self.artist.clone(),
+                }
+            }
+        }
     }
 }
 

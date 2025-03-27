@@ -72,6 +72,14 @@ pub(crate) fn derive_plot_opt(
 
             #field_methods
         }
+
+        impl Clone for #opt {
+            fn clone(&self) -> Self {
+                Self {
+                    plot: plot.clone(),
+                }
+            }
+        }
     }.into()
 }
 

@@ -30,7 +30,7 @@ pub use data_frame::{
 pub use frame::{
     FrameArtist, FrameTextOpt,
 };
-pub(crate) use frame::ChartFrame;
+pub use frame::ChartFrame;
 
 pub use legend::{
     Legend, LegendHandler,

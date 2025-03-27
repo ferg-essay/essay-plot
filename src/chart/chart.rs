@@ -191,6 +191,12 @@ impl From<&Chart> for View<ChartFrame> {
     }
 }
 
+impl Default for Chart {
+    fn default() -> Self {
+        Chart::new(&ConfigArc::default())
+    }
+}
+
 impl Drawable for Chart {
     fn draw(&mut self, renderer: &mut dyn Renderer) -> renderer::Result<()> {
         self.view.drawable().draw(renderer)

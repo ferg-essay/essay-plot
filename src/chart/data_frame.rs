@@ -524,6 +524,16 @@ impl<A: PlotArtist + 'static> ArtistView<A> {
     }
 }
 
+impl<A: PlotArtist> Clone for ArtistView<A> {
+    fn clone(&self) -> Self {
+        Self { 
+            view: self.view.clone(), 
+            id: self.id.clone(), 
+            marker: self.marker.clone() 
+        }
+    }
+}
+
 trait ArtistHandleTrait<M: Coord> : Send {
     fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
     fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<M>;
@@ -580,7 +590,7 @@ where
 }
 
 pub trait PlotArtist : Artist<Data> + Sized {
-    type Opt;
+    type Opt : Clone;
     
     fn config(
         &mut self, 
@@ -588,7 +598,9 @@ pub trait PlotArtist : Artist<Data> + Sized {
         view: ArtistView<Self>,
     ) -> Self::Opt;
 
-    fn get_legend(&self) -> Option<LegendHandler>;
+    fn get_legend(&self) -> Option<LegendHandler> {
+        None
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

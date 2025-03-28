@@ -10,29 +10,31 @@ fn main() {
 
     let mut figure = Figure::new();
 
-    for j in 0..3 {
-        let mut sub_figure = figure.horizontal();
-
-        for i in 0..3 {
-            let mut chart = sub_figure.chart();
-
-            let t = linspace(0., 6.28, 40);
-            let x = ((i as f32 + 1.) * &t).sin();
-            let y = ((j as f32 + 1.) * t).cos();
-
-            chart.title("My Title"); // .color(0x008033).size(18.);
-            chart.plot(&x, &y);
+    figure.multichart(|ui| {
+        for j in 0..3 {
+            ui.horizontal(|ui| {
+                for i in 0..3 {
+                    let mut chart = ui.chart();
+    
+                    let t = linspace(0., 6.28, 40);
+                    let x = ((i as f32 + 1.) * &t).sin();
+                    let y = ((j as f32 + 1.) * t).cos();
+    
+                    chart.title("My Title"); // .color(0x008033).size(18.);
+                    chart.plot(&x, &y);
+                }
+            });
         }
-    }
-
-    let mut chart = figure.chart();
-
-    let t = linspace(0., 6.28, 40);
-    let x = t.sin();
-    let y = (4. * t).cos();
-
-    chart.title("My Title"); // .color(0x008033).size(18.);
-    chart.plot(&x, &y);
+    
+        let mut chart = ui.chart();
+    
+        let t = linspace(0., 6.28, 40);
+        let x = t.sin();
+        let y = (4. * t).cos();
+    
+        chart.title("My Title"); // .color(0x008033).size(18.);
+        chart.plot(&x, &y);
+    });
 
     figure.show();
 }

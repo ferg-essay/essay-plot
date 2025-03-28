@@ -9,7 +9,8 @@ mod tick_formatter;
 mod tick_locator;
 mod style;
 
-pub use chart::{Chart, Builder, IntoArtist};
+pub use chart::{Chart, // Builder, 
+    IntoArtist};
 
 pub use figure::Figure;
 

@@ -1,6 +1,6 @@
 use essay_graphics::{
     api::renderer::{self, Drawable, Event, Renderer},
-    layout::{Page, PageBuilder, View}, 
+    layout::View, 
 };
 
 use crate::{
@@ -9,34 +9,6 @@ use crate::{
 };
 
 use super::{style::PlotOptHandle, ConfigArc, PlotOpt, Scaling};
-
-pub struct Builder {
-    config: ConfigArc,
-    page: PageBuilder,
-}
-
-impl Builder {
-    pub fn new() -> Self {
-        Self {
-            config: ConfigArc::default(),
-
-            page: Page::builder(),
-        }
-    }
-
-    pub fn chart(&mut self) -> Chart {
-        // Chart::new(self.page.view(pos, ChartFrame::new(&self.config)))
-        let chart = Chart::new(&self.config);
-
-        self.page.view(chart.view.clone());
-
-        chart
-    }
-
-    pub fn into_page(self) -> Page {
-        self.page.build()
-    }
-}
 
 #[derive(Clone)]
 pub struct Chart {

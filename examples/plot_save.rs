@@ -53,13 +53,18 @@ fn main_grid() {
 
 fn main_plot2() {
     let mut figure = Figure::new();
-    let mut sub_figure = figure.horizontal();
-    let mut graph1 = sub_figure.chart();
-    let mut graph2 = sub_figure.chart();
 
-    let mut sub_figure = figure.horizontal();
-    let mut graph3 = sub_figure.chart();
-    let mut graph4 = sub_figure.chart();
+    let ((mut graph1, mut graph2), (mut graph3, mut graph4))
+        = figure.multichart(|ui| {
+        (
+            ui.horizontal(|ui| {
+                (ui.chart(), ui.chart())
+            }),
+            ui.horizontal(|ui| {
+                (ui.chart(), ui.chart())
+            }),
+        )
+    });
 
     let x = linspace(0., 1., 10);
     let odor = tf32!([

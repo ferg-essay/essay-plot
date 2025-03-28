@@ -14,7 +14,7 @@ pub struct Figure {
     backend: Box<dyn Backend>,
 
     config: ConfigArc,
-    page: PageBuilder,
+    page: Option<Page>,
 }
 
 impl Figure {
@@ -22,7 +22,7 @@ impl Figure {
         Self {
             backend: Box::new(WgpuBackend::new()),
             config: ConfigArc::default(),
-            page: Page::builder(),
+            page: None,
 
             size: (6.4, 4.8),
             dpi: 200.,
@@ -32,11 +32,27 @@ impl Figure {
     pub fn chart(&mut self) -> Chart {
         let chart = Chart::new(&self.config);
 
-        self.page.view(chart.view().clone());
+        self.page = Some(Page::new(chart.clone()));
 
         chart
     }
 
+    pub fn multichart<R>(&mut self, f: impl FnOnce(&mut SubFigure) -> R) -> R {
+        let mut page_builder = PageBuilder::new();
+
+        let mut builder = SubFigure {
+            config: &self.config,
+            sub_page: &mut page_builder,
+        };
+        
+        let result = (f)(&mut builder);
+
+        self.page = Some(page_builder.build());
+
+        result
+    }
+
+    /*
     pub fn horizontal(&mut self) -> SubFigure {
         SubFigure {
             config: &self.config,
@@ -50,12 +66,13 @@ impl Figure {
             sub_page: self.page.vertical(),
         }
     }
+    */
 
     pub fn show(self) {
-        let layout = self.page.build();
-        let mut device = self.backend;
-
-        device.main_loop(Box::new(layout)).unwrap();
+        let mut own = self;
+        if let Some(page) = own.page.take() {
+            own.backend.main_loop(Box::new(page)).unwrap();
+        }
     }
 
     #[inline]
@@ -80,7 +97,9 @@ impl Figure {
         hardcopy.scale_factor(dpi / 100.);
 
         let surface = hardcopy.add_surface();
-        hardcopy.draw(&mut self.page.build());
+        if let Some(page) = &mut self.page {
+            hardcopy.draw(page);
+        }
         hardcopy.save(surface, path, dpi as usize);
     }
 }
@@ -94,22 +113,30 @@ impl SubFigure<'_> {
     pub fn chart(&mut self) -> Chart {
         let chart = Chart::new(&self.config);
 
-        self.sub_page.view(chart.view().clone());
+        self.sub_page.view(chart.clone());
 
         chart
     }
 
-    pub fn horizontal(&mut self) -> SubFigure {
-        SubFigure {
-            config: &self.config,
-            sub_page: self.sub_page.horizontal(),
-        }
+    pub fn horizontal<R>(&mut self, f: impl FnOnce(&mut SubFigure) -> R) -> R {
+        self.sub_page.horizontal(|page_builder| {
+            let mut sub = SubFigure {
+                config: &self.config,
+                sub_page: page_builder,
+            };
+
+            (f)(&mut sub)
+        })
     }
 
-    pub fn vertical(&mut self) -> SubFigure {
-        SubFigure {
-            config: &self.config,
-            sub_page: self.sub_page.vertical(),
-        }
+    pub fn vertical<R>(&mut self, f: impl FnOnce(&mut SubFigure) -> R) -> R {
+        self.sub_page.vertical(|page_builder| {
+            let mut sub = SubFigure {
+                config: &self.config,
+                sub_page: page_builder,
+            };
+
+            (f)(&mut sub)
+        })
     }
 }

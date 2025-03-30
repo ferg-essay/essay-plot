@@ -38,10 +38,6 @@ impl PathCollection {
 }
 
 impl Artist<Data> for PathCollection {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-        self.bounds = Bounds::from(&self.xy);
-    }
-    
     fn bounds(&mut self) -> Bounds<Data> {
         self.bounds.clone()
     }

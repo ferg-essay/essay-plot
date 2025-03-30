@@ -12,7 +12,7 @@ mod style;
 pub use chart::{Chart, // Builder, 
     IntoArtist};
 
-pub use figure::Figure;
+pub use figure::{Figure, SubFigure};
 
 pub use config::{
     Config, ConfigArc,

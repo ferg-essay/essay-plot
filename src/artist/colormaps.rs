@@ -51,7 +51,8 @@ impl From<ColorMaps> for ColorMap {
                 ColorMap::from([
                     // cool, unsaturated orange to warm, saturated orange
                     (0.0, Hsv(0.99, 1., 0.90)), // "red" // top 1% distinct
-                    (0.01, Hsv(0.02, 1.0, 0.94)), // "tomato red"
+                    // <div style="background-color: hsl(7, 100%, 50%)"></div>
+                    (0.01, Hsv(0.02, 1.0, 0.94).into()), // "tomato red"
                     (0.10, Hsv(0.06, 0.95, 0.97)), // "bright orange"
                     (0.30, Hsv(0.13, 0.90, 0.97)), // "golden yellow"
 
@@ -60,8 +61,10 @@ impl From<ColorMaps> for ColorMap {
                     // cool, saturated blue to warm, unsaturated blue
                     (0.75, Hsv(0.56, 0.80, 0.95)), // "css:dodgerblue",
                     (0.90, Hsv(0.61, 0.99, 0.87)), // "blue",
-                    (0.99, Hsv(0.66, 0.98, 0.65)), // "cobalt blue" 
-                    (1., Hsv(0.69, 0.92, 0.45)), // "css:midnightblue" bottom 1% distinct
+                    // <div style="background-color: hsl(237, 98%, 65%)"></div>
+                    (0.99, Hsv(0.66, 0.98, 0.65).into()), // "cobalt blue" 
+                    // <div style="background-color: hsl(248, 92%, 45%)"></div>
+                    (1., Hsv(0.69, 0.92, 0.45).into()), // "css:midnightblue" bottom 1% distinct
                 ])
             }
             ColorMaps::BlueOrangeClip => {

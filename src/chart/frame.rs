@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use essay_graphics::{
     api::{
-        renderer::{Result, Canvas, Drawable, Event, Renderer}, 
+        renderer::{Result, Canvas, Drawable, Renderer}, 
         Affine2d, Bounds, Color, PathOpt, Point, VertAlign 
     }, 
     layout::View
@@ -110,6 +110,7 @@ impl ChartFrame {
     /// The position for a frame is the size of the data box. The frame,
     /// axes and titles are relative to the data box.
     /// 
+    /*
     pub(crate) fn _set_pos(&mut self, pos: &Bounds<Canvas>) -> &mut Self {
         self.pos = pos.clone();
 
@@ -150,6 +151,7 @@ impl ChartFrame {
 
         self
     }
+    */
 
     pub(crate) fn data(&self) -> &DataFrame {
         &self.data
@@ -208,7 +210,7 @@ impl ChartFrame {
         let title = self.title.bounds();
     
         // title exists outside the pos bounds
-        self.title.resize(
+        self.title.update_pos(
             renderer,
             &Bounds::from((
                 pos.xmin(), pos.ymax(), 
@@ -221,7 +223,7 @@ impl ChartFrame {
             Point(pos.xmax(), pos.ymax()),
         );
     
-        self.data.resize(renderer, &pos_data);
+        self.data.update_pos(renderer, &pos_data);
     
         let pos_data = self.data.get_pos().clone();
     
@@ -259,17 +261,6 @@ impl ChartFrame {
 }
 
 impl Drawable for ChartFrame {
-    fn event(&mut self, renderer: &mut dyn Renderer, event: &Event) {
-        if self.data.get_pos().contains(event.point()) {
-            if self.data.event(renderer, event) {
-                self.left.update_axis(&self.data);
-                self.bottom.update_axis(&self.data);
-
-                renderer.request_redraw(&self.pos);
-            };
-        }
-    }
-
     fn draw(&mut self, renderer: &mut dyn Renderer) -> Result<()> {
         // let clip = Clip::from(&self.pos);
         if self.pos != *renderer.pos() {
@@ -360,13 +351,13 @@ impl TopFrame {
             ))
         }
     }
-}
 
-impl Artist<Canvas> for TopFrame {
     fn resize(&mut self, _renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.set_pos(pos);
     }
-    
+}
+
+impl Artist<Canvas> for TopFrame {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.bounds.clone()
     }
@@ -427,7 +418,7 @@ impl BottomFrame {
         let mut y = self.x_axis.draw(renderer, data, to_canvas, style)?;
         y -= renderer.to_px(self.sizes.label_pad);
 
-        self.title.set_pos(Bounds::new(
+        self.title.update_pos(renderer, &Bounds::new(
             Point(data.get_pos().xmin(), y),
             Point(data.get_pos().xmax(), y),
         ));
@@ -440,7 +431,7 @@ impl BottomFrame {
     }
 
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        self.title.resize(renderer, pos);
+        self.title.update_pos(renderer, pos);
         self.x_axis.resize(renderer, pos);
     }
 
@@ -493,7 +484,7 @@ impl LeftFrame {
         let mut x = self.y_axis.draw(renderer, data, to_canvas, style)?;
         x -= renderer.to_px(self.sizes.label_pad);
 
-        self.title.set_pos(Bounds::new(
+        self.title.update_pos(renderer, &Bounds::new(
             Point(x, data.get_pos().ymid()),
             Point(x, data.get_pos().ymid()),
         ));
@@ -506,7 +497,7 @@ impl LeftFrame {
     }
 
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        self.title.resize(renderer, pos);
+        self.title.update_pos(renderer, pos);
         self.y_axis.update(renderer, pos);
     }
 
@@ -557,9 +548,7 @@ impl RightFrame {
     pub fn colorbar(&mut self) {
         self.colorbar = Some(Colorbar::new());
     }
-}
 
-impl Artist<Canvas> for RightFrame {
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.set_pos(pos);
 
@@ -567,7 +556,9 @@ impl Artist<Canvas> for RightFrame {
             colorbar.resize(renderer, pos);
         }
     }
-    
+}
+
+impl Artist<Canvas> for RightFrame {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.bounds.clone()
     }

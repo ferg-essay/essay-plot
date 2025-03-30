@@ -49,10 +49,7 @@ impl TriContour {
 
         self.data = data;
     }
-}
-
-impl Artist<Data> for TriContour {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer) {
         //let (rows, cols) = (self.data.rows(), self.data.cols());
 
         //for vert in self.tri.triangles().iter_slice() {
@@ -90,7 +87,10 @@ impl Artist<Data> for TriContour {
 
         // self.xy = xy.into_tensor();
     }
-    
+
+}
+
+impl Artist<Data> for TriContour {
     fn bounds(&mut self) -> Bounds<Data> {
         self.bounds.clone()
     }
@@ -101,6 +101,8 @@ impl Artist<Data> for TriContour {
         to_canvas: &ToCanvas,
         _style: &dyn PathOpt,
     ) -> Result<()> {
+        self.resize(renderer);
+
         let mut style = PathStyle::new();
 
         style.edge_color("k");

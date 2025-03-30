@@ -49,9 +49,6 @@ impl Patch {
 }
 
 impl Artist<Data> for Patch {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-    }
-    
     fn bounds(&mut self) -> Bounds<Data> {
         Bounds::none()
     }
@@ -251,9 +248,6 @@ impl CanvasPatch {
 }
 
 impl Artist<Canvas> for CanvasPatch {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-    }
-    
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.bounds.clone()
     }
@@ -288,9 +282,6 @@ impl<M: Coord> PathPatch<M> {
 }
 
 impl Artist<Canvas> for PathPatch<Canvas> {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-    }
-    
     fn bounds(&mut self) -> Bounds<Canvas> {
         todo!()
     }
@@ -311,9 +302,6 @@ impl Artist<Canvas> for PathPatch<Canvas> {
 }
 
 impl Artist<Data> for PathPatch<Data> {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-    }
-    
     fn bounds(&mut self) -> Bounds<Data> {
         self.path.get_bounds()
     }
@@ -374,9 +362,6 @@ impl PatchTrait<Canvas> for Line {
 }
 
 impl Artist<Canvas> for Line {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-    }
-    
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.get_path().get_bounds()
     }
@@ -448,9 +433,6 @@ impl PatchTrait<Data> for Wedge {
 }
 
 impl Artist<Data> for Wedge {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-    }
-    
     fn bounds(&mut self) -> Bounds<Data> {
         self.get_path().get_bounds()
     }

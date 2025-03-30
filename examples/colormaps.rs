@@ -1,19 +1,23 @@
-use essay_plot::{artist::{ColorMaps, Shading}, chart::{Chart, Scaling, ShowGrid}, plot::grid_color, prelude::*};
-use essay_tensor::init::{linspace, meshgrid};
+use essay_plot::{artist::ColorMaps, chart::{Scaling, ShowGrid, SubFigure}, plot::grid_color, prelude::*};
+use essay_tensor::init::linspace;
 
 fn main() { 
     let mut figure = Figure::new();
     // let mut graph1 = figure.chart(());
-    draw_grid(&mut figure, (0., 0.), ColorMaps::RedYellow);
-    draw_grid(&mut figure, (1., 0.), ColorMaps::BlueOrange);
-    draw_grid(&mut figure, (2., 0.), ColorMaps::VioletWhite);
+    figure.multichart(|ui| {
+        ui.horizontal(|ui| {
+            draw_grid(ui, ColorMaps::RedYellow);
+            draw_grid(ui, ColorMaps::BlueOrange);
+            draw_grid(ui, ColorMaps::VioletWhite);
+        })
+    });
     // let mut graph2 = figure.chart(());
 
 
     figure.show();
 }
 
-fn draw_grid(figure: &mut Figure, pos: (f32, f32), colormap: ColorMaps) {
+fn draw_grid(figure: &mut SubFigure, colormap: ColorMaps) {
     let mut chart = figure.chart();
 
     chart.scaling(Scaling::Image);

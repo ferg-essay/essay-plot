@@ -537,7 +537,7 @@ impl AxisTicks {
     }
 
     pub(crate) fn update(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        self.label_text.resize(renderer, pos);
+        self.label_text.update_pos(renderer, pos);
     }
 }
 

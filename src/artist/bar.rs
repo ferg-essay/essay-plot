@@ -29,7 +29,7 @@ impl Bar {
 
         assert!(data.rank() == 1, "bar requires 1D value {:?}", data.shape().as_slice());
 
-        Self {
+        let mut bar = Self {
             height: data,
             style: PathStyle::new(),
 
@@ -40,7 +40,11 @@ impl Bar {
             extent: Bounds::<Data>::none(),
             paths: Vec::new(),
             is_stale: true,
-        }
+        };
+
+        bar.update_bounds();
+
+        bar
     }
 
     pub(crate) fn data(&mut self, data: impl Into<Tensor>) {
@@ -51,6 +55,7 @@ impl Bar {
 
         self.height = data;
         self.is_stale = true;
+        self.update_bounds();
     }
 
     pub(crate) fn x(&mut self, x: impl Into<Tensor>) {
@@ -61,6 +66,7 @@ impl Bar {
                 x.shape().as_slice(), self.height.shape().as_slice());
 
         self.x = Some(x);
+        self.update_bounds();
     }
 
     pub(crate) fn width(&mut self, width: impl Into<Tensor>) {
@@ -75,6 +81,7 @@ impl Bar {
 
             self.width = Some(width);
         }
+        self.update_bounds();
     }
 
     pub(crate) fn bottom(&mut self, bottom: impl Into<Tensor>) {
@@ -89,11 +96,10 @@ impl Bar {
 
             self.bottom = Some(bottom);
         }
+        self.update_bounds();
     }
-}
 
-impl Artist<Data> for Bar {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
+    fn update_bounds(&mut self) {
         if self.is_stale {
             self.is_stale = false;
 
@@ -136,6 +142,9 @@ impl Artist<Data> for Bar {
             self.paths = paths;
         }
     }
+}
+
+impl Artist<Data> for Bar {
     
     fn bounds(&mut self) -> Bounds<Data> {
         self.extent.clone()

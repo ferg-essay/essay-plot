@@ -39,7 +39,7 @@ pub struct Lines2d {
     is_visible: bool,
     z_order: f32,
 
-    extent: Bounds<Data>,
+    bounds: Bounds<Data>,
     is_stale: bool,
 }
 
@@ -62,6 +62,7 @@ impl Lines2d {
         assert_eq!(lines.cols(), 2);
 
         let path = build_path(&lines, &DrawStyle::Default);
+        let bounds = Bounds::from(&lines);
 
         Self {
             xy: lines,
@@ -79,7 +80,7 @@ impl Lines2d {
 
             is_stale: true,
 
-            extent: Bounds::<Data>::none(),
+            bounds,
         }
     }
 
@@ -94,6 +95,7 @@ impl Lines2d {
         let path = build_path(&xy, &self.draw_style);
 
         self.xy = xy;
+        self.bounds = Bounds::from(&self.xy);
         self.path = path;
 
         if let Some(marker) = &self.marker {
@@ -166,20 +168,22 @@ fn build_path(line: &Tensor, draw_style: &DrawStyle) -> Path<Data> {
 }
 
 impl Artist<Data> for Lines2d {
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        self.extent = Bounds::from(&self.xy);
+    /*
+    fn update_pos(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        // self.bounds = Bounds::from(&self.xy);
 
         if self.is_stale {
             self.is_stale = false;
 
             if let Some(collection) = &mut self.collection {
-                collection.resize(renderer, pos);
+                // collection.resize(renderer, pos);
             }
         }
     }
-    
+    */
+
     fn bounds(&mut self) -> Bounds<Data> {
-        self.extent.clone()
+        self.bounds.clone()
     }
 
     fn draw(

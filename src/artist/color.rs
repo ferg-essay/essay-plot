@@ -99,6 +99,54 @@ impl From<Color> for Lab {
 ///
 /// Hue, saturation, value.
 /// 
+/// Note: hue is degree based
+/// 
+pub struct Hsl(pub f32, pub f32, pub f32);
+
+impl Hsl {
+    #[inline]
+    pub fn h(&self) -> f32 {
+        self.0
+    }
+
+    #[inline]
+    pub fn s(&self) -> f32 {
+        self.1
+    }
+
+    #[inline]
+    pub fn v(&self) -> f32 {
+        self.2
+    }
+}
+
+impl fmt::Debug for Hsl {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Hsl").field(&self.0).field(&self.1).field(&self.2).finish()
+    }
+}
+
+impl From<Hsl> for Color {
+    #[inline]
+    fn from(value: Hsl) -> Color {
+        let Hsl(h, s, v) = value;
+
+        Color::from_hsva(h / 360., s, v, 1.0)
+    }
+}
+
+impl From<Hsl> for Hsv {
+    #[inline]
+    fn from(value: Hsl) -> Hsv {
+        let Hsl(h, s, v) = value;
+
+        Hsv(h / 360., s, v)
+    }
+}
+
+///
+/// Hue, saturation, value.
+/// 
 /// Note: hue is unit circle based: [0, 1], not degree based.
 /// 
 pub struct Hsv(pub f32, pub f32, pub f32);

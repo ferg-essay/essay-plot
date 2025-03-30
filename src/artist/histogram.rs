@@ -26,7 +26,7 @@ impl Histogram {
 
         assert!(data.rank() == 1, "histogram requires 1D value {:?}", data.shape().as_slice());
 
-        Self {
+        let mut histogram = Self {
             data,
             style: PathStyle::new(),
             bins: Tensor::zeros([1]),
@@ -34,19 +34,22 @@ impl Histogram {
             extent: Bounds::<Data>::none(),
             paths: Vec::new(),
             is_stale: true,
-        }
+        };
+
+        histogram.update_bounds();
+
+        histogram
     }
 
-    pub(crate) fn _set_data(&mut self, data: Tensor) {
+    pub(crate) fn set_data(&mut self, data: Tensor) {
         assert!(data.rank() == 1, "histogram requires 1D value {:?}", data.shape().as_slice());
 
         self.data = data;
+        self.update_bounds();
         self.is_stale = true;
     }
-}
 
-impl Artist<Data> for Histogram {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
+    fn update_bounds(&mut self) {
         if self.is_stale {
             self.is_stale = false;
 
@@ -73,6 +76,9 @@ impl Artist<Data> for Histogram {
         }
     }
     
+}
+
+impl Artist<Data> for Histogram {
     fn bounds(&mut self) -> Bounds<Data> {
         self.extent.clone()
     }
@@ -118,8 +124,7 @@ impl HistogramOpt {
         assert!(data.rank() == 2, "Histogram data must be 1D. Shape={:?}", data.shape().as_slice());
 
         self.write(|artist| {
-            artist.data = data;
-            artist.is_stale = true;
+            artist.set_data(data);
         });
 
         self

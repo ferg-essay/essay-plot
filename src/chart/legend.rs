@@ -50,10 +50,8 @@ impl Legend {
         let handlers = data.get_handlers();
         self.handlers = handlers;
     }
-}
 
-impl Artist<Canvas> for Legend {
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+    pub(super) fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         let font_size = match self.text_style.get_size() {
             Some(size) => *size,
             None => 10.,
@@ -62,7 +60,9 @@ impl Artist<Canvas> for Legend {
         self.glyph_size = renderer.to_px(font_size);
         self.pos = pos.clone();
     }
+}
 
+impl Artist<Canvas> for Legend {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.extent.clone()
     }

@@ -17,8 +17,6 @@ pub struct Quiver {
 
     extent: Bounds<Data>,
     paths: Vec<Path<Data>>,
-
-    is_stale: bool,
 }
 
 impl Quiver {
@@ -40,7 +38,7 @@ impl Quiver {
             v.shape().as_slice(),
         );
 
-        Self {
+        let mut quiver = Self {
             x,
             y,
             u,
@@ -48,15 +46,20 @@ impl Quiver {
             style: PathStyle::new(),
             extent: Bounds::<Data>::none(),
             paths: Vec::new(),
-            is_stale: true,
-        }
+        };
+
+        quiver.update_bounds();
+
+        quiver
     }
 
     pub(crate) fn uv(&mut self, uv: Tensor) {
         assert!(uv.rank() == 3, "quiver requires rank-3 value {:?}", uv.shape().as_slice());
 
-        //self.uv = uv;
-        self.is_stale = true;
+        // self.uv = uv;
+        self.update_bounds();
+
+        todo!();
     }
 
     fn draw_arrow(x: f32, y: f32, u: f32, v: f32) -> Path::<Data> {
@@ -90,39 +93,35 @@ impl Quiver {
             .close_poly(x - xt + uh, y - yt + vh)
             .to_path()
     }
+
+    fn update_bounds(&mut self) {
+        let x_min = self.x.reduce_min()[0];
+        let x_max = self.x.reduce_max()[0];
+
+        let y_min = self.y.reduce_min()[0];
+        let y_max = self.y.reduce_max()[0];
+
+        self.extent = Bounds::new((x_min, y_min), (x_max, y_max));
+
+        let magnitude = self.u.hypot(&self.v);
+        let max = magnitude.reduce_max()[0].max(f32::EPSILON);
+
+        let mut paths = Vec::<Path<Data>>::new();
+
+        let dx = (self.x[1] - self.x[0]) / max;
+        let dy = (self.y[1] - self.y[0]) / max;
+
+        for (j, y) in self.y.iter().enumerate() {
+            for (i, x) in self.x.iter().enumerate() {
+                paths.push(Self::draw_arrow(*x, *y, self.u[(j, i)] * dx, self.v[(j, i)] * dy));
+            }
+        }
+
+        self.paths = paths;
+    }
 }
 
 impl Artist<Data> for Quiver {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-        if self.is_stale {
-            self.is_stale = false;
-
-            let x_min = self.x.reduce_min()[0];
-            let x_max = self.x.reduce_max()[0];
-
-            let y_min = self.y.reduce_min()[0];
-            let y_max = self.y.reduce_max()[0];
-
-            self.extent = Bounds::new((x_min, y_min), (x_max, y_max));
-
-            let magnitude = self.u.hypot(&self.v);
-            let max = magnitude.reduce_max()[0].max(f32::EPSILON);
-
-            let mut paths = Vec::<Path<Data>>::new();
-
-            let dx = (self.x[1] - self.x[0]) / max;
-            let dy = (self.y[1] - self.y[0]) / max;
-
-            for (j, y) in self.y.iter().enumerate() {
-                for (i, x) in self.x.iter().enumerate() {
-                    paths.push(Self::draw_arrow(*x, *y, self.u[(j, i)] * dx, self.v[(j, i)] * dy));
-                }
-            }
-
-            self.paths = paths;
-        }
-    }
-    
     fn bounds(&mut self) -> Bounds<Data> {
         self.extent.clone()
     }
@@ -133,6 +132,8 @@ impl Artist<Data> for Quiver {
         to_canvas: &ToCanvas,
         style: &dyn PathOpt,
     ) -> Result<()> {
+        // self.resize(renderer);
+
         let style = self.style.push(style);
 
         for path in &self.paths {

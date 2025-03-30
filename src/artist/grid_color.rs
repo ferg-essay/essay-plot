@@ -157,9 +157,6 @@ impl GridColor {
 }
 
 impl Artist<Data> for GridColor {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-    }
-    
     fn bounds(&mut self) -> Bounds<Data> {
         let (rows, cols) = match self.shading {
             Shading::Gouraud => (self.data.rows() - 1, self.data.cols() - 1),

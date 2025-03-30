@@ -13,7 +13,7 @@ pub struct Level {
 }
 
 impl Level {
-    fn new(paths: Vec<Path<Data>>) -> Self {
+    fn _new(paths: Vec<Path<Data>>) -> Self {
         Self {
             paths,
         }
@@ -24,7 +24,7 @@ pub struct Contour {
     data: Tensor,
     color_map: ColorMap,
 
-    xy: Tensor,
+    _xy: Tensor,
     norm: Tensor,
     levels: Vec<Level>,
 }
@@ -37,7 +37,7 @@ impl Contour {
 
         Self {
             data,
-            xy: Tensor::empty(),
+            _xy: Tensor::empty(),
             norm: Tensor::empty(),
             color_map: ColorMaps::Default.into(),
             levels: Vec::new(),
@@ -49,10 +49,8 @@ impl Contour {
 
         self.data = data;
     }
-}
 
-impl Artist<Data> for Contour {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
+    fn _resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
         let mut xy = TensorVec::<[f32; 2]>::new();
         let (rows, cols) = (self.data.rows(), self.data.cols());
 
@@ -84,14 +82,16 @@ impl Artist<Data> for Contour {
                 .map(|p| Path::<Data>::lines(p))
                 .collect();
 
-            levels.push(Level::new(paths));
+            levels.push(Level::_new(paths));
         }
 
         self.levels = levels;
 
-        self.xy = xy.into_tensor();
+        self._xy = xy.into_tensor();
     }
-    
+}
+
+impl Artist<Data> for Contour {
     fn bounds(&mut self) -> Bounds<Data> {
         let (rows, cols) = (self.data.rows(), self.data.cols());
 

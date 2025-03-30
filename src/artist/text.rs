@@ -38,8 +38,25 @@ impl TextCanvas {
         }
     }
 
-    pub(crate) fn set_pos(&mut self, pos: impl Into<Bounds<Canvas>>) {
-        self.pos = pos.into();
+    pub(crate) fn update_pos(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        self.extent = match &self.text {
+            None => Bounds::zero(),
+            Some(text) => {
+                self.pos = pos.clone();
+
+                let size = match self.text_style.get_size() {
+                    Some(size) => *size,
+                    None => TextStyle::SIZE_DEFAULT,
+                };
+
+                let width = text.len() as f32 * size as f32; //  * 0.5;
+
+                Bounds::extent(
+                    renderer.to_px(width),
+                    renderer.to_px(size)
+                )
+            }
+        }
     }
 
     pub fn label(&mut self, text: &str) -> &mut Self {
@@ -82,27 +99,6 @@ impl TextCanvas {
 impl Artist<Canvas> for TextCanvas {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.extent.clone()
-    }
-
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        self.extent = match &self.text {
-            None => Bounds::zero(),
-            Some(text) => {
-                self.pos = pos.clone();
-
-                let size = match self.text_style.get_size() {
-                    Some(size) => *size,
-                    None => TextStyle::SIZE_DEFAULT,
-                };
-
-                let width = text.len() as f32 * size as f32; //  * 0.5;
-
-                Bounds::extent(
-                    renderer.to_px(width),
-                    renderer.to_px(size)
-                )
-            }
-        }
     }
 
     fn draw(
@@ -198,9 +194,6 @@ impl Text {
 }
 
 impl Artist<Data> for Text {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-    }
-    
     fn bounds(&mut self) -> Bounds<Data> {
         Bounds::none()
     }

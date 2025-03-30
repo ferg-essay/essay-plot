@@ -1,5 +1,5 @@
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer, Result},
+    renderer::{Renderer, Result},
     Bounds, Point, PathOpt
 };
 use essay_tensor::Tensor;
@@ -16,7 +16,6 @@ pub struct Image {
     norm: Norm,
     color_map: ColorMap,
     extent: Option<Bounds<Data>>,
-    is_stale: bool,
 }
 
 impl Image {
@@ -25,17 +24,21 @@ impl Image {
 
         assert!(data.rank() == 2, "image requires 2d value {:?}", data.shape().as_slice());
 
-        Self {
+        let mut image = Self {
             data,
             norm: Norm::from(Norms::Linear),
             color_map: ColorMaps::Default.into(), // ColorMaps::Default.into(),
             extent: None,
-            is_stale: true,
-        }
+        };
+
+        image.update_bounds();
+
+        image
     }
 
     pub fn norm(&mut self, norm: impl Into<Norm>) -> &mut Self {
         self.norm = norm.into();
+        self.update_bounds();
 
         self
     }
@@ -45,13 +48,18 @@ impl Image {
 
         self
     }
+
+    fn set_data(&mut self, data: Tensor) {
+        self.data = data;
+        self.update_bounds();
+    }
+
+    fn update_bounds(&mut self) {
+        self.norm.set_bounds(&self.data);
+    }
 }
 
 impl Artist<Data> for Image {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-        self.norm.set_bounds(&self.data);
-    }
-    
     fn bounds(&mut self) -> Bounds<Data> {
         match &self.extent {
             Some(extent) => extent.clone(),
@@ -119,8 +127,7 @@ impl ImageOpt {
         assert!(data.rank() == 2, "Image data must be rank 2. Shape={:?}", data.shape().as_slice());
 
         self.write(|artist| {
-            artist.data = data;
-            artist.is_stale = true;
+            artist.set_data(data);
         });
 
         self

@@ -61,6 +61,21 @@ impl ScatterPlot {
         }
     }
 
+    fn resize(&mut self, renderer: &mut dyn Renderer) {
+        if self.is_stale {
+            self.is_stale = false;
+
+            // 0.5 because source is [-1, 1]
+            let scale = 0.5 * self.size.sqrt() * renderer.scale_factor();
+
+            let path: Path<Canvas> = self.marker.get_scaled_path(scale);
+
+            self.collection = PathCollection::new(path, &self.xy);
+        }
+
+        // self.collection.resize(renderer, pos);
+    }
+
     /*
     fn size(&mut self, size: f32) -> &mut Self {
         assert!(size >= 0.);
@@ -79,21 +94,6 @@ impl ScatterPlot {
 }
 
 impl Artist<Data> for ScatterPlot {
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        if self.is_stale {
-            self.is_stale = false;
-
-            // 0.5 because source is [-1, 1]
-            let scale = 0.5 * self.size.sqrt() * renderer.scale_factor();
-
-            let path: Path<Canvas> = self.marker.get_scaled_path(scale);
-
-            self.collection = PathCollection::new(path, &self.xy);
-        }
-
-        self.collection.resize(renderer, pos);
-    }
-
     fn bounds(&mut self) -> Bounds<Data> {
         self.collection.bounds()
     }
@@ -104,6 +104,7 @@ impl Artist<Data> for ScatterPlot {
         to_canvas: &ToCanvas,
         style: &dyn PathOpt,
     ) -> Result<()> {
+        self.resize(renderer);
         let style = self.style.push(style);
 
         self.collection.draw(renderer, to_canvas, &style)

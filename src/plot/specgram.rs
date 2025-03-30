@@ -1,4 +1,4 @@
-use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, PathOpt};
+use essay_graphics::api::{renderer::{Renderer, Result}, Bounds, PathOpt};
 use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 
 use crate::{
@@ -24,8 +24,6 @@ pub struct SpecGram {
     nfft: usize,
     overlap: usize,
     norm: Norm,
-
-    is_stale: bool,
 }
 
 impl SpecGram {
@@ -45,22 +43,32 @@ impl SpecGram {
         grid_color.color_map(ColorMaps::BlueOrange);
         grid_color.norm(Norm::from(norms.clone()));
 
-        Self {
+        let mut spec_gram = Self {
             data: data,
             nfft,
             overlap,
             grid_color,
             norm: Norm::from(norms),
-            
-            is_stale: true,
-        }
+        };
+
+        spec_gram.update_bounds();
+
+        spec_gram
     }
 
-    pub(crate) fn _set_data(&mut self, data: Tensor) {
-        assert!(data.rank() == 1, "specgram requires 2d value {:?}", data.shape().as_slice());
+    fn update_bounds(&mut self) {
+        let spectrum = calculate_spectrum(
+            &self.data, 
+            self.nfft, 
+            self.overlap
+        );
 
-        self.data = data;
-        self.is_stale = true;
+        self.norm.set_bounds(&spectrum);
+
+        let max = self.norm.max();
+        let min = self.norm.min().max(max - 4.);
+        self.grid_color.set_data(spectrum);
+        self.grid_color.set_norm(min, max);
     }
 }
 
@@ -91,26 +99,6 @@ fn calculate_spectrum(data: &Tensor, nfft: usize, overlap: usize) -> Tensor {
 }
 
 impl Artist<Data> for SpecGram {
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        if self.is_stale {
-            self.is_stale = false;
-            let spectrum = calculate_spectrum(
-                &self.data, 
-                self.nfft, 
-                self.overlap
-            );
-
-            self.norm.set_bounds(&spectrum);
-
-            let max = self.norm.max();
-            let min = self.norm.min().max(max - 4.);
-            self.grid_color.set_data(spectrum);
-            self.grid_color.set_norm(min, max);
-        }
-
-        self.grid_color.resize(renderer, pos);
-    }
-    
     fn bounds(&mut self) -> Bounds<Data> {
         self.grid_color.bounds()
     }
@@ -146,7 +134,7 @@ impl SpecGramOpt {
 
         self.write(|artist| {
             artist.data = data;
-            artist.is_stale = true;
+            artist.update_bounds();
         });
 
         self
@@ -159,7 +147,7 @@ impl SpecGramOpt {
             assert!(artist.overlap < artist.nfft);
 
             artist.nfft = nfft;
-            artist.is_stale = true;
+            artist.update_bounds();
         });
 
         self
@@ -170,7 +158,7 @@ impl SpecGramOpt {
             assert!(overlap < artist.nfft);
 
             artist.overlap = overlap;
-            artist.is_stale = true;
+            artist.update_bounds();
         });
 
         self
@@ -178,19 +166,20 @@ impl SpecGramOpt {
 
     pub fn norm(&mut self, norm: impl Into<Norm>) -> &mut Self {
             self.write(|artist| {
-            artist.grid_color.norm(norm);
-        });
+                artist.grid_color.norm(norm);
+                artist.update_bounds();
+            });
 
         self
     }
 
     pub fn color_map(&mut self, cmap: impl Into<ColorMap>) -> &mut Self {
         self.write(|artist| {
-        artist.grid_color.color_map(cmap);
-    });
+            artist.grid_color.color_map(cmap);
+        });
 
-    self
-}
+        self
+    }
 
     pub fn shading(&mut self, shading: Shading) -> &mut Self {
         self.write(|artist| {

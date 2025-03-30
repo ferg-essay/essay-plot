@@ -1,5 +1,5 @@
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer, Result}, Bounds, Coord, PathOpt
+    renderer::{Renderer, Result}, Bounds, Coord, PathOpt
 };
 
 use crate::{chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, data_artist_option_struct};
@@ -27,11 +27,13 @@ impl<M: Coord> Container<M> {
 }
 
 impl<M: Coord> Artist<M> for Container<M> {
+    /*
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         for artist in &mut self.artists {
             artist.resize(renderer, pos);
         }
     }
+    */
 
     fn bounds(&mut self) -> Bounds<M> {
         let mut bounds = Bounds::<M>::none();

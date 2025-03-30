@@ -1,5 +1,5 @@
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer, Result}, 
+    renderer::{Renderer, Result}, 
     Bounds, Path, PathCode, PathOpt, Point
 };
 use essay_tensor::Tensor;
@@ -27,16 +27,16 @@ impl TriPlot {
             is_stale: true,
         }
     }
-}
 
-impl Artist<Data> for TriPlot {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer) {
         if self.is_stale {
             self.is_stale = false;
             self.triangulation = Some(triangulate(&self.data));
         }
     }
-    
+}
+
+impl Artist<Data> for TriPlot {
     fn bounds(&mut self) -> Bounds<Data> {
         Bounds::from(&self.data)
     }
@@ -47,6 +47,8 @@ impl Artist<Data> for TriPlot {
         to_canvas: &ToCanvas,
         style: &dyn PathOpt,
     ) -> Result<()> {
+        self.resize(renderer);
+
         if let Some(tri) = &self.triangulation {
             let mut codes = Vec::<PathCode>::new();
 

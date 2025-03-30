@@ -10,11 +10,11 @@ fn main() {
     //let mut gui = WgpuBackend::new();
 
     let mut figure = Figure::new();
-    let mut graph = figure.chart();
+    let mut chart = figure.chart();
 
     let test = Tests::WEDGE;
 
-    graph.add_simple_artist(PathPatch::new(test.path())).color(Color(0x0080c080));
+    chart.add_simple_artist(PathPatch::new(test.path())).color(Color(0x0080c080));
 
     /*
     match test {

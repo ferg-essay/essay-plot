@@ -3,7 +3,7 @@ use std::{any::Any, marker::PhantomData};
 
 use essay_graphics::{
     api::{
-        renderer::{Canvas, Event, Renderer, Result}, 
+        renderer::{Canvas, Renderer, Result}, 
         Affine2d, Bounds, Coord, PathOpt, Point
     }, 
     layout::View
@@ -134,10 +134,13 @@ impl DataFrame {
         opt
     }
 
-    ///
-    /// Sets the canvas bounds
-    /// 
-    pub(crate) fn set_pos(&mut self, pos: &Bounds<Canvas>) -> &mut Self {
+    pub(super) fn update_pos(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        for item in &mut self.artist_items {
+            item.resize(renderer, pos);
+        }
+
+        self.data_bounds = self.bounds();
+    
         self.update_view();
 
         self.pos_canvas = pos.clone();
@@ -152,8 +155,6 @@ impl DataFrame {
                 .scale(1., -1.)
                 .translate(0., self.pos_canvas.ymax());
         }
-
-        self
     }
 
     fn update_view(&mut self) {
@@ -332,58 +333,8 @@ impl DataFrame {
             bounds
         }
     }
-}
 
-impl Artist<Canvas> for DataFrame {
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        self.set_pos(pos);
-        
-        for item in &mut self.artist_items {
-            item.resize(renderer, pos);
-        }
-
-        // self.artists.resize(renderer, pos);
-
-        self.data_bounds = self.bounds();
-    
-        self.update_view();
-        self.set_pos(pos); // TODO: cleanup order
-    }
-
-    fn bounds(&mut self) -> Bounds<Canvas> {
-        self.pos_canvas.clone()
-    }
-
-    fn draw(
-        &mut self, 
-        renderer: &mut dyn Renderer, 
-        to_canvas: &ToCanvas,
-        style: &dyn PathOpt,
-    ) -> Result<()> {
-        // TODO: 
-        renderer.flush();
-        //let to_canvas = to_canvas.matmul(&self.to_canvas);
-        // let to_canvas = &self.to_canvas;
-        let style = self.style.push(style);
-        // let clip = Clip::Bounds(self.pos_canvas.p0(), self.pos_canvas.p1());
-
-        for (i, item) in self.artist_items.iter_mut().enumerate() {
-            let style = self.cycle.push(&style, i);
-
-            item.draw(renderer, to_canvas, &style)?;
-        }
-
-        //renderer.flush(&clip);
-        renderer.flush();
-
-        Ok(())
-
-        // TODO: intersect clip
-        //for artist in &mut self.artists {
-        //    artist.draw(renderer, &to_canvas, &self.pos_canvas, &style);
-        //}
-    }
-
+    /*
     // true if request redraw
     fn event(&mut self, _renderer: &mut dyn Renderer, event: &Event) -> bool {
         match event {
@@ -430,6 +381,44 @@ impl Artist<Canvas> for DataFrame {
             },
             _ => { false }
         }
+    }
+    */
+}
+
+impl Artist<Canvas> for DataFrame {
+    fn bounds(&mut self) -> Bounds<Canvas> {
+        self.pos_canvas.clone()
+    }
+
+    fn draw(
+        &mut self, 
+        renderer: &mut dyn Renderer, 
+        to_canvas: &ToCanvas,
+        style: &dyn PathOpt,
+    ) -> Result<()> {
+        // self.resize(renderer);
+        // TODO: 
+        renderer.flush();
+        //let to_canvas = to_canvas.matmul(&self.to_canvas);
+        //let to_canvas = &self.to_canvas;
+        let style = self.style.push(style);
+        // let clip = Clip::Bounds(self.pos_canvas.p0(), self.pos_canvas.p1());
+
+        for (i, item) in self.artist_items.iter_mut().enumerate() {
+            let style = self.cycle.push(&style, i);
+
+            item.draw(renderer, to_canvas, &style)?;
+        }
+
+        //renderer.flush(&clip);
+        renderer.flush();
+
+        Ok(())
+
+        // TODO: intersect clip
+        //for artist in &mut self.artists {
+        //    artist.draw(renderer, &to_canvas, &self.pos_canvas, &style);
+        //}
     }
 }
 
@@ -487,9 +476,9 @@ impl ArtistItem {
     #[inline]
     fn resize(
         &mut self, 
-        renderer: &mut dyn Renderer, 
-        pos: &Bounds<Canvas>) {
-        self.handle.resize(&mut self.any, renderer, pos);
+        _renderer: &mut dyn Renderer, 
+        _pos: &Bounds<Canvas>) {
+        // self.handle.resize(&mut self.any, renderer, pos);
     }
 }
 
@@ -535,7 +524,7 @@ impl<A: PlotArtist> Clone for ArtistView<A> {
 }
 
 trait ArtistHandleTrait<M: Coord> : Send {
-    fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
+    // fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
     fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<M>;
     fn get_legend(&self, any: &mut Box<dyn Any + Send>) -> Option<LegendHandler>;
 
@@ -564,9 +553,11 @@ impl<A: Artist<Data>> ArtistHandleTrait<Data> for ArtistHandle<Data, A>
 where
     A: PlotArtist + 'static,
 {
+    /*
     fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        any.downcast_mut::<A>().unwrap().resize(renderer, pos);
+        // any.downcast_mut::<A>().unwrap().update_pos(renderer, pos);
     }
+    */
 
     fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<Data> {
         any.downcast_mut::<A>().unwrap().bounds()

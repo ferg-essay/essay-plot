@@ -28,11 +28,10 @@ impl Colorbar {
     pub fn set_pos(&mut self, pos: Bounds<Canvas>) {
         self.pos = pos.clone();
     }
-}
 
-impl Artist<Data> for Colorbar {
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        self.pos = pos.clone();
+    pub(crate) fn resize(&mut self, _renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+        // let pos = renderer.pos().clone();
+
         let is_triangle = false;
         if is_triangle {
             self.bounds = Bounds::new(Point(0., 0.), Point(2., 100.));
@@ -42,9 +41,13 @@ impl Artist<Data> for Colorbar {
         let x = linspace(0., 1., 101);//.reshape([101, 1]);
         self.data = x.stack([x.clone()], -1);
         self.mesh.set_data(self.data.clone());
-        self.mesh.resize(renderer, pos);
+        // self.mesh.resize(renderer, pos.clone());
+        self.pos = pos.clone();
     }
 
+}
+
+impl Artist<Data> for Colorbar {
     fn bounds(&mut self) -> Bounds<Data> {
         self.bounds.clone()
     }

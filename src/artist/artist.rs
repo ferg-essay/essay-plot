@@ -1,26 +1,19 @@
 use std::ops::Deref;
 
 use essay_graphics::api::{
-    renderer::{Canvas, Event, Renderer, Result}, 
+    renderer::{Canvas, Renderer, Result}, 
     Affine2d, Bounds, Coord, PathOpt
 };
 
 pub trait Artist<M: Coord> : Send {
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
-
     fn bounds(&mut self) -> Bounds<M>;
-    
+
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
         to_canvas: &ToCanvas,
         style: &dyn PathOpt,
     ) -> Result<()>;
-
-    #[allow(unused_variables)]
-    fn event(&mut self, renderer: &mut dyn Renderer, event: &Event) -> bool {
-        false
-    }
 }
 
 pub struct ToCanvas {

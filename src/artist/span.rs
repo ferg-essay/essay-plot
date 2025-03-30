@@ -50,10 +50,6 @@ impl HorizontalLine {
 }
 
 impl Artist<Data> for HorizontalLine {
-    fn resize(&mut self, _renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        self.pos = pos.clone();
-    }
-    
     fn bounds(&mut self) -> Bounds<Data> {
         Bounds::none()
     }

@@ -1,4 +1,4 @@
-use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Coord, PathOpt};
+use essay_graphics::api::{renderer::{Renderer, Result}, Bounds, Coord, PathOpt};
 
 use crate::{
     artist::{Artist, PathStyle, ToCanvas}, 
@@ -33,9 +33,11 @@ impl<M: Coord> PlotOptHandle<M> {
 }
 
 impl Artist<Data> for PlotOptHandle<Data> {
+    /*
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         self.artist.resize(renderer, pos);
     }
+    */
 
     fn bounds(&mut self) -> Bounds<Data> {
         self.artist.bounds()

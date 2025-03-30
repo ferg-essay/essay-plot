@@ -1,5 +1,5 @@
 use essay_graphics::{
-    api::renderer::{self, Drawable, Event, Renderer},
+    api::renderer::{self, Drawable, Renderer},
     layout::View, 
 };
 
@@ -172,10 +172,6 @@ impl Default for Chart {
 impl Drawable for Chart {
     fn draw(&mut self, renderer: &mut dyn Renderer) -> renderer::Result<()> {
         self.view.drawable().draw(renderer)
-    }
-
-    fn event(&mut self, renderer: &mut dyn Renderer, event: &Event) {
-        self.view.drawable().event(renderer, event);
     }
 }
 

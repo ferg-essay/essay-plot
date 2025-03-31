@@ -6,9 +6,8 @@ use essay_tensor::Tensor;
 
 use crate::{
     artist::{
-        paths::{self}, 
-        Artist, Markers, PathCollection, PathStyle, ToCanvas
-    }, chart::{ArtistView, Chart, ConfigArc, Data, LegendHandler, PlotArtist}, 
+        paths::{self}, Artist, ArtistDraw, ArtistView, Markers, PathCollection, PathStyle, ToCanvas
+    }, chart::{Chart, ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct, path_style_options 
 };
 
@@ -93,7 +92,7 @@ impl ScatterPlot {
     */
 }
 
-impl Artist<Data> for ScatterPlot {
+impl ArtistDraw<Data> for ScatterPlot {
     fn bounds(&mut self) -> Bounds<Data> {
         self.collection.bounds()
     }
@@ -111,17 +110,15 @@ impl Artist<Data> for ScatterPlot {
     }
 }
 
-impl PlotArtist for ScatterPlot {
+impl Artist<Data> for ScatterPlot {
     type Opt = ScatterOpt;
 
-    fn config(
-        &mut self, 
-        cfg: &ConfigArc, 
-        artist: ArtistView<ScatterPlot>,
-    ) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc) {
         self.style = PathStyle::from_config(cfg, "scatter");
+    }
 
-        ScatterOpt::new(artist)
+    fn opt(&mut self, view: ArtistView<Data, ScatterPlot>) -> Self::Opt {
+        ScatterOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

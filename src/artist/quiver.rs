@@ -2,11 +2,11 @@ use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, Pa
 use essay_tensor::Tensor;
 
 use crate::{
-    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    chart::{ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct, path_style_options
 };
 
-use super::{paths, Artist, PathStyle, ToCanvas};
+use super::{paths, Artist, ArtistDraw, ArtistView, PathStyle, ToCanvas};
 
 pub struct Quiver {
     x: Tensor,
@@ -121,7 +121,7 @@ impl Quiver {
     }
 }
 
-impl Artist<Data> for Quiver {
+impl ArtistDraw<Data> for Quiver {
     fn bounds(&mut self) -> Bounds<Data> {
         self.extent.clone()
     }
@@ -145,18 +145,20 @@ impl Artist<Data> for Quiver {
     }
 }
 
-impl PlotArtist for Quiver {
+impl Artist<Data> for Quiver {
     type Opt = QuiverOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<Quiver>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc) {
         self.style = PathStyle::from_config(cfg, "quiver");
 
         // TODO: when Cycle is changed, this shouldn't be necessary
         if self.style.get_face_color().is_none() {
             self.style.color("k");
         }
+    }
 
-        QuiverOpt::new(artist)
+    fn opt(&mut self, view: ArtistView<Data, Quiver>) -> Self::Opt {
+        QuiverOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

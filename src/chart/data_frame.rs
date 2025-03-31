@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{any::Any, marker::PhantomData};
+use std::marker::PhantomData;
 
 use essay_graphics::{
     api::{
@@ -10,7 +10,7 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, PathStyle, StyleCycle, ToCanvas}, 
+    artist::{Artist, ArtistDraw, ArtistContainer, ArtistView, PathStyle, StyleCycle, ToCanvas}, 
     chart::{Config, ConfigArc}
 };
 
@@ -35,7 +35,7 @@ pub(crate) struct DataFrame {
     is_flip_y: bool,
 
     // artists: PlotContainer,
-    artist_items: Vec<ArtistItem>,
+    artist_items: ArtistContainer<Data>,
 
     to_canvas: Affine2d,
     style: PathStyle,
@@ -63,7 +63,7 @@ impl DataFrame {
             is_flip_y: false,
 
             // artists: PlotContainer::new(cfg),
-            artist_items: Vec::new(),
+            artist_items: ArtistContainer::default(),
 
             style: PathStyle::default(),
             cycle: StyleCycle::from_config(cfg, "frame.cycle"),
@@ -113,31 +113,23 @@ impl DataFrame {
         self
     }
 
-    pub(crate) fn add_artist<A: PlotArtist + 'static>(
+    pub(crate) fn add_artist<A: Artist<Data> + 'static>(
         &mut self, 
-        artist: A,
+        mut artist: A,
         config: &ConfigArc,
         view: View<ChartFrame>,
     ) -> A::Opt {
-        let id = self.artist_items.len();
-        let view = ArtistView::new(view.clone(), id);
-
         let mut artist = artist;
 
-        let opt = artist.config(config, view);
+        artist.config(config);
 
-        self.artist_items.push(ArtistItem {
-            any: Box::new(artist),
-            handle: Box::new(ArtistHandle::<Data, A>::new()),
-        });
-
-        opt
+        self.artist_items.add(artist)
     }
 
     pub(super) fn update_pos(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        for item in &mut self.artist_items {
-            item.resize(renderer, pos);
-        }
+        //for item in &mut self.artist_items {
+        //    item.resize(renderer, pos);
+        //}
 
         self.data_bounds = self.bounds();
     
@@ -282,23 +274,9 @@ impl DataFrame {
         &self.to_canvas
     }
 
-    /*
-    pub(crate) fn artist<A>(&self, id: ArtistId) -> &A
-    where
-        A: Artist<Data> + 'static
-    {
-        self.artists.artist(id)
-    }
-
-    pub(crate) fn artist_mut<A>(&mut self, id: ArtistId) -> &mut A
-    where
-        A: Artist<Data> + 'static
-    {
-        self.artists.artist_mut(id)
-    }
-    */
-
     pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
+        self.artist_items.get_handlers()
+        /*
         let mut vec = Vec::<LegendHandler>::new();
 
         for item in &mut self.artist_items {
@@ -309,6 +287,7 @@ impl DataFrame {
         }
 
         vec
+        */
     }
 
     // pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
@@ -316,16 +295,9 @@ impl DataFrame {
     // }
     
     fn bounds(&mut self) -> Bounds<Data> {
-        let mut bounds = Bounds::none();
+        let bounds = Bounds::none();
 
-        for item in &mut self.artist_items {
-            bounds = if bounds.is_none() {
-                item.get_extent()
-            } else {
-                let extent = item.get_extent();
-                if extent.is_none() { bounds } else { bounds.union(&extent) }
-            }
-        }
+        let bounds = self.artist_items.bounds(&bounds);
 
         if bounds.is_none() {
             Bounds::new(Point(0., 0.), Point(1., 1.))
@@ -333,59 +305,9 @@ impl DataFrame {
             bounds
         }
     }
-
-    /*
-    // true if request redraw
-    fn event(&mut self, _renderer: &mut dyn Renderer, event: &Event) -> bool {
-        match event {
-            Event::ResetView(_) => {
-                //self.update_view();
-                self._is_stale = true;
-                self.pan_zoom_bounds = None;
-                true
-            }
-            Event::Pan(_p_start, p_last, p_now) => {
-                let to_data = self.pos_canvas.affine_to(&self.get_view_bounds());
-                let p0 = to_data.transform_point(*p_last);
-                let p1 = to_data.transform_point(*p_now);
-
-                let dx = p0.x() - p1.x();
-                let dy = p0.y() - p1.y();
-
-                let view = &self.get_view_bounds();
-                self.pan_zoom_bounds = Some(Bounds::new(
-                    Point(
-                        view.x0() + dx,
-                        view.y0() + dy,
-                    ),
-                    Point(
-                        view.x1() + dx,
-                        view.y1() + dy,
-                    )
-                ));
-
-                true
-            },
-            Event::ZoomBounds(p_start, p_now) => {
-                if self.pos_canvas.contains(*p_now) {
-                    let to_data = self.pos_canvas.affine_to(&self.get_view_bounds());
-                    let p0 = to_data.transform_point(*p_start);
-                    let p1 = to_data.transform_point(*p_now);
-
-                    // let view = &self.view_bounds;
-                    // TODO: check min size?
-                    self.pan_zoom_bounds = Some(Bounds::new(p0, p1));
-                }
-
-                true
-            },
-            _ => { false }
-        }
-    }
-    */
 }
 
-impl Artist<Canvas> for DataFrame {
+impl ArtistDraw<Canvas> for DataFrame {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.pos_canvas.clone()
     }
@@ -404,11 +326,15 @@ impl Artist<Canvas> for DataFrame {
         let style = self.style.push(style);
         // let clip = Clip::Bounds(self.pos_canvas.p0(), self.pos_canvas.p1());
 
+        self.artist_items.draw(renderer, to_canvas, &style);
+
+        /*
         for (i, item) in self.artist_items.iter_mut().enumerate() {
             let style = self.cycle.push(&style, i);
 
             item.draw(renderer, to_canvas, &style)?;
         }
+        */
 
         //renderer.flush(&clip);
         renderer.flush();
@@ -438,57 +364,13 @@ pub enum AspectMode {
     View
 }
 
-struct ArtistItem {
-    any: Box<dyn Any + Send>,
-    handle: Box<dyn ArtistHandleTrait<Data>>,
-}
-
-impl ArtistItem {
-    #[inline]
-    fn deref<A: PlotArtist + 'static>(&self) -> &A {
-        self.any.downcast_ref().unwrap()
-    }
-
-    #[inline]
-    fn deref_mut<A: PlotArtist + 'static>(&mut self) -> &mut A {
-        self.any.downcast_mut().unwrap()
-    }
-
-    #[inline]
-    fn get_extent(&mut self) -> Bounds<Data> {
-        self.handle.get_extent(&mut self.any)
-    }
-
-    #[inline]
-    fn get_legend(&mut self) -> Option<LegendHandler> {
-        self.handle.get_legend(&mut self.any)
-    }
-
-    #[inline]
-    fn draw(
-        &mut self, 
-        renderer: &mut dyn Renderer, 
-        to_canvas: &ToCanvas,
-        style: &dyn PathOpt) -> Result<()> {
-        self.handle.draw(&mut self.any, renderer, to_canvas, style)
-    }
-
-    #[inline]
-    fn resize(
-        &mut self, 
-        _renderer: &mut dyn Renderer, 
-        _pos: &Bounds<Canvas>) {
-        // self.handle.resize(&mut self.any, renderer, pos);
-    }
-}
-
-pub struct ArtistView<A: PlotArtist> {
+pub struct ArtistViewImpl<A: Artist<Data>> {
     view: View<ChartFrame>,
     id: usize,
     marker: PhantomData<fn(A)>
 }
 
-impl<A: PlotArtist + 'static> ArtistView<A> {
+impl<A: Artist<Data> + 'static> ArtistViewImpl<A> {
     pub(crate) fn new(
         view: View<ChartFrame>, 
         id: usize,
@@ -499,98 +381,29 @@ impl<A: PlotArtist + 'static> ArtistView<A> {
             marker: Default::default(),
         }
     }
-
-    pub fn read<R>(&self, fun: impl FnOnce(&A) -> R) -> R {
+}
+/*
+impl<A: Artist<Data> + 'static> ArtistView<Data, A> for ArtistViewImpl<A> {
+    fn read<R>(&self, fun: impl FnOnce(&A) -> R) -> R {
         self.view.read(|f| {
             fun(f.data().artist_items[self.id].deref())
         })
     }
 
-    pub fn write<R>(&mut self, fun: impl FnOnce(&mut A) -> R) -> R {
+    fn write<R>(&mut self, fun: impl FnOnce(&mut A) -> R) -> R {
         self.view.write(|f| {
             fun(f.data_mut().artist_items[self.id].deref_mut())
         })
     }
 }
-
-impl<A: PlotArtist> Clone for ArtistView<A> {
+*/
+impl<A: Artist<Data>> Clone for ArtistViewImpl<A> {
     fn clone(&self) -> Self {
         Self { 
             view: self.view.clone(), 
             id: self.id.clone(), 
             marker: self.marker.clone() 
         }
-    }
-}
-
-trait ArtistHandleTrait<M: Coord> : Send {
-    // fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>);
-    fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<M>;
-    fn get_legend(&self, any: &mut Box<dyn Any + Send>) -> Option<LegendHandler>;
-
-    fn draw(
-        &self, 
-        artist_any: &mut Box<dyn Any + Send>,
-        renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
-        style: &dyn PathOpt,
-    ) -> Result<()>;
-}
-
-struct ArtistHandle<M: Coord, A: Artist<M>> {
-    marker: PhantomData<fn(M, A)>,
-}
-
-impl<M: Coord, A: Artist<M>> ArtistHandle<M, A> {
-    fn new() -> Self {
-        Self {
-            marker: PhantomData,
-        }
-    }
-}
-
-impl<A: Artist<Data>> ArtistHandleTrait<Data> for ArtistHandle<Data, A>
-where
-    A: PlotArtist + 'static,
-{
-    /*
-    fn resize(&self, any: &mut Box<dyn Any + Send>, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        // any.downcast_mut::<A>().unwrap().update_pos(renderer, pos);
-    }
-    */
-
-    fn get_extent(&self, any: &mut Box<dyn Any + Send>) -> Bounds<Data> {
-        any.downcast_mut::<A>().unwrap().bounds()
-    }
-
-    fn draw(
-        &self, 
-        artist_any: &mut Box<dyn Any + Send + 'static>,
-        renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
-        style: &dyn PathOpt,
-    ) -> Result<()> {
-        let artist = artist_any.downcast_mut::<A>().unwrap();
-        artist.draw(renderer, to_canvas, style)
-    }
-
-    fn get_legend(&self, any: &mut Box<dyn Any + Send>) -> Option<LegendHandler> {
-        let artist = any.downcast_mut::<A>().unwrap();
-        artist.get_legend()
-    }
-}
-
-pub trait PlotArtist : Artist<Data> + Sized {
-    type Opt : Clone;
-    
-    fn config(
-        &mut self, 
-        cfg: &ConfigArc, 
-        view: ArtistView<Self>,
-    ) -> Self::Opt;
-
-    fn get_legend(&self) -> Option<LegendHandler> {
-        None
     }
 }
 

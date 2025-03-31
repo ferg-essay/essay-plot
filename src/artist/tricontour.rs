@@ -3,7 +3,7 @@ use essay_tensor::{Tensor, math::normalize_unit};
 
 use crate::{chart::Data, contour::TriContourGenerator, tri::Triangulation};
 
-use super::{Artist, PathStyle, ToCanvas};
+use super::{ArtistDraw, PathStyle, ToCanvas};
 
 pub struct Level {
     paths: Vec<Path<Data>>,
@@ -90,7 +90,7 @@ impl TriContour {
 
 }
 
-impl Artist<Data> for TriContour {
+impl ArtistDraw<Data> for TriContour {
     fn bounds(&mut self) -> Bounds<Data> {
         self.bounds.clone()
     }

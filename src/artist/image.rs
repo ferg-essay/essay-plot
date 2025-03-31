@@ -4,12 +4,14 @@ use essay_graphics::api::{
 };
 use essay_tensor::Tensor;
 
-use crate::chart::ArtistView;
+use crate::chart::ArtistViewImpl;
 use crate::{
-    artist::{Norms, Norm, Artist, ColorMap, ColorMaps, ToCanvas},
-    chart::{ConfigArc, LegendHandler, Data, PlotArtist},
+    artist::{Norms, Norm, Artist, ArtistDraw, ColorMap, ColorMaps, ToCanvas},
+    chart::{ConfigArc, LegendHandler, Data},
     data_artist_option_struct,
 };
+
+use super::ArtistView;
 
 pub struct Image {
     data: Tensor,
@@ -59,7 +61,7 @@ impl Image {
     }
 }
 
-impl Artist<Data> for Image {
+impl ArtistDraw<Data> for Image {
     fn bounds(&mut self) -> Bounds<Data> {
         match &self.extent {
             Some(extent) => extent.clone(),
@@ -107,11 +109,14 @@ impl Artist<Data> for Image {
     }
 }
 
-impl PlotArtist for Image {
+impl Artist<Data> for Image {
     type Opt = ImageOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistView<Image>) -> Self::Opt {
-        ImageOpt::new(artist)
+    fn config(&mut self, _cfg: &ConfigArc) {
+    }
+
+    fn opt(&mut self, view: ArtistView<Data, Image>) -> Self::Opt {
+        ImageOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

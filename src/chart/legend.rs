@@ -3,7 +3,7 @@ use essay_graphics::api::{
     Bounds, HorizAlign, Path, PathCode, PathOpt, Point, TextStyle, VertAlign
 };
 
-use crate::{artist::{Artist, PathStyle, StyleCycle, ToCanvas}, chart::Config};
+use crate::{artist::{ArtistDraw, PathStyle, StyleCycle, ToCanvas}, chart::Config};
 
 use super::data_frame::DataFrame;
 
@@ -62,7 +62,7 @@ impl Legend {
     }
 }
 
-impl Artist<Canvas> for Legend {
+impl ArtistDraw<Canvas> for Legend {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.extent.clone()
     }

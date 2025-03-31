@@ -6,7 +6,7 @@ use essay_tensor::{Tensor, tensor::TensorVec, math::normalize_unit};
 
 use crate::{chart::Data, contour::ContourGenerator};
 
-use super::{Artist, ColorMap, ColorMaps, PathStyle, ToCanvas};
+use super::{ArtistDraw, ColorMap, ColorMaps, PathStyle, ToCanvas};
 
 pub struct Level {
     paths: Vec<Path<Data>>,
@@ -91,7 +91,7 @@ impl Contour {
     }
 }
 
-impl Artist<Data> for Contour {
+impl ArtistDraw<Data> for Contour {
     fn bounds(&mut self) -> Bounds<Data> {
         let (rows, cols) = (self.data.rows(), self.data.cols());
 

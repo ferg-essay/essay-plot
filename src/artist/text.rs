@@ -4,11 +4,11 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    chart::{ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct, path_style_options
 };
 
-use super::{artist::ToCanvas, Artist, PathStyle};
+use super::{artist::ToCanvas, Artist, ArtistDraw, ArtistView, PathStyle};
 
 pub struct TextCanvas {
     pos: Bounds<Canvas>,
@@ -96,7 +96,7 @@ impl TextCanvas {
     }
 }
 
-impl Artist<Canvas> for TextCanvas {
+impl ArtistDraw<Canvas> for TextCanvas {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.extent.clone()
     }
@@ -193,7 +193,7 @@ impl Text {
     }
 }
 
-impl Artist<Data> for Text {
+impl ArtistDraw<Data> for Text {
     fn bounds(&mut self) -> Bounds<Data> {
         Bounds::none()
     }
@@ -230,13 +230,15 @@ impl Artist<Data> for Text {
     }
 }
 
-impl PlotArtist for Text {
+impl Artist<Data> for Text {
     type Opt = TextOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistView<Text>) -> Self::Opt {
+    fn config(&mut self, _cfg: &ConfigArc) {
         // self.style = PathStyle::from_config(cfg, "text");
+    }
 
-        TextOpt::new(artist)
+    fn opt(&mut self, view: ArtistView<Data, Text>) -> Self::Opt {
+        TextOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

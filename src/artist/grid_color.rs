@@ -6,11 +6,11 @@ use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{
     artist::{Norm, Norms}, 
-    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    chart::{ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct
 };
 
-use super::{Artist, ColorMap, ColorMaps, PathStyle, ToCanvas};
+use super::{Artist, ArtistDraw, ArtistView, ColorMap, ColorMaps, PathStyle, ToCanvas};
 
 pub enum Shading {
     Flat,
@@ -156,7 +156,7 @@ impl GridColor {
     }
 }
 
-impl Artist<Data> for GridColor {
+impl ArtistDraw<Data> for GridColor {
     fn bounds(&mut self) -> Bounds<Data> {
         let (rows, cols) = match self.shading {
             Shading::Gouraud => (self.data.rows() - 1, self.data.cols() - 1),
@@ -202,13 +202,15 @@ impl Artist<Data> for GridColor {
     }
 }
 
-impl PlotArtist for GridColor {
+impl Artist<Data> for GridColor {
     type Opt = GridColorOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistView<GridColor>) -> Self::Opt {
+    fn config(&mut self, _cfg: &ConfigArc) {
         // self.style = PathStyle::from_config(cfg, "color_grid");
+    }
 
-        GridColorOpt::new(artist)
+    fn opt(&mut self, view: ArtistView<Data, GridColor>) -> Self::Opt {
+        GridColorOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

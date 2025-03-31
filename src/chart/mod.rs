@@ -25,7 +25,7 @@ pub use tick_locator::IndexLocator;
 pub use axis::{AxisOpt, ShowGrid};
 
 pub use data_frame::{
-    Data, Scaling, AspectMode, ArtistView, PlotArtist,
+    Data, Scaling, AspectMode, ArtistViewImpl,
 };
 
 pub use frame::{

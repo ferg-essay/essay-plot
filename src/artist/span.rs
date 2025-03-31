@@ -6,12 +6,12 @@ use essay_graphics::api::{
 
 use crate::{
     artist::PathStyle, 
-    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    chart::{ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct, path_style_options
 };
 
 use super::{
-    Artist, ToCanvas
+    Artist, ArtistDraw, ArtistView, ToCanvas
 };
 
 pub struct HorizontalLine {
@@ -49,7 +49,7 @@ impl HorizontalLine {
     }
 }
 
-impl Artist<Data> for HorizontalLine {
+impl ArtistDraw<Data> for HorizontalLine {
     fn bounds(&mut self) -> Bounds<Data> {
         Bounds::none()
     }
@@ -83,15 +83,17 @@ impl Artist<Data> for HorizontalLine {
     }
 }
 
-impl PlotArtist for HorizontalLine {
+impl Artist<Data> for HorizontalLine {
     type Opt = HorizontalLineOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<HorizontalLine>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc) {
         self.style = PathStyle::from_config(cfg, "span");
 
         // self.style.line_style(":");
+    }
 
-        HorizontalLineOpt::new(artist)
+    fn opt(&mut self, view: ArtistView<Data, HorizontalLine>) -> Self::Opt {
+        HorizontalLineOpt::new(view)
     }
     
     fn get_legend(&self) -> Option<LegendHandler> {

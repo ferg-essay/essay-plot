@@ -7,13 +7,12 @@ use essay_tensor::Tensor;
 
 use crate::{
     artist::PathStyle, 
-    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    chart::{ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct, path_style_options
 };
 
 use super::{
-    markers::{MarkerStyle, IntoMarker}, 
-    Artist, PathCollection, ToCanvas
+    markers::{IntoMarker, MarkerStyle}, Artist, ArtistDraw, ArtistView, PathCollection, ToCanvas
 };
 
 #[derive(Clone, PartialEq, Debug)]
@@ -167,21 +166,7 @@ fn build_path(line: &Tensor, draw_style: &DrawStyle) -> Path<Data> {
     Path::new(codes)
 }
 
-impl Artist<Data> for Lines2d {
-    /*
-    fn update_pos(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        // self.bounds = Bounds::from(&self.xy);
-
-        if self.is_stale {
-            self.is_stale = false;
-
-            if let Some(collection) = &mut self.collection {
-                // collection.resize(renderer, pos);
-            }
-        }
-    }
-    */
-
+impl ArtistDraw<Data> for Lines2d {
     fn bounds(&mut self) -> Bounds<Data> {
         self.bounds.clone()
     }
@@ -214,13 +199,15 @@ impl Artist<Data> for Lines2d {
     }
 }
 
-impl PlotArtist for Lines2d {
+impl Artist<Data> for Lines2d {
     type Opt = LinesOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<Lines2d>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc) {
         self.style = PathStyle::from_config(cfg, "lines");
+    }
 
-        LinesOpt::new(artist)
+    fn opt(&mut self, view: ArtistView<Data, Lines2d>) -> Self::Opt {
+        LinesOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

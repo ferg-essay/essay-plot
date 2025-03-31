@@ -6,7 +6,7 @@ use essay_tensor::Tensor;
 
 use crate::{chart::Data, tri::{Triangulation, triangulate}};
 
-use super::{Artist, ToCanvas};
+use super::{ArtistDraw, ToCanvas};
 
 pub struct TriPlot {
     data: Tensor,
@@ -36,7 +36,7 @@ impl TriPlot {
     }
 }
 
-impl Artist<Data> for TriPlot {
+impl ArtistDraw<Data> for TriPlot {
     fn bounds(&mut self) -> Bounds<Data> {
         Bounds::from(&self.data)
     }

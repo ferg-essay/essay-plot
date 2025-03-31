@@ -9,11 +9,11 @@ use essay_graphics::api::{
 
 use crate::{
     artist::{Markers, PathStyle}, 
-    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    chart::{ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct, path_style_options
 };
 
-use super::{Artist, PathCollection, ToCanvas};
+use super::{Artist, ArtistDraw, ArtistView, PathCollection, ToCanvas};
 
 pub struct Stem {
     xy: Tensor,
@@ -86,7 +86,7 @@ impl Stem {
     
 }
 
-impl Artist<Data> for Stem {
+impl ArtistDraw<Data> for Stem {
     fn bounds(&mut self) -> Bounds<Data> {
         self.extent.clone()
     }
@@ -124,17 +124,19 @@ impl Artist<Data> for Stem {
     }
 }
 
-impl PlotArtist for Stem {
+impl Artist<Data> for Stem {
     type Opt = StemOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<Stem>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc) {
         self.line_style = PathStyle::from_config(cfg, "stem.lines");
         self.baseline_style = PathStyle::from_config(cfg, "stem.lines");
         self.marker_style = PathStyle::from_config(cfg, "stem.marker");
 
         self.baseline_style.color("red"); // C3
+    }
 
-        StemOpt::new(artist)
+    fn opt(&mut self, view: ArtistView<Data, Stem>) -> Self::Opt {
+        StemOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

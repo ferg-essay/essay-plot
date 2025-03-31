@@ -2,11 +2,11 @@ use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, Pa
 use essay_tensor::Tensor;
 
 use crate::{
-    chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    chart::{ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct, path_style_options
 };
 
-use super::{paths, Artist, PathStyle, ToCanvas};
+use super::{paths, Artist, ArtistDraw, ArtistView, PathStyle, ToCanvas};
 
 pub struct Histogram {
     data: Tensor,
@@ -78,7 +78,7 @@ impl Histogram {
     
 }
 
-impl Artist<Data> for Histogram {
+impl ArtistDraw<Data> for Histogram {
     fn bounds(&mut self) -> Bounds<Data> {
         self.extent.clone()
     }
@@ -100,13 +100,15 @@ impl Artist<Data> for Histogram {
     }
 }
 
-impl PlotArtist for Histogram {
+impl Artist<Data> for Histogram {
     type Opt = HistogramOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<Histogram>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc) {
         self.style = PathStyle::from_config(cfg, "histogram");
+    }
 
-        HistogramOpt::new(artist)
+    fn opt(&mut self, view: ArtistView<Data, Histogram>) -> Self::Opt {
+        HistogramOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

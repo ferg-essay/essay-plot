@@ -4,8 +4,8 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::Artist,
-    chart::{AspectMode, AxisOpt, Data, ChartFrame, FrameArtist, FrameTextOpt, PlotArtist}
+    artist::{Artist, ArtistDraw},
+    chart::{AspectMode, AxisOpt, ChartFrame, Data, FrameArtist, FrameTextOpt}
 };
 
 use super::{style::PlotOptHandle, ConfigArc, PlotOpt, Scaling};
@@ -127,7 +127,7 @@ impl Chart {
         artist: A,
     ) -> PlotOpt
     where
-        A: Artist<Data> + 'static
+        A: ArtistDraw<Data> + 'static
     {
         self.artist(PlotOptHandle::new(artist))
     }
@@ -135,7 +135,7 @@ impl Chart {
     pub fn artist<'a, A>(
         &mut self, 
         artist: A,
-    ) -> <A::Artist as PlotArtist>::Opt 
+    ) -> <A::Artist as Artist<Data>>::Opt 
     where
         A: IntoArtist + 'static
     {
@@ -176,12 +176,12 @@ impl Drawable for Chart {
 }
 
 pub trait IntoArtist {
-    type Artist : PlotArtist;
+    type Artist : Artist<Data>;
 
     fn into_artist(self) -> Self::Artist;
 }
 
-impl<A: PlotArtist> IntoArtist for A {
+impl<A: Artist<Data>> IntoArtist for A {
     type Artist = Self;
 
     fn into_artist(self) -> Self::Artist {

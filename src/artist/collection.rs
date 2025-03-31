@@ -5,7 +5,7 @@ use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, Pa
 
 use crate::{chart::Data, artist::PathStyle};
 
-use super::{Artist, ToCanvas};
+use super::{ArtistDraw, ToCanvas};
 
 ///
 /// Collection of a single path displayed at multiple locations with optional
@@ -37,7 +37,7 @@ impl PathCollection {
     }
 }
 
-impl Artist<Data> for PathCollection {
+impl ArtistDraw<Data> for PathCollection {
     fn bounds(&mut self) -> Bounds<Data> {
         self.bounds.clone()
     }

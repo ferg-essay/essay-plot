@@ -10,7 +10,7 @@ use essay_graphics::{
 
 use crate::{
     artist::{
-        patch::CanvasPatch, paths, Artist, Colorbar, PathStyle, TextCanvas, ToCanvas
+        patch::CanvasPatch, paths, ArtistDraw, Colorbar, PathStyle, TextCanvas, ToCanvas
     }, 
     chart::{Config, ConfigArc}
 };
@@ -357,7 +357,7 @@ impl TopFrame {
     }
 }
 
-impl Artist<Canvas> for TopFrame {
+impl ArtistDraw<Canvas> for TopFrame {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.bounds.clone()
     }
@@ -558,7 +558,7 @@ impl RightFrame {
     }
 }
 
-impl Artist<Canvas> for RightFrame {
+impl ArtistDraw<Canvas> for RightFrame {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.bounds.clone()
     }

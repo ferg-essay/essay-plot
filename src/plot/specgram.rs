@@ -2,8 +2,8 @@ use essay_graphics::api::{renderer::{Renderer, Result}, Bounds, PathOpt};
 use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 
 use crate::{
-    artist::{Artist, ColorMap, ColorMaps, GridColor, Norm, Norms, Shading, ToCanvas}, 
-    chart::{ArtistView, Chart, ConfigArc, Data, LegendHandler, PlotArtist}, 
+    artist::{Artist, ArtistDraw, ArtistView, ColorMap, ColorMaps, GridColor, Norm, Norms, Shading, ToCanvas}, 
+    chart::{Chart, ConfigArc, Data, LegendHandler}, 
     data_artist_option_struct
 };
 
@@ -98,7 +98,7 @@ fn calculate_spectrum(data: &Tensor, nfft: usize, overlap: usize) -> Tensor {
     stack(values, 1)
 }
 
-impl Artist<Data> for SpecGram {
+impl ArtistDraw<Data> for SpecGram {
     fn bounds(&mut self) -> Bounds<Data> {
         self.grid_color.bounds()
     }
@@ -113,11 +113,14 @@ impl Artist<Data> for SpecGram {
     }
 }
 
-impl PlotArtist for SpecGram {
+impl Artist<Data> for SpecGram {
     type Opt = SpecGramOpt;
 
-    fn config(&mut self, _cfg: &ConfigArc, artist: ArtistView<SpecGram>) -> Self::Opt {
-        SpecGramOpt::new(artist)
+    fn config(&mut self, _cfg: &ConfigArc) {
+    }
+
+    fn opt(&mut self, view: ArtistView<Data, SpecGram>) -> Self::Opt {
+        SpecGramOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

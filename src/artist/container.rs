@@ -2,12 +2,12 @@ use essay_graphics::api::{
     renderer::{Renderer, Result}, Bounds, Coord, PathOpt
 };
 
-use crate::{chart::{ArtistView, ConfigArc, Data, LegendHandler, PlotArtist}, data_artist_option_struct};
+use crate::{chart::{ConfigArc, Data, LegendHandler}, data_artist_option_struct};
 
-use super::{Artist, PathStyle, StyleCycle, ToCanvas};
+use super::{Artist, ArtistDraw, ArtistView, PathStyle, StyleCycle, ToCanvas};
 
 pub struct Container<M: Coord> {
-    artists: Vec<Box<dyn Artist<M>>>,
+    artists: Vec<Box<dyn ArtistDraw<M>>>,
     style: PathStyle,
     cycle: StyleCycle,
 }
@@ -21,12 +21,12 @@ impl<M: Coord> Container<M> {
         }
     }
 
-    pub fn push(&mut self, artist: impl Artist<M> + 'static) {
+    pub fn push(&mut self, artist: impl ArtistDraw<M> + 'static) {
         self.artists.push(Box::new(artist));
     }
 }
 
-impl<M: Coord> Artist<M> for Container<M> {
+impl<M: Coord> ArtistDraw<M> for Container<M> {
     /*
     fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         for artist in &mut self.artists {
@@ -40,7 +40,7 @@ impl<M: Coord> Artist<M> for Container<M> {
 
         for artist in &mut self.artists {
             bounds = if bounds.is_none() {
-                    artist.bounds().clone()
+                artist.bounds().clone()
             } else {
                 bounds.union(&artist.bounds())
             };
@@ -67,13 +67,15 @@ impl<M: Coord> Artist<M> for Container<M> {
     }
 }
 
-impl PlotArtist for Container<Data> {
+impl Artist<Data> for Container<Data> {
     type Opt = ContainerOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<Container<Data>>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc) {
         self.cycle = StyleCycle::from_config(cfg, "container.cycle");
+    }
 
-        ContainerOpt::new(artist)
+    fn opt(&mut self, view: ArtistView<Data, Container<Data>>) -> Self::Opt {
+        ContainerOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {

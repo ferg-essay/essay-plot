@@ -6,7 +6,7 @@ use essay_tensor::{Tensor, init::linspace, tf32};
 
 use crate::chart::Data;
 
-use super::{Artist, grid_color::GridColor, paths, PathStyle, ToCanvas};
+use super::{ArtistDraw, grid_color::GridColor, paths, PathStyle, ToCanvas};
 
 pub struct Colorbar {
     bounds: Bounds<Data>,
@@ -47,7 +47,7 @@ impl Colorbar {
 
 }
 
-impl Artist<Data> for Colorbar {
+impl ArtistDraw<Data> for Colorbar {
     fn bounds(&mut self) -> Bounds<Data> {
         self.bounds.clone()
     }

@@ -28,29 +28,29 @@ macro_rules! frame_option_struct {
 macro_rules! data_artist_option_struct {
     ($name: ident, $ty: ty) => {
         pub struct $name {
-            artist: $crate::chart::ArtistView<$ty>,
+            view: $crate::artist::ArtistView<$crate::chart::Data, $ty>,
         }
         
         impl $name {
             pub(crate) fn new(
-                artist: $crate::chart::ArtistView<$ty>,
+                view: $crate::artist::ArtistView<$crate::chart::Data, $ty>,
             ) -> Self {
                 Self {
-                    artist: artist,
+                    view,
                 }
             }
         
             #[inline]
             #[allow(unused)]
             fn write<R>(&mut self, fun: impl FnOnce(&mut $ty) -> R) -> R {
-                self.artist.write(|artist| fun(artist))
+                self.view.write(|artist| fun(artist))
             }
         }
 
         impl Clone for $name {
             fn clone(&self) -> Self {
                 Self {
-                    artist: self.artist.clone(),
+                    view: self.view.clone(),
                 }
             }
         }

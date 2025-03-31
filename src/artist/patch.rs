@@ -5,11 +5,11 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    chart::{ArtistView, ConfigArc, Data, IntoArtist, LegendHandler, PlotArtist},
+    chart::{ConfigArc, Data, IntoArtist, LegendHandler},
     data_artist_option_struct, path_style_options, transform_options
 };
 
-use super::{paths, Artist, PathStyle, ToCanvas};
+use super::{paths, Artist, ArtistDraw, ArtistView, PathStyle, ToCanvas};
 
 pub trait PatchTrait<M: Coord> : Send {
     fn get_path(&mut self) -> &Path<M>;
@@ -48,7 +48,7 @@ impl Patch {
     }
 }
 
-impl Artist<Data> for Patch {
+impl ArtistDraw<Data> for Patch {
     fn bounds(&mut self) -> Bounds<Data> {
         Bounds::none()
     }
@@ -69,13 +69,15 @@ impl Artist<Data> for Patch {
     }
 }
 
-impl PlotArtist for Patch {
+impl Artist<Data> for Patch {
     type Opt = PatchOpt;
 
-    fn config(&mut self, cfg: &ConfigArc, artist: ArtistView<Patch>) -> Self::Opt {
+    fn config(&mut self, cfg: &ConfigArc) {
         self.style = PathStyle::from_config(cfg, "patch");
+    }
 
-        PatchOpt::new(artist)
+    fn opt(&mut self, view: ArtistView<Data, Patch>) -> Self::Opt {
+        PatchOpt::new(view)
     }
 
     fn get_legend(&self) -> Option<LegendHandler> {
@@ -247,7 +249,7 @@ impl CanvasPatch {
     }
 }
 
-impl Artist<Canvas> for CanvasPatch {
+impl ArtistDraw<Canvas> for CanvasPatch {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.bounds.clone()
     }
@@ -281,7 +283,7 @@ impl<M: Coord> PathPatch<M> {
     }
 }
 
-impl Artist<Canvas> for PathPatch<Canvas> {
+impl ArtistDraw<Canvas> for PathPatch<Canvas> {
     fn bounds(&mut self) -> Bounds<Canvas> {
         todo!()
     }
@@ -301,7 +303,7 @@ impl Artist<Canvas> for PathPatch<Canvas> {
     }
 }
 
-impl Artist<Data> for PathPatch<Data> {
+impl ArtistDraw<Data> for PathPatch<Data> {
     fn bounds(&mut self) -> Bounds<Data> {
         self.path.get_bounds()
     }
@@ -361,7 +363,7 @@ impl PatchTrait<Canvas> for Line {
     }
 }
 
-impl Artist<Canvas> for Line {
+impl ArtistDraw<Canvas> for Line {
     fn bounds(&mut self) -> Bounds<Canvas> {
         self.get_path().get_bounds()
     }
@@ -432,7 +434,7 @@ impl PatchTrait<Data> for Wedge {
     }
 }
 
-impl Artist<Data> for Wedge {
+impl ArtistDraw<Data> for Wedge {
     fn bounds(&mut self) -> Bounds<Data> {
         self.get_path().get_bounds()
     }

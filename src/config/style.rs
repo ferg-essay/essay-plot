@@ -2,9 +2,7 @@ use core::fmt;
 
 use essay_graphics::api::{path_opt::Hatch, CapStyle, Color, JoinStyle, LineStyle, PathOpt, TextureId};
 
-use crate::chart::Config;
-
-use super::Markers;
+use crate::{artist::Markers, config::Config};
 
 pub trait PathStyleOpt : PathOpt {
     fn _get_marker(&self) -> &Option<Markers>;

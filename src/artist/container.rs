@@ -2,9 +2,13 @@ use essay_graphics::api::{
     renderer::{Renderer, Result}, Bounds, Coord, PathOpt
 };
 
-use crate::{chart::{ConfigArc, Data, LegendHandler}, data_artist_option_struct};
+use crate::{
+    chart::{Data, LegendHandler}, 
+    config::{ConfigArc, PathStyle, StyleCycle},
+    data_artist_option_struct
+};
 
-use super::{Artist, ArtistDraw, ArtistView, PathStyle, StyleCycle, ToCanvas};
+use super::{Artist, ArtistDraw, ArtistView, ToCanvas};
 
 pub struct Container<M: Coord> {
     artists: Vec<Box<dyn ArtistDraw<M>>>,

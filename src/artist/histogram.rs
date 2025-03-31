@@ -2,11 +2,12 @@ use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, Pa
 use essay_tensor::Tensor;
 
 use crate::{
-    chart::{ConfigArc, Data, LegendHandler}, 
+    chart::{Data, LegendHandler}, 
+    config::{ConfigArc, PathStyle},
     data_artist_option_struct, path_style_options
 };
 
-use super::{paths, Artist, ArtistDraw, ArtistView, PathStyle, ToCanvas};
+use super::{paths, Artist, ArtistDraw, ArtistView, ToCanvas};
 
 pub struct Histogram {
     data: Tensor,

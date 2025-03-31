@@ -3,9 +3,8 @@ use essay_graphics::wgpu::{WgpuBackend, WgpuHardcopy};
 
 use essay_graphics::api::renderer::Backend;
 
-use crate::chart::Chart; // , frame::{Layout, LayoutArc}};
-
-use super::ConfigArc;
+use crate::chart::Chart;
+use crate::config::ConfigArc; // , frame::{Layout, LayoutArc}};
 
 pub struct Figure {
     size: (f32, f32),

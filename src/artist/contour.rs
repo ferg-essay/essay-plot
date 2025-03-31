@@ -4,9 +4,14 @@ use essay_graphics::api::{
 };
 use essay_tensor::{Tensor, tensor::TensorVec, math::normalize_unit};
 
-use crate::{chart::Data, contour::ContourGenerator};
+use crate::{
+    chart::Data, 
+    color::{ColorMap, ColorMaps},
+    config::PathStyle,
+    contour::ContourGenerator
+};
 
-use super::{ArtistDraw, ColorMap, ColorMaps, PathStyle, ToCanvas};
+use super::{ArtistDraw, ToCanvas};
 
 pub struct Level {
     paths: Vec<Path<Data>>,

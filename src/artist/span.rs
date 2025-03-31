@@ -5,8 +5,8 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    artist::PathStyle, 
-    chart::{ConfigArc, Data, LegendHandler}, 
+    chart::{Data, LegendHandler}, 
+    config::{ConfigArc, PathStyle},
     data_artist_option_struct, path_style_options
 };
 

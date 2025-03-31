@@ -3,7 +3,9 @@ use std::str::FromStr;
 use essay_graphics::api::{path_opt::StyleErr, renderer::Canvas, Angle, CapStyle, Color, JoinStyle, Path, PathCode, Point};
 use essay_tensor::tf32;
 
-use super::{paths::{Unit, self}, PathStyle};
+use crate::config::PathStyle;
+
+use super::paths::{Unit, self};
 
 pub struct MarkerStyle {
     path: Path<Unit>,

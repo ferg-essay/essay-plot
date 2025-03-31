@@ -4,10 +4,11 @@ use essay_graphics::api::{
 };
 use essay_tensor::Tensor;
 
-use crate::chart::ArtistViewImpl;
 use crate::{
-    artist::{Norms, Norm, Artist, ArtistDraw, ColorMap, ColorMaps, ToCanvas},
-    chart::{ConfigArc, LegendHandler, Data},
+    artist::{Norms, Norm, Artist, ArtistDraw, ToCanvas},
+    chart::{LegendHandler, Data},
+    color::{ColorMap, ColorMaps},
+    config::ConfigArc,
     data_artist_option_struct,
 };
 

@@ -303,7 +303,7 @@ impl From<&Hsv> for Color {
 mod test {
     use essay_graphics::api::Color;
 
-    use crate::artist::color::Hsva;
+    use crate::color::Hsva;
 
     #[test]
     fn hsva_to_color() {

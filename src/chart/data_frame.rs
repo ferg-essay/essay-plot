@@ -10,8 +10,8 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, ArtistDraw, ArtistContainer, ArtistView, PathStyle, StyleCycle, ToCanvas}, 
-    chart::{Config, ConfigArc}
+    artist::{Artist, ArtistContainer, ArtistDraw, ToCanvas}, 
+    config::{ConfigArc, PathStyle, StyleCycle}
 };
 
 use super::{ChartFrame, LegendHandler};
@@ -45,7 +45,7 @@ pub(crate) struct DataFrame {
 }
 
 impl DataFrame {
-    pub fn new(cfg: &Config) -> Self {
+    pub fn new(cfg: &ConfigArc) -> Self {
         Self {
             pos_canvas: Bounds::none(),
 
@@ -63,7 +63,7 @@ impl DataFrame {
             is_flip_y: false,
 
             // artists: PlotContainer::new(cfg),
-            artist_items: ArtistContainer::default(),
+            artist_items: ArtistContainer::from_config(cfg, "frame"),
 
             style: PathStyle::default(),
             cycle: StyleCycle::from_config(cfg, "frame.cycle"),
@@ -326,7 +326,7 @@ impl ArtistDraw<Canvas> for DataFrame {
         let style = self.style.push(style);
         // let clip = Clip::Bounds(self.pos_canvas.p0(), self.pos_canvas.p1());
 
-        self.artist_items.draw(renderer, to_canvas, &style);
+        self.artist_items.draw(renderer, to_canvas, &style)?;
 
         /*
         for (i, item) in self.artist_items.iter_mut().enumerate() {

@@ -3,7 +3,10 @@ use essay_graphics::api::{
     Bounds, HorizAlign, Path, PathCode, PathOpt, Point, TextStyle, VertAlign
 };
 
-use crate::{artist::{ArtistDraw, PathStyle, StyleCycle, ToCanvas}, chart::Config};
+use crate::{
+    artist::{ArtistDraw, ToCanvas}, 
+    config::{Config, PathStyle, StyleCycle},
+};
 
 use super::data_frame::DataFrame;
 

@@ -1,10 +1,9 @@
 use essay_graphics::layout::MainLoop;
-use essay_plot::chart::{Chart, ConfigArc};
+use essay_plot::chart::Chart;
 use essay_tensor::prelude::*;
 
 fn main() { 
-    let config = ConfigArc::default();
-    let mut chart = Chart::new(&config);
+    let mut chart = Chart::default();
 
     let bottom = Tensor::zeros([3]);
     chart.bar([1., 2., 3.]).bottom(&bottom);

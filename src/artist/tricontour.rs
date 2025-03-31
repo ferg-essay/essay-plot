@@ -1,9 +1,9 @@
 use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
 use essay_tensor::{Tensor, math::normalize_unit};
 
-use crate::{chart::Data, contour::TriContourGenerator, tri::Triangulation};
+use crate::{chart::Data, config::PathStyle, contour::TriContourGenerator, tri::Triangulation};
 
-use super::{ArtistDraw, PathStyle, ToCanvas};
+use super::{ArtistDraw, ToCanvas};
 
 pub struct Level {
     paths: Vec<Path<Data>>,

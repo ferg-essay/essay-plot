@@ -4,9 +4,12 @@ use essay_graphics::api::{
 };
 use essay_tensor::{Tensor, init::linspace, tf32};
 
-use crate::chart::Data;
+use crate::{
+    chart::Data,
+    config::PathStyle,
+};
 
-use super::{ArtistDraw, grid_color::GridColor, paths, PathStyle, ToCanvas};
+use super::{ArtistDraw, grid_color::GridColor, paths, ToCanvas};
 
 pub struct Colorbar {
     bounds: Bounds<Data>,

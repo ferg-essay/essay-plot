@@ -1,5 +1,4 @@
 mod axis;
-mod config;
 mod data_frame;
 mod figure;
 mod frame;
@@ -9,14 +8,9 @@ mod tick_formatter;
 mod tick_locator;
 mod style;
 
-pub use chart::{Chart, // Builder, 
-    IntoArtist};
+pub use chart::{Chart, IntoArtist};
 
 pub use figure::{Figure, SubFigure};
-
-pub use config::{
-    Config, ConfigArc,
-};
 
 pub use style::PlotOpt;
 

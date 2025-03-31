@@ -10,9 +10,9 @@ use essay_graphics::{
 
 use crate::{
     artist::{
-        patch::CanvasPatch, paths, ArtistDraw, Colorbar, PathStyle, TextCanvas, ToCanvas
+        patch::CanvasPatch, paths, ArtistDraw, Colorbar, TextCanvas, ToCanvas
     }, 
-    chart::{Config, ConfigArc}
+    config::{Config, ConfigArc, PathStyle}
 };
 
 use super::{axis::{Axis, AxisTicks, XAxis, YAxis}, data_frame::DataFrame, legend::Legend};

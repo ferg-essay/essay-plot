@@ -5,7 +5,8 @@ use essay_graphics::api::{
     Affine2d, Bounds, Coord, PathOpt
 };
 
-use crate::chart::{ConfigArc, LegendHandler};
+use crate::chart::LegendHandler;
+use crate::config::{ConfigArc, StyleCycle};
 
 pub trait ArtistDraw<M: Coord> : Send {
     fn bounds(&mut self) -> Bounds<M>;
@@ -32,10 +33,32 @@ pub trait Artist<M: Coord> : ArtistDraw<M> + Send + Sized {
 
 pub struct ArtistContainer<M: Coord> {
     artists: ContainerArc<M>,
+
+    config: ConfigArc,
+    _prefix: String,
+    
+    cycle: StyleCycle,
 }
 
 impl<M: Coord> ArtistContainer<M> {
+    pub fn from_config(config: &ConfigArc, prefix: &str) -> Self {
+        Self {
+            artists: ContainerArc(Arc::new(Mutex::new(Vec::new()))),
+
+            cycle: StyleCycle::from_config(config, &format!("{}.cycle", prefix)),
+
+            config: config.clone(),
+            _prefix: String::from(prefix),
+        }
+    }
+
+    pub fn cycle(&mut self, cycle: impl Into<StyleCycle>) {
+        self.cycle = cycle.into();
+    }
+
     pub fn add<A: Artist<M> + 'static>(&mut self, mut artist: A) -> A::Opt {
+        artist.config(&self.config); // todo: prefix
+
         let index = self.artists.0.lock().unwrap().len();
 
         let view = ArtistView::<M, A> {
@@ -79,10 +102,10 @@ impl<M: Coord> ArtistContainer<M> {
     ) -> renderer::Result<()> {
         let mut vec = self.artists.0.lock().unwrap();
 
-        for item in vec.iter_mut() {
-            // let style = self.cycle.push(&style, i);
+        for (i, item) in vec.iter_mut().enumerate() {
+            let style = self.cycle.push(style, i);
 
-            item.draw(renderer, to_canvas, style)?;
+            item.draw(renderer, to_canvas, &style)?;
         }
 
         Ok(())
@@ -105,14 +128,6 @@ impl<M: Coord> ArtistContainer<M> {
 
         vec
         */
-    }
-}
-
-impl<M: Coord> Default for ArtistContainer<M> {
-    fn default() -> Self {
-        Self { 
-            artists: ContainerArc(Arc::new(Mutex::new(Vec::new())))
-        }
     }
 }
 

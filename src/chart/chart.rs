@@ -5,10 +5,10 @@ use essay_graphics::{
 
 use crate::{
     artist::{Artist, ArtistDraw},
-    chart::{AspectMode, AxisOpt, ChartFrame, Data, FrameArtist, FrameTextOpt}
+    chart::{AspectMode, AxisOpt, ChartFrame, Data, FrameArtist, FrameTextOpt}, config::ConfigArc
 };
 
-use super::{style::PlotOptHandle, ConfigArc, PlotOpt, Scaling};
+use super::{style::PlotOptHandle, PlotOpt, Scaling};
 
 #[derive(Clone)]
 pub struct Chart {

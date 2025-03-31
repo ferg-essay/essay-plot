@@ -2,8 +2,10 @@ use essay_graphics::api::{renderer::{Renderer, Result}, Bounds, PathOpt};
 use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 
 use crate::{
-    artist::{Artist, ArtistDraw, ArtistView, ColorMap, ColorMaps, GridColor, Norm, Norms, Shading, ToCanvas}, 
-    chart::{Chart, ConfigArc, Data, LegendHandler}, 
+    artist::{Artist, ArtistDraw, ArtistView, GridColor, Norm, Norms, Shading, ToCanvas}, 
+    chart::{Chart, Data, LegendHandler}, 
+    color::{ColorMap, ColorMaps},
+    config::ConfigArc,
     data_artist_option_struct
 };
 

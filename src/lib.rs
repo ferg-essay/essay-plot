@@ -1,3 +1,5 @@
+pub mod color;
+pub mod config;
 pub mod tri;
 pub mod contour;
 pub mod macros;

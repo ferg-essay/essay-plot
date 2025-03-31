@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use essay_graphics::api::{path_opt::{Hatch, StyleErr}, CapStyle, Color, JoinStyle, LineStyle, PathOpt, TextureId};
 
-use crate::chart::Config;
+use crate::config::Config;
 
 
 pub struct StyleCycle {

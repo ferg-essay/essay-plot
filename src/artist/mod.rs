@@ -2,12 +2,8 @@ mod artist;
 mod bar;
 mod collection;
 mod colorbar;
-mod colormaps;
-mod colormap;
 mod container;
 mod contour;
-mod cycle;
-mod color;
 mod grid_color;
 mod histogram;
 mod image;
@@ -20,7 +16,6 @@ pub mod paths;
 mod quiver;
 mod span;
 mod stem;
-mod style;
 mod text;
 mod tricontour;
 
@@ -38,13 +33,7 @@ pub use container::{
     Container, ContainerOpt
 };
 
-pub use color::ColorCycle;
-
 pub use colorbar::Colorbar;
-
-pub use colormap::ColorMap;
-
-pub use colormaps::ColorMaps;
 
 pub use grid_color::{
     GridColor, GridColorOpt, Shading,
@@ -65,8 +54,6 @@ pub use image::{
 };
 
 pub use tricontour::TriContour;
-
-pub use cycle::StyleCycle;
 
 pub use triplot::TriPlot;
 
@@ -96,8 +83,6 @@ pub use span::{
 pub use stem::{
     Stem, StemOpt,
 };
-
-pub use style::PathStyle;
 
 pub use text::{
     Text, TextOpt, TextCoords, TextCanvas, // TextStyle,

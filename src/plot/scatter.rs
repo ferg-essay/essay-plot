@@ -6,8 +6,10 @@ use essay_tensor::Tensor;
 
 use crate::{
     artist::{
-        paths::{self}, Artist, ArtistDraw, ArtistView, Markers, PathCollection, PathStyle, ToCanvas
-    }, chart::{Chart, ConfigArc, Data, LegendHandler}, 
+        paths::{self}, Artist, ArtistDraw, ArtistView, Markers, PathCollection, ToCanvas
+    }, 
+    chart::{Chart, Data, LegendHandler}, 
+    config::{ConfigArc, PathStyle},
     data_artist_option_struct, path_style_options 
 };
 

@@ -4,11 +4,12 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    chart::{ConfigArc, Data, LegendHandler}, 
+    chart::{Data, LegendHandler}, 
+    config::{ConfigArc, PathStyle},
     data_artist_option_struct, path_style_options
 };
 
-use super::{artist::ToCanvas, Artist, ArtistDraw, ArtistView, PathStyle};
+use super::{artist::ToCanvas, Artist, ArtistDraw, ArtistView};
 
 pub struct TextCanvas {
     pos: Bounds<Canvas>,

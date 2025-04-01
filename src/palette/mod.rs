@@ -1,3 +1,4 @@
+mod colorcet;
 mod diverging;
 mod category;
 mod sequential;
@@ -13,6 +14,8 @@ pub use color::{
 };
 
 pub use category::Category;
+
+pub use colorcet::Colorcet;
 
 pub use colormap::ColorMap;
 

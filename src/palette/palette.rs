@@ -1,15 +1,24 @@
-use std::{ops::Index, str::FromStr};
+use std::{borrow::Cow, ops::Index, str::FromStr};
 
 use essay_graphics::api::{path_opt::StyleErr, Color};
 use super::Category;
 
 #[derive(Clone)]
 pub struct Palette {
-    colors: Vec<Vec<Color>>,
+    colors: Cow<'static, Vec<Vec<Color>>>,
+    row_map: RowMap,
 }
 
 impl Palette {
     pub fn new(colors: &Vec<Vec<Color>>) -> Self {
+        assert!(colors.len() > 0);
+
+        if colors.len() == 1 {
+            return Self {
+                colors: Cow::Owned(colors.clone()),
+                row_map: RowMap::Flat,
+            }
+        }
         let mut cycle_group = Vec::new();
 
         let mut n = 0;
@@ -31,7 +40,8 @@ impl Palette {
         assert!(n > 0);
 
         Self {
-            colors: cycle_group,
+            colors: Cow::Owned(cycle_group),
+            row_map: RowMap::Hierarchical(n),
         }
     }
 
@@ -41,7 +51,7 @@ impl Palette {
 
         let n = n.min(self.colors.last().unwrap().len());
 
-        self.colors[n - 1][i % n]
+        self.colors[self.row_map.row(i)][i % n]
     }
 
     pub fn colors(&self) -> &Vec<Color> {
@@ -63,6 +73,12 @@ impl Index<usize> for Palette {
 impl Default for Palette {
     fn default() -> Self {
         Category::Tableau.into()
+    }
+}
+
+impl From<Vec<Color>> for Palette {
+    fn from(value: Vec<Color>) -> Self {
+        Palette::new(&vec![value])
     }
 }
 
@@ -170,4 +186,19 @@ impl FromStr for Palette {
 
 fn colors_from<const N: usize>(value: &[u32; N]) -> Vec<Color> {
     value.iter().map(|v| Color::from(*v)).collect()
+}
+
+#[derive(Clone, Debug)]
+enum RowMap {
+    Flat,
+    Hierarchical(usize),
+}
+
+impl RowMap {
+    fn row(&self, i: usize) -> usize {
+        match self {
+            RowMap::Flat => 0,
+            RowMap::Hierarchical(n) => i % n,
+        }
+    }
 }

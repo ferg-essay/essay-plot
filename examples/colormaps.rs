@@ -1,6 +1,6 @@
 use essay_plot::{
-    chart::{Chart, Scaling, ShowGrid, SubFigure}, 
-    palette::{ColorMap, ColorMaps, Diverging, Sequential}, 
+    chart::{Chart, Scaling, SubFigure}, 
+    palette::{ColorMap, Diverging, Sequential}, 
     plot::grid_color, 
     prelude::*
 };
@@ -11,24 +11,18 @@ fn main() {
     // let mut graph1 = figure.chart(());
     figure.multichart(|ui| {
         ui.horizontal(|ui| {
-            draw_grid(ui, Diverging::RedBlue);
-            draw_grid(ui, Diverging::RedYellowBlue);
-            draw_grid(ui, Diverging::PurpleGreen);
+            draw_grid(ui, Diverging::RedBlue).title("rd_bu");
+            draw_grid(ui, Diverging::RedYellowBlue).title("rd_yl_bu");
+            draw_grid(ui, Diverging::PurpleGreen).title("pu_gn");
             draw_grid(ui, Diverging::Spectral).title("Spectral");
         });
         ui.horizontal(|ui| {
-            draw_grid(ui, Sequential::RedPurple);
-            draw_grid(ui, Sequential::Blues);            
-            draw_grid(ui, Sequential::Viridis);
-            draw_grid(ui, Sequential::Inferno);
-            draw_grid(ui, Sequential::Magma);
-            draw_grid(ui, Sequential::Plasma);
-        });
-        ui.horizontal(|ui| {
-            draw_grid(ui, ColorMaps::RedYellow);
-            draw_grid(ui, ColorMaps::BlueOrange);
-            draw_grid(ui, ColorMaps::VioletWhite);
-            ui.chart();
+            draw_grid(ui, Sequential::RedPurple).title("rd_pu");
+            draw_grid(ui, Sequential::Blues).title("blues");            
+            draw_grid(ui, Sequential::Viridis).title("viridis");
+            draw_grid(ui, Sequential::Inferno).title("inferno");
+            draw_grid(ui, Sequential::Magma).title("magma");
+            draw_grid(ui, Sequential::Plasma).title("plasma");
         });
     });
     // let mut graph2 = figure.chart(());
@@ -43,11 +37,11 @@ fn draw_grid(figure: &mut SubFigure, colormap: impl Into<ColorMap>) -> Chart {
     chart.scaling(Scaling::Image);
     chart.x().visible(false);
 
-    // chart.y().visible(false);
-    chart.y().show_grid(ShowGrid::Major);
+    chart.y().visible(false);
+    //chart.y().show_grid(ShowGrid::Major);
 
     let z = linspace(0., 1., 100);
-    let z = z.reshape([100, 1]);
+    let z = z.reshape([1, 100]);
 
     grid_color(&mut chart, &z)
         // .shading(Shading::Flat)

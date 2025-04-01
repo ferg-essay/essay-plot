@@ -8,26 +8,34 @@ fn main() {
 
     figure.multichart(|ui| {
         ui.horizontal(|ui| {
-            plot_pair(ui, Category::Tableau);
+            plot_pair(ui, Category::Tableau, "Tableau");
         });
         ui.horizontal(|ui| {
-            plot_pair(ui, Category::CategoryC);
+            plot_pair(ui, Category::CategoryC, "CategoryC");
         });
     });
 
     figure.show();
 }
 
-fn plot_pair(ui: &mut SubFigure, palette: impl Into<Palette>) {
+fn plot_pair(
+    ui: &mut SubFigure, 
+    palette: impl Into<Palette>,
+    title: &str,
+) {
     let palette = palette.into();
 
     let mut chart = ui.chart();
-    chart.color_cycle(palette.clone());
+    chart.color_cycle(palette.clone()).title(title);
+    chart.x().visible(false);
+    chart.y().visible(false);
     plot(&mut chart, 5);
 
     let mut chart = ui.chart();
-    chart.color_cycle(palette.clone());
+    chart.color_cycle(palette.clone()).title(title);
     plot(&mut chart, 20);
+    chart.x().visible(false);
+    chart.y().visible(false);
 }
 
 fn plot(chart: &mut Chart, n: usize) {

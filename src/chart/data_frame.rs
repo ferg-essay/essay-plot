@@ -10,8 +10,7 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, ArtistContainer, ArtistDraw, ToCanvas}, 
-    config::{ConfigArc, PathStyle, StyleCycle}
+    artist::{Artist, ArtistContainer, ArtistDraw, ToCanvas}, color::ColorCycle, config::{ConfigArc, PathStyle, StyleCycle}
 };
 
 use super::{ChartFrame, LegendHandler};
@@ -111,6 +110,12 @@ impl DataFrame {
         self.y_lim = Some((y_min, y_max));
 
         self
+    }
+    
+    pub(crate) fn color_cycle(&mut self, cycle: impl Into<ColorCycle>) {
+        let cycle = cycle.into();
+
+        self.artist_items.cycle(cycle);
     }
 
     pub(crate) fn add_artist<A: Artist<Data> + 'static>(

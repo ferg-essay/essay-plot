@@ -102,8 +102,10 @@ impl<M: Coord> ArtistContainer<M> {
     ) -> renderer::Result<()> {
         let mut vec = self.artists.0.lock().unwrap();
 
+        let len = vec.len();
+
         for (i, item) in vec.iter_mut().enumerate() {
-            let style = self.cycle.push(style, i);
+            let style = self.cycle.push(style, i, len);
 
             item.draw(renderer, to_canvas, &style)?;
         }

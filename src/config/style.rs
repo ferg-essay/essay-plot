@@ -168,18 +168,12 @@ impl fmt::Debug for PathStyle {
 }
 
 impl PathOpt for PathStyle {
-    fn get_face_color(&self) -> &Option<Color> {
-        match &self.face_color {
-            Some(_color) => &self.face_color,
-            None => &self.color,
-        }
+    fn get_face_color(&self) -> Option<Color> {
+        self.face_color.or(self.color)
     }
 
-    fn get_edge_color(&self) -> &Option<Color> {
-        match &self.edge_color {
-            Some(_color) => &self.edge_color,
-            None => &self.color,
-        }
+    fn get_edge_color(&self) -> Option<Color> {
+        self.edge_color.or(self.color)
     }
 
     fn get_line_width(&self) -> &Option<f32> {

@@ -11,8 +11,7 @@ use essay_graphics::{
 use crate::{
     artist::{
         patch::CanvasPatch, paths, ArtistDraw, Colorbar, TextCanvas, ToCanvas
-    }, 
-    config::{Config, ConfigArc, PathStyle}
+    }, color::ColorCycle, config::{Config, ConfigArc, PathStyle}
 };
 
 use super::{axis::{Axis, AxisTicks, XAxis, YAxis}, data_frame::DataFrame, legend::Legend};
@@ -193,6 +192,10 @@ impl ChartFrame {
 
     pub(crate) fn colorbar(&mut self) {
         self.right.colorbar();
+    }
+
+    pub(crate) fn color_cycle(&mut self, cycle: impl Into<ColorCycle>) {
+        self.data.color_cycle(cycle);
     }
 
     fn resize(&mut self, renderer: &mut dyn Renderer) {

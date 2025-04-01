@@ -61,8 +61,10 @@ impl<M: Coord> ArtistDraw<M> for Container<M> {
     ) -> Result<()> {
         let style = self.style.push(style);
 
+        let len = self.artists.len();
+
         for (i, artist) in self.artists.iter_mut().enumerate() {
-            let style = self.cycle.push(&style, i);
+            let style = self.cycle.push(&style, i, len);
 
             artist.draw(renderer, to_canvas, &style)?;
         }

@@ -114,6 +114,8 @@ impl ArtistDraw<Canvas> for Legend {
         let x_symbol = x0 + margin;
         let x_t = x_symbol + rect_width + pad_x;
 
+        let n = self.handlers.len();
+
         for (i, handler) in self.handlers.iter().enumerate() {
             let y = y0 - i as f32 * (dh + pad_y) - margin;
             renderer.draw_text(
@@ -129,7 +131,7 @@ impl ArtistDraw<Canvas> for Legend {
                 Point(x_symbol + rect_width, y - dh)
              );
 
-            let style = self.style_cycle.push(style, i);
+            let style = self.style_cycle.push(style, i, n);
              //let color = self.cycle.
              
              handler.draw(renderer, &style, &rect)?;

@@ -4,8 +4,7 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, ArtistDraw},
-    chart::{AspectMode, AxisOpt, ChartFrame, Data, FrameArtist, FrameTextOpt}, config::ConfigArc
+    artist::{Artist, ArtistDraw}, chart::{AspectMode, AxisOpt, ChartFrame, Data, FrameArtist, FrameTextOpt}, color::ColorCycle, config::ConfigArc
 };
 
 use super::{style::PlotOptHandle, PlotOpt, Scaling};
@@ -111,6 +110,14 @@ impl Chart {
     pub fn colorbar(&mut self) -> &mut Self {
         self.view.write(|f| { 
             f.colorbar();
+        });
+
+        self
+    }
+
+    pub fn color_cycle(&mut self, cycle: impl Into<ColorCycle>) -> &mut Self {
+        self.view.write(|f| { 
+            f.color_cycle(cycle);
         });
 
         self

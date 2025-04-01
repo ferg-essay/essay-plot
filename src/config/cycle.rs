@@ -2,12 +2,13 @@ use std::str::FromStr;
 
 use essay_graphics::api::{path_opt::{Hatch, StyleErr}, CapStyle, Color, JoinStyle, LineStyle, PathOpt, TextureId};
 
-use crate::config::Config;
+use crate::{color::ColorCycle, config::Config};
 
 
 pub struct StyleCycle {
-    fill_colors: Vec<Option<Color>>,
-    edge_colors: Vec<Option<Color>>,
+    colors: Option<ColorCycle>,
+    fill_colors: Option<ColorCycle>,
+    edge_colors: Option<ColorCycle>,
     line_widths: Vec<Option<f32>>,
     line_styles: Vec<Option<LineStyle>>,
 }
@@ -15,8 +16,9 @@ pub struct StyleCycle {
 impl StyleCycle {
     pub fn new() -> Self {
         Self {
-            fill_colors: Vec::new(),
-            edge_colors: Vec::new(),
+            colors: None,
+            fill_colors: None,
+            edge_colors: None,
             line_widths: Vec::new(),
             line_styles: Vec::new(),
         }
@@ -24,32 +26,26 @@ impl StyleCycle {
     pub fn push<'a>(
         &'a self, 
         prev: &'a dyn PathOpt, 
-        index: usize
+        index: usize,
+        n: usize,
     ) -> PropCycleChain<'a> {
-        PropCycleChain::new(self, prev, index)
+        PropCycleChain::new(self, prev, index, n)
     }
 
-    pub fn fill_colors(&mut self, colors: impl Into<Colors>) -> &mut Self {
-        let colors: Colors = colors.into();
-
-        self.fill_colors = colors.color_cycle;
+    pub fn fill_colors(&mut self, colors: impl Into<ColorCycle>) -> &mut Self {
+        self.fill_colors = Some(colors.into());
 
         self
     }
 
-    pub fn edge_colors(&mut self, colors: impl Into<Colors>) -> &mut Self {
-        let colors: Colors = colors.into();
-
-        self.edge_colors = colors.color_cycle;
+    pub fn edge_colors(&mut self, colors: impl Into<ColorCycle>) -> &mut Self {
+        self.edge_colors = Some(colors.into());
 
         self
     }
 
-    pub fn colors(&mut self, colors: impl Into<Colors>) -> &mut Self {
-        let colors: Colors = colors.into();
-
-        self.fill_colors = colors.color_cycle.clone();
-        self.edge_colors = colors.color_cycle;
+    pub fn colors(&mut self, colors: impl Into<ColorCycle>) -> &mut Self {
+        self.colors = Some(colors.into());
 
         self
     }
@@ -74,26 +70,28 @@ impl StyleCycle {
         self
     }
 
-    fn is_fill_color_set(&self) -> bool {
-        self.fill_colors.len() > 0
+    fn get_fill_color(&self, i: usize, n: usize) -> Option<Color> {
+        if let Some(cycle) = &self.fill_colors {
+            Some(cycle.color(i, n))
+        } else {
+            None
+        }
     }
 
-    fn get_fill_color(&self, index: usize) -> &Option<Color> {
-        let len = self.fill_colors.len();
-        assert!(len > 0);
-
-        &self.fill_colors[index % self.fill_colors.len()]
+    fn get_edge_color(&self, i: usize, n: usize) -> Option<Color> {
+        if let Some(cycle) = &self.edge_colors {
+            Some(cycle.color(i, n))
+        } else {
+            None
+        }
     }
 
-    fn is_edge_color_set(&self) -> bool {
-        self.edge_colors.len() > 0
-    }
-
-    fn get_edge_color(&self, index: usize) -> &Option<Color> {
-        let len = self.edge_colors.len();
-        assert!(len > 0);
-        
-        &self.edge_colors[index % self.edge_colors.len()]
+    fn get_color(&self, i: usize, n: usize) -> Option<Color> {
+        if let Some(cycle) = &self.colors {
+            Some(cycle.color(i, n))
+        } else {
+            None
+        }
     }
 
     fn is_line_width_set(&self) -> bool {
@@ -122,10 +120,20 @@ impl StyleCycle {
         let mut cycle = StyleCycle::new();
 
         if let Some(colors) = cfg.get_as_type::<Colors>(prefix, "colors") {
-            cycle.colors(colors);
+            // todo: cycle.colors(colors.);
         }
 
         cycle
+    }
+}
+
+impl From<ColorCycle> for StyleCycle {
+    fn from(value: ColorCycle) -> Self {
+        let mut style_cycle = StyleCycle::new();
+
+        style_cycle.colors = Some(value);
+
+        style_cycle
     }
 }
 
@@ -133,6 +141,7 @@ pub struct PropCycleChain<'a> {
     cycle: &'a StyleCycle,
     prev: &'a dyn PathOpt,
     index: usize,
+    n: usize,
 }
 
 impl<'a> PropCycleChain<'a> {
@@ -140,30 +149,30 @@ impl<'a> PropCycleChain<'a> {
         cycle: &'a StyleCycle,
         prev: &'a dyn PathOpt,
         index: usize,
+        n: usize,
     ) -> Self {
+        assert!(n > 0);
+
         Self {
             prev,
             cycle,
             index,
+            n,
         }
     }
 }
 
 impl PathOpt for PropCycleChain<'_> {
-    fn get_face_color(&self) -> &Option<Color> {
-        if self.cycle.is_fill_color_set() {
-            self.cycle.get_fill_color(self.index)
-        } else {
-            self.prev.get_face_color()
-        }
+    fn get_face_color(&self) -> Option<Color> {
+        self.cycle.get_fill_color(self.index, self.n)
+            .or(self.cycle.get_color(self.index, self.n))
+            .or(self.prev.get_face_color())
     }
 
-    fn get_edge_color(&self) -> &Option<Color> {
-        if self.cycle.is_edge_color_set() {
-            self.cycle.get_edge_color(self.index)
-        } else {
-            self.prev.get_edge_color()
-        }
+    fn get_edge_color(&self) -> Option<Color> {
+        self.cycle.get_edge_color(self.index, self.n)
+            .or(self.cycle.get_color(self.index, self.n))
+            .or(self.prev.get_edge_color())
     }
 
     fn get_line_style(&self) -> &Option<LineStyle> {

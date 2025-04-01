@@ -2,6 +2,8 @@ pub mod color;
 mod color_cycle;
 mod colormap;
 mod colormaps;
+pub(super) mod palette_brewer;
+pub(super) mod palette_vega;
 
 pub use color::{
     Hsv, Hsva, Hsl,

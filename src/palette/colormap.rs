@@ -1,6 +1,6 @@
 use essay_graphics::api::Color;
 
-use super::color::Hsv;
+use super::{color::Hsv, Palette};
 
 #[derive(Clone)]
 pub struct ColorMap {
@@ -123,6 +123,21 @@ pub fn raw_to_full(v: f32, raw_colors: &[(f32, Color)]) -> [f32; 4] {
 
     let c = Color::from_xyz(x, y, z);
     [c.red(), c.green(), c.blue(), 1.]
+}
+
+impl From<Palette> for ColorMap {
+    fn from(palette: Palette) -> Self {
+        let value = palette.colors();
+
+        let mut colors = Vec::<(f32, Color)>::new();
+
+        let factor = 1. / (value.len().max(2) - 1) as f32;
+        for (i, color) in value.iter().enumerate() {
+            colors.push((i as f32 * factor, *color));
+        }
+
+        ColorMap::from_colors(colors.as_slice())
+    }
 }
 
 impl From<&[(f32, Color)]> for ColorMap {

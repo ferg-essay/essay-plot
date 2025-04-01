@@ -1,14 +1,12 @@
-use std::str::FromStr;
+use essay_graphics::api::{path_opt::Hatch, CapStyle, Color, JoinStyle, LineStyle, PathOpt, TextureId};
 
-use essay_graphics::api::{path_opt::{Hatch, StyleErr}, CapStyle, Color, JoinStyle, LineStyle, PathOpt, TextureId};
-
-use crate::{color::ColorCycle, config::Config};
+use crate::{palette::Palette, config::Config};
 
 
 pub struct StyleCycle {
-    colors: Option<ColorCycle>,
-    fill_colors: Option<ColorCycle>,
-    edge_colors: Option<ColorCycle>,
+    colors: Option<Palette>,
+    fill_colors: Option<Palette>,
+    edge_colors: Option<Palette>,
     line_widths: Vec<Option<f32>>,
     line_styles: Vec<Option<LineStyle>>,
 }
@@ -32,19 +30,19 @@ impl StyleCycle {
         PropCycleChain::new(self, prev, index, n)
     }
 
-    pub fn fill_colors(&mut self, colors: impl Into<ColorCycle>) -> &mut Self {
+    pub fn fill_colors(&mut self, colors: impl Into<Palette>) -> &mut Self {
         self.fill_colors = Some(colors.into());
 
         self
     }
 
-    pub fn edge_colors(&mut self, colors: impl Into<ColorCycle>) -> &mut Self {
+    pub fn edge_colors(&mut self, colors: impl Into<Palette>) -> &mut Self {
         self.edge_colors = Some(colors.into());
 
         self
     }
 
-    pub fn colors(&mut self, colors: impl Into<ColorCycle>) -> &mut Self {
+    pub fn colors(&mut self, colors: impl Into<Palette>) -> &mut Self {
         self.colors = Some(colors.into());
 
         self
@@ -119,16 +117,17 @@ impl StyleCycle {
     pub(crate) fn from_config(cfg: &Config, prefix: &str) -> StyleCycle {
         let mut cycle = StyleCycle::new();
 
-        if let Some(colors) = cfg.get_as_type::<Colors>(prefix, "colors") {
-            // todo: cycle.colors(colors.);
-        }
+        if let Some(palette) = cfg.get_as_type::<Palette>(prefix, "colors")
+            .or_else(|| Some(Palette::default())) {
+            cycle.colors(palette);
+        };
 
         cycle
     }
 }
 
-impl From<ColorCycle> for StyleCycle {
-    fn from(value: ColorCycle) -> Self {
+impl From<Palette> for StyleCycle {
+    fn from(value: Palette) -> Self {
         let mut style_cycle = StyleCycle::new();
 
         style_cycle.colors = Some(value);
@@ -209,112 +208,6 @@ impl PathOpt for PropCycleChain<'_> {
 
     fn get_hatch(&self) -> &Option<Hatch> {
         self.prev.get_hatch()
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct Colors {
-    color_cycle: Vec<Option<Color>>,
-}
-
-impl<const N: usize> From<[Color; N]> for Colors {
-    fn from(value: [Color; N]) -> Self {
-        let mut vec = Vec::new();
-
-        for color in value {
-            vec.push(Some(color));
-        }
-
-        Self { color_cycle: vec }
-    }
-}
-
-impl From<&[Color]> for Colors {
-    fn from(value: &[Color]) -> Self {
-        let mut vec = Vec::new();
-
-        for color in value {
-            vec.push(Some(color.clone()));
-        }
-
-        Self { color_cycle: vec }
-    }
-}
-
-impl<const N: usize> From<[&str; N]> for Colors {
-    fn from(value: [&str; N]) -> Self {
-        let mut vec = Vec::new();
-
-        for name in value {
-            vec.push(Some(Color::from(name)));
-        }
-
-        Self { color_cycle: vec }
-    }
-}
-
-impl From<&[&str]> for Colors {
-    fn from(value: &[&str]) -> Self {
-        let mut vec = Vec::new();
-
-        for name in value {
-            vec.push(Some(Color::from(*name)));
-        }
-
-        Self { color_cycle: vec }
-    }
-}
-
-impl From<&[String]> for Colors {
-    fn from(value: &[String]) -> Self {
-        let mut vec = Vec::new();
-
-        for name in value {
-            vec.push(Some(Color::from(name.as_str())));
-        }
-
-        Self { color_cycle: vec }
-    }
-}
-
-impl<const N: usize> From<[u32; N]> for Colors {
-    fn from(value: [u32; N]) -> Self {
-        let mut vec = Vec::new();
-
-        for name in value {
-            vec.push(Some(Color::from(name)));
-        }
-
-        Self { color_cycle: vec }
-    }
-}
-
-impl From<&[u32]> for Colors {
-    fn from(value: &[u32]) -> Self {
-        let mut vec = Vec::new();
-
-        for rgb in value {
-            vec.push(Some(Color::from(*rgb)));
-        }
-
-        Self { color_cycle: vec }
-    }
-}
-
-impl FromStr for Colors {
-    type Err = StyleErr;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut vec : Vec<&str> = Vec::new();
-
-        for item in s.split(",") {
-            let item = item.trim();
-
-            // TODO: also trim quotes
-            vec.push(item);
-        };
-
-        Ok(Colors::from(vec.as_slice()))
     }
 }
 

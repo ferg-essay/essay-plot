@@ -1,22 +1,33 @@
 use std::f32::consts::PI;
 
-use essay_plot::{chart::Chart, color::Sequential, prelude::*};
+use essay_plot::{chart::{Chart, SubFigure}, palette::{Category, Palette}, prelude::*};
 use essay_tensor::init::linspace;
 
 fn main() {
     let mut figure = Figure::new();
 
     figure.multichart(|ui| {
-        let mut chart = ui.chart();
-        chart.color_cycle(Sequential::PuBuGn);
-        plot(&mut chart, 3);
-
-        let mut chart = ui.chart();
-        chart.color_cycle(Sequential::PuBuGn);
-        plot(&mut chart, 12);
+        ui.horizontal(|ui| {
+            plot_pair(ui, Category::Tableau);
+        });
+        ui.horizontal(|ui| {
+            plot_pair(ui, Category::CategoryC);
+        });
     });
 
     figure.show();
+}
+
+fn plot_pair(ui: &mut SubFigure, palette: impl Into<Palette>) {
+    let palette = palette.into();
+
+    let mut chart = ui.chart();
+    chart.color_cycle(palette.clone());
+    plot(&mut chart, 5);
+
+    let mut chart = ui.chart();
+    chart.color_cycle(palette.clone());
+    plot(&mut chart, 20);
 }
 
 fn plot(chart: &mut Chart, n: usize) {

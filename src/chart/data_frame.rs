@@ -1,19 +1,17 @@
 use core::fmt;
-use std::marker::PhantomData;
 
-use essay_graphics::{
-    api::{
-        renderer::{Canvas, Renderer, Result}, 
-        Affine2d, Bounds, Coord, PathOpt, Point
-    }, 
-    layout::View
+use essay_graphics::api::{
+    renderer::{Canvas, Renderer, Result}, 
+    Affine2d, Bounds, Coord, PathOpt, Point
 };
 
 use crate::{
-    artist::{Artist, ArtistContainer, ArtistDraw, ToCanvas}, color::ColorCycle, config::{ConfigArc, PathStyle, StyleCycle}
+    artist::{Artist, ArtistContainer, ArtistDraw, ToCanvas}, 
+    palette::Palette, 
+    config::{ConfigArc, PathStyle}
 };
 
-use super::{ChartFrame, LegendHandler};
+use super::LegendHandler;
 
 pub(crate) struct DataFrame {
     pos_canvas: Bounds<Canvas>,
@@ -38,7 +36,6 @@ pub(crate) struct DataFrame {
 
     to_canvas: Affine2d,
     style: PathStyle,
-    cycle: StyleCycle,
 
     _is_stale: bool,
 }
@@ -65,7 +62,6 @@ impl DataFrame {
             artist_items: ArtistContainer::from_config(cfg, "frame"),
 
             style: PathStyle::default(),
-            cycle: StyleCycle::from_config(cfg, "frame.cycle"),
 
             to_canvas: Affine2d::eye(),
             _is_stale: true,
@@ -112,7 +108,7 @@ impl DataFrame {
         self
     }
     
-    pub(crate) fn color_cycle(&mut self, cycle: impl Into<ColorCycle>) {
+    pub(crate) fn color_cycle(&mut self, cycle: impl Into<Palette>) {
         let cycle = cycle.into();
 
         self.artist_items.cycle(cycle);
@@ -120,9 +116,8 @@ impl DataFrame {
 
     pub(crate) fn add_artist<A: Artist<Data> + 'static>(
         &mut self, 
-        mut artist: A,
+        artist: A,
         config: &ConfigArc,
-        view: View<ChartFrame>,
     ) -> A::Opt {
         let mut artist = artist;
 
@@ -131,7 +126,7 @@ impl DataFrame {
         self.artist_items.add(artist)
     }
 
-    pub(super) fn update_pos(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+    pub(super) fn update_pos(&mut self, _renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
         //for item in &mut self.artist_items {
         //    item.resize(renderer, pos);
         //}
@@ -281,23 +276,7 @@ impl DataFrame {
 
     pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
         self.artist_items.get_handlers()
-        /*
-        let mut vec = Vec::<LegendHandler>::new();
-
-        for item in &mut self.artist_items {
-            match item.get_legend() {
-                Some(handler) => vec.push(handler),
-                None => {},
-            };
-        }
-
-        vec
-        */
     }
-
-    // pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
-    //     self.artists.get_legend_handlers()
-    // }
     
     fn bounds(&mut self) -> Bounds<Data> {
         let bounds = Bounds::none();
@@ -333,23 +312,9 @@ impl ArtistDraw<Canvas> for DataFrame {
 
         self.artist_items.draw(renderer, to_canvas, &style)?;
 
-        /*
-        for (i, item) in self.artist_items.iter_mut().enumerate() {
-            let style = self.cycle.push(&style, i);
-
-            item.draw(renderer, to_canvas, &style)?;
-        }
-        */
-
-        //renderer.flush(&clip);
         renderer.flush();
 
         Ok(())
-
-        // TODO: intersect clip
-        //for artist in &mut self.artists {
-        //    artist.draw(renderer, &to_canvas, &self.pos_canvas, &style);
-        //}
     }
 }
 
@@ -367,49 +332,6 @@ impl fmt::Debug for DataFrame {
 pub enum AspectMode {
     BoundingBox,
     View
-}
-
-pub struct ArtistViewImpl<A: Artist<Data>> {
-    view: View<ChartFrame>,
-    id: usize,
-    marker: PhantomData<fn(A)>
-}
-
-impl<A: Artist<Data> + 'static> ArtistViewImpl<A> {
-    pub(crate) fn new(
-        view: View<ChartFrame>, 
-        id: usize,
-    ) -> Self {
-        Self {
-            view,
-            id,
-            marker: Default::default(),
-        }
-    }
-}
-/*
-impl<A: Artist<Data> + 'static> ArtistView<Data, A> for ArtistViewImpl<A> {
-    fn read<R>(&self, fun: impl FnOnce(&A) -> R) -> R {
-        self.view.read(|f| {
-            fun(f.data().artist_items[self.id].deref())
-        })
-    }
-
-    fn write<R>(&mut self, fun: impl FnOnce(&mut A) -> R) -> R {
-        self.view.write(|f| {
-            fun(f.data_mut().artist_items[self.id].deref_mut())
-        })
-    }
-}
-*/
-impl<A: Artist<Data>> Clone for ArtistViewImpl<A> {
-    fn clone(&self) -> Self {
-        Self { 
-            view: self.view.clone(), 
-            id: self.id.clone(), 
-            marker: self.marker.clone() 
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

@@ -4,7 +4,7 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, ArtistDraw}, chart::{AspectMode, AxisOpt, ChartFrame, Data, FrameArtist, FrameTextOpt}, color::ColorCycle, config::ConfigArc
+    artist::{Artist, ArtistDraw}, chart::{AspectMode, AxisOpt, ChartFrame, Data, FrameArtist, FrameTextOpt}, palette::Palette, config::ConfigArc
 };
 
 use super::{style::PlotOptHandle, PlotOpt, Scaling};
@@ -115,7 +115,7 @@ impl Chart {
         self
     }
 
-    pub fn color_cycle(&mut self, cycle: impl Into<ColorCycle>) -> &mut Self {
+    pub fn color_cycle(&mut self, cycle: impl Into<Palette>) -> &mut Self {
         self.view.write(|f| { 
             f.color_cycle(cycle);
         });
@@ -148,12 +148,10 @@ impl Chart {
     {
         let artist = artist.into_artist();
 
-        let view_clone = self.view.clone();
-
         self.view.write(|f| {
             let config = f.config().clone();
 
-            f.data_mut().add_artist(artist, &config, view_clone)
+            f.data_mut().add_artist(artist, &config)
         })
     }
 }

@@ -1,4 +1,4 @@
-use essay_plot::{artist::Shading, chart::{Chart, Scaling, ShowGrid}, color::ColorMaps, plot::grid_color, prelude::*};
+use essay_plot::{artist::Shading, chart::{Chart, Scaling, ShowGrid}, palette::ColorMaps, plot::grid_color, prelude::*};
 use essay_tensor::{init::{linspace, meshgrid}, Tensor};
 
 fn main() { 

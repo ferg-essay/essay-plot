@@ -6,7 +6,7 @@ use essay_tensor::{Tensor, tensor::TensorVec, math::normalize_unit};
 
 use crate::{
     chart::Data, 
-    color::{ColorMap, ColorMaps},
+    palette::{ColorMap, ColorMaps},
     config::PathStyle,
     contour::ContourGenerator
 };

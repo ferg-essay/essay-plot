@@ -1,4 +1,4 @@
-use crate::color::Hsv;
+use crate::palette::Hsv;
 
 use super::ColorMap;
 

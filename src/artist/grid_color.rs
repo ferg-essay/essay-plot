@@ -5,7 +5,7 @@ use essay_graphics::api::{
 use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
 
 use crate::{
-    artist::{Norm, Norms}, chart::{Data, LegendHandler}, color::{ColorMap, ColorMaps}, config::{ConfigArc, PathStyle}, data_artist_option_struct
+    artist::{Norm, Norms}, chart::{Data, LegendHandler}, palette::{ColorMap, ColorMaps}, config::{ConfigArc, PathStyle}, data_artist_option_struct
 };
 
 use super::{Artist, ArtistDraw, ArtistView, ToCanvas};

@@ -1,4 +1,4 @@
-pub mod color;
+pub mod palette;
 pub mod config;
 pub mod tri;
 pub mod contour;

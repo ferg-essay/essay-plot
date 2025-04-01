@@ -19,7 +19,7 @@ pub use tick_locator::IndexLocator;
 pub use axis::{AxisOpt, ShowGrid};
 
 pub use data_frame::{
-    Data, Scaling, AspectMode, ArtistViewImpl,
+    Data, Scaling, AspectMode,
 };
 
 pub use frame::{

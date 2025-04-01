@@ -4,7 +4,7 @@ use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
 use crate::{
     artist::{Artist, ArtistDraw, ArtistView, GridColor, Norm, Norms, Shading, ToCanvas}, 
     chart::{Chart, Data, LegendHandler}, 
-    color::{ColorMap, ColorMaps},
+    palette::{ColorMap, ColorMaps},
     config::ConfigArc,
     data_artist_option_struct
 };

@@ -11,7 +11,7 @@ use essay_graphics::{
 use crate::{
     artist::{
         patch::CanvasPatch, paths, ArtistDraw, Colorbar, TextCanvas, ToCanvas
-    }, color::ColorCycle, config::{Config, ConfigArc, PathStyle}
+    }, palette::Palette, config::{Config, ConfigArc, PathStyle}
 };
 
 use super::{axis::{Axis, AxisTicks, XAxis, YAxis}, data_frame::DataFrame, legend::Legend};
@@ -103,59 +103,6 @@ impl ChartFrame {
         &self.config
     }
 
-    ///
-    /// Sets the device bounds and propagates to children
-    /// 
-    /// The position for a frame is the size of the data box. The frame,
-    /// axes and titles are relative to the data box.
-    /// 
-    /*
-    pub(crate) fn _set_pos(&mut self, pos: &Bounds<Canvas>) -> &mut Self {
-        self.pos = pos.clone();
-
-        let title = self.title.bounds();
-
-        // title exists outside the pos bounds
-        self.title.set_pos((
-            pos.xmin(), pos.ymax(), 
-            pos.xmax(), pos.ymax() + title.height()
-        )); 
-
-        let pos_data = Bounds::<Canvas>::new(
-            Point(pos.xmin(), pos.ymin()), 
-            Point(pos.xmax(), pos.ymax()),
-        );
-
-        self.data.set_pos(&pos_data);
-
-        let pos_data = self.data.get_pos();
-
-        let pos_top = Bounds::<Canvas>::new(
-            Point(pos_data.xmin(), pos_data.ymax()),
-            Point(pos_data.xmax(), pos_data.ymax()),
-        );
-        self.top.set_pos(&pos_top);
-
-        let pos_right = Bounds::<Canvas>::new(
-            Point(pos_data.xmax(), pos_data.ymin()),
-            Point(pos_data.xmax(), pos_data.ymax()),
-        );
-        self.right.set_pos(&pos_right);
-
-        let pos_canvas = Bounds::<Canvas>::new(
-            Point(pos_data.xmin(), pos_data.ymax()),
-            Point(pos_data.xmin(), pos_data.ymax()),
-        );
-        self.legend.set_pos(pos_canvas);
-
-        self
-    }
-    */
-
-    pub(crate) fn data(&self) -> &DataFrame {
-        &self.data
-    }
-
     pub(crate) fn data_mut(&mut self) -> &mut DataFrame {
         &mut self.data
     }
@@ -194,7 +141,7 @@ impl ChartFrame {
         self.right.colorbar();
     }
 
-    pub(crate) fn color_cycle(&mut self, cycle: impl Into<ColorCycle>) {
+    pub(crate) fn color_cycle(&mut self, cycle: impl Into<Palette>) {
         self.data.color_cycle(cycle);
     }
 

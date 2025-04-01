@@ -1,5 +1,4 @@
 use core::fmt;
-use std::ops::Index;
 
 use essay_graphics::api::Color;
 
@@ -250,7 +249,7 @@ impl From<&Hsv> for Color {
 mod test {
     use essay_graphics::api::Color;
 
-    use crate::color::Hsva;
+    use crate::palette::Hsva;
 
     #[test]
     fn hsva_to_color() {

@@ -7,7 +7,7 @@ use essay_tensor::Tensor;
 use crate::{
     artist::{Norms, Norm, Artist, ArtistDraw, ToCanvas},
     chart::{LegendHandler, Data},
-    color::{ColorMap, ColorMaps},
+    palette::{ColorMap, ColorMaps},
     config::ConfigArc,
     data_artist_option_struct,
 };

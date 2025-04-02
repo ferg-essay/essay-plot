@@ -1,14 +1,15 @@
 #[macro_export]
 macro_rules! frame_option_struct {
-    ($name: ident, $ty: ident, $getter: ident) => {
+    ($name: ident, $ty: ident, $f_ty: ident, $getter: ident) => {
         pub struct $name {
-            view: essay_graphics::layout::View<$crate::chart::ChartFrame>,
+            view: essay_graphics::layout::View<$f_ty>,
             artist: $crate::chart::FrameArtist,
         }
         
         impl $name {
             pub(crate) fn new(
-                view: &essay_graphics::layout::View<$crate::chart::ChartFrame>, 
+            //    view: &essay_graphics::layout::View<$crate::chart::CartesianFrame>, 
+                view: &essay_graphics::layout::View<$f_ty>, 
                 artist: $crate::chart::FrameArtist,
             ) -> Self {
                 Self {

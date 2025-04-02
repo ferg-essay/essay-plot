@@ -14,9 +14,13 @@ use crate::{
     }, palette::Palette, config::{Config, ConfigArc, PathStyle}
 };
 
-use super::{axis::{Axis, AxisTicks, XAxis, YAxis}, data_frame::DataFrame, legend::Legend};
+use super::{
+    axis::{Axis, AxisTicks, XAxis, YAxis}, 
+    data_frame::DataFrame, 
+    legend::Legend
+};
 
-pub struct ChartFrame {
+pub struct CartesianFrame {
     pos: Bounds<Canvas>,
 
     config: ConfigArc,
@@ -29,7 +33,6 @@ pub struct ChartFrame {
     _is_share_y: bool,
 
     path_style: PathStyle,
-    // prop_cycle
 
     data: DataFrame,
 
@@ -66,14 +69,14 @@ pub struct ChartFrame {
     // zorder
 }
 
-impl ChartFrame {
+impl CartesianFrame {
     pub(crate) fn new(cfg: &ConfigArc) -> Self {
         Self {
             config: cfg.clone(),
 
             pos: Bounds::none(),
 
-            data: DataFrame::new(cfg),
+            data: DataFrame::new(cfg, "frame"),
 
             title: TextCanvas::new(),
 
@@ -90,7 +93,6 @@ impl ChartFrame {
 
             legend: Legend::new(cfg),
 
-            //is_stale: true,
             _is_share_x: false,
             _is_share_y: false,
             //is_frame_visible: true,
@@ -105,16 +107,6 @@ impl ChartFrame {
 
     pub(crate) fn data_mut(&mut self) -> &mut DataFrame {
         &mut self.data
-    }
-
-    pub(crate) fn get_text_mut(&mut self, artist: FrameArtist) -> &mut TextCanvas {
-        match artist {
-            FrameArtist::Title => &mut self.title,
-            FrameArtist::XLabel => &mut self.bottom.title,
-            FrameArtist::YLabel => &mut self.left.title,
-
-            _ => panic!("Invalid text {:?}", artist)
-        }
     }
 
     pub(crate) fn get_axis_mut(&mut self, artist: FrameArtist) -> &mut Axis {
@@ -162,7 +154,7 @@ impl ChartFrame {
         // title exists outside the pos bounds
         self.title.update_pos(
             renderer,
-            &Bounds::from((
+            Bounds::from((
                 pos.xmin(), pos.ymax(), 
                 pos.xmax(), pos.ymax() + title.height()
             ))
@@ -181,7 +173,7 @@ impl ChartFrame {
             Point(pos_data.xmin(), pos_data.ymax()),
             Point(pos_data.xmax(), pos_data.ymax()),
         );
-        self.top.resize(renderer, &pos_top);
+        self.top.resize(renderer, pos_top);
     
         let pos_right = Bounds::<Canvas>::new(
             Point(pos_data.xmax(), pos_data.ymin()),
@@ -197,23 +189,21 @@ impl ChartFrame {
     
         // TODO:
         self.bottom.update_axis(&self.data);
-        // self.bottom.resize(renderer, &pos);
-        self.bottom.resize(renderer, &pos_data);
+        self.bottom.resize(renderer, pos_data);
     
         self.left.update_axis(&self.data);
-        self.left.resize(renderer, &pos_data);
+        self.left.resize(renderer, pos_data);
     
-        self.top.resize(renderer, &pos_data);
+        self.top.resize(renderer, pos_data);
         self.right.resize(renderer, &pos_data);
     
         self.legend.update_handlers(&mut self.data);
     }
 }
 
-impl Drawable for ChartFrame {
+impl Drawable for CartesianFrame {
     fn draw(&mut self, renderer: &mut dyn Renderer) -> Result<()> {
-        // let clip = Clip::from(&self.pos);
-        if self.pos != *renderer.pos() {
+        if self.pos != renderer.pos() {
             self.resize(renderer);
         }
 
@@ -235,12 +225,27 @@ impl Drawable for ChartFrame {
         self.top.draw(renderer, &frame_to_canvas, &self.path_style)?;
         self.right.draw(renderer,  &frame_to_canvas, &self.path_style)?;
 
-        // TODO: grid order
-        self.data.draw(renderer, &to_canvas, &self.path_style)?;
+        // self.data.draw(renderer, &to_canvas, &self.path_style)?;
+
+        renderer.draw_with_closure(self.data.get_pos(), Box::new(|r| {
+            self.data.draw(r, &to_canvas, &self.path_style)
+        }))?;
 
         self.legend.draw(renderer, &frame_to_canvas, &self.path_style)?;
 
         Ok(())
+    }
+}
+
+impl FrameWithTextArtist for CartesianFrame {
+    fn get_text_mut(&mut self, artist: FrameArtist) -> &mut TextCanvas {
+        match artist {
+            FrameArtist::Title => &mut self.title,
+            FrameArtist::XLabel => &mut self.bottom.title,
+            FrameArtist::YLabel => &mut self.left.title,
+
+            _ => panic!("Invalid text {:?}", artist)
+        }
     }
 }
 
@@ -291,7 +296,7 @@ impl TopFrame {
         }
     }
 
-    pub fn set_pos(&mut self, pos: &Bounds<Canvas>) {
+    pub fn set_pos(&mut self, pos: Bounds<Canvas>) {
         self.pos = pos.clone();
 
         if let Some(spine) = &mut self.spine {
@@ -302,7 +307,7 @@ impl TopFrame {
         }
     }
 
-    fn resize(&mut self, _renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+    fn resize(&mut self, _renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
         self.set_pos(pos);
     }
 }
@@ -368,7 +373,7 @@ impl BottomFrame {
         let mut y = self.x_axis.draw(renderer, data, to_canvas, style)?;
         y -= renderer.to_px(self.sizes.label_pad);
 
-        self.title.update_pos(renderer, &Bounds::new(
+        self.title.update_pos(renderer, Bounds::new(
             Point(data.get_pos().xmin(), y),
             Point(data.get_pos().xmax(), y),
         ));
@@ -380,7 +385,7 @@ impl BottomFrame {
         self.title.label(text)
     }
 
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
         self.title.update_pos(renderer, pos);
         self.x_axis.resize(renderer, pos);
     }
@@ -434,7 +439,7 @@ impl LeftFrame {
         let mut x = self.y_axis.draw(renderer, data, to_canvas, style)?;
         x -= renderer.to_px(self.sizes.label_pad);
 
-        self.title.update_pos(renderer, &Bounds::new(
+        self.title.update_pos(renderer, Bounds::new(
             Point(x, data.get_pos().ymid()),
             Point(x, data.get_pos().ymid()),
         ));
@@ -446,7 +451,7 @@ impl LeftFrame {
         self.title.label(text)
     }
 
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+    fn resize(&mut self, renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
         self.title.update_pos(renderer, pos);
         self.y_axis.update(renderer, pos);
     }
@@ -531,13 +536,13 @@ impl ArtistDraw<Canvas> for RightFrame {
     }
 }
 
-pub struct FrameTextOpt {
-    view: View<ChartFrame>,
+pub struct FrameTextOpt<F: FrameWithTextArtist> {
+    view: View<F>,
     artist: FrameArtist,
 }
 
-impl FrameTextOpt {
-    pub(crate) fn new(view: View<ChartFrame>, artist: FrameArtist) -> Self {
+impl<F: FrameWithTextArtist> FrameTextOpt<F> {
+    pub(crate) fn new(view: View<F>, artist: FrameArtist) -> Self {
         Self {
             view,
             artist,
@@ -566,34 +571,27 @@ impl FrameTextOpt {
     }
 }
 
-struct FrameMargins {
-    top: f32,
-    bottom: f32,
-    left: f32,
-    right: f32,
+pub trait FrameWithTextArtist: Drawable + Send + 'static {
+    fn get_text_mut(&mut self, artist: FrameArtist) -> &mut TextCanvas;
+}
+
+pub(super) struct FrameMargins {
+    pub top: f32,
+    pub bottom: f32,
+    pub left: f32,
+    pub right: f32,
 }
 
 impl FrameMargins {
-    fn new(cfg: &Config) -> Self {
-        let bottom = match cfg.get_as_type("figure.subplot", "bottom") {
-            Some(value) => value,
-            None => 0.
-        };
-
-        let top = match cfg.get_as_type("figure.subplot", "top") {
-            Some(value) => value,
-            None => 1.
-        };
-
-        let left = match cfg.get_as_type("figure.subplot", "left") {
-            Some(value) => value,
-            None => 0.
-        };
-
-        let right = match cfg.get_as_type("figure.subplot", "right") {
-            Some(value) => value,
-            None => 1.
-        };
+    pub fn new(cfg: &Config) -> Self {
+        let bottom = cfg.get_as_type("figure.subplot", "bottom")
+            .unwrap_or(0.);
+        let top = cfg.get_as_type("figure.subplot", "top")
+            .unwrap_or(1.);
+        let left = cfg.get_as_type("figure.subplot", "left")
+            .unwrap_or(0.);
+        let right = cfg.get_as_type("figure.subplot", "right")
+            .unwrap_or(1.);
 
         Self {
             bottom,

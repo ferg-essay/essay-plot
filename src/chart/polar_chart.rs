@@ -4,22 +4,19 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, ArtistDraw}, 
-    chart::{AspectMode, AxisOpt, CartesianFrame, Data, FrameArtist, FrameTextOpt}, 
-    palette::Palette, 
-    config::ConfigArc
+    artist::{Artist, ArtistDraw, IntoArtist}, chart::{AspectMode, AxisOpt, Data, FrameArtist, FrameTextOpt}, config::ConfigArc, palette::Palette
 };
 
-use super::{style::PlotOptHandle, PlotOpt, Scaling};
+use super::{polar_frame::PolarFrame, style::PlotOptHandle, PlotOpt, PolarAxisOpt, Scaling};
 
 #[derive(Clone)]
-pub struct Chart {
-    view: View<CartesianFrame>,
+pub struct PolarChart {
+    view: View<PolarFrame>,
 }
 
-impl Chart {
+impl PolarChart {
     pub fn new(config: &ConfigArc) -> Self {
-        let view = View::from(CartesianFrame::new(config));
+        let view = View::from(PolarFrame::new(config));
         
         // chart.default_properties();
 
@@ -28,35 +25,35 @@ impl Chart {
         }
     }
 
-    pub fn view(&self) -> &View<CartesianFrame> {
+    pub fn view(&self) -> &View<PolarFrame> {
         &self.view
     }
 
-    fn text_opt(&self, artist: FrameArtist) -> FrameTextOpt<CartesianFrame> {
+    fn text_opt(&self, artist: FrameArtist) -> FrameTextOpt<PolarFrame> {
         FrameTextOpt::new(self.view.clone(), artist)
     }
 
-    pub fn title(&mut self, label: &str) -> FrameTextOpt<CartesianFrame> {
+    pub fn title(&mut self, label: &str) -> FrameTextOpt<PolarFrame> {
         let mut opt = self.text_opt(FrameArtist::Title);
         opt.label(label);
         opt
     }
 
-    pub fn x(&mut self) -> AxisOpt {
-        AxisOpt::new(&self.view, FrameArtist::X)
+    pub fn x(&mut self) -> PolarAxisOpt {
+        PolarAxisOpt::new(&self.view, FrameArtist::X)
     }
 
-    pub fn y(&mut self) -> AxisOpt {
-        AxisOpt::new(&self.view, FrameArtist::Y)
+    pub fn y(&mut self) -> PolarAxisOpt {
+        PolarAxisOpt::new(&self.view, FrameArtist::Y)
     }
 
-    pub fn x_label(&mut self, label: &str) -> FrameTextOpt<CartesianFrame> {
+    pub fn x_label(&mut self, label: &str) -> FrameTextOpt<PolarFrame> {
         let mut opt = self.text_opt(FrameArtist::XLabel);
         opt.label(label);
         opt
     }
 
-    pub fn y_label(&mut self, label: &str) -> FrameTextOpt<CartesianFrame> {
+    pub fn y_label(&mut self, label: &str) -> FrameTextOpt<PolarFrame> {
         let mut opt = self.text_opt(FrameArtist::YLabel);
         opt.label(label);
         opt
@@ -147,7 +144,7 @@ impl Chart {
         artist: A,
     ) -> <A::Artist as Artist<Data>>::Opt 
     where
-        A: IntoArtist + 'static
+        A: IntoArtist<Data> + 'static
     {
         let artist = artist.into_artist();
 
@@ -159,40 +156,26 @@ impl Chart {
     }
 }
 
-impl From<Chart> for View<CartesianFrame> {
-    fn from(chart: Chart) -> Self {
+impl From<PolarChart> for View<PolarFrame> {
+    fn from(chart: PolarChart) -> Self {
         chart.view.clone()
     }
 }
 
-impl From<&Chart> for View<CartesianFrame> {
-    fn from(chart: &Chart) -> Self {
+impl From<&PolarChart> for View<PolarFrame> {
+    fn from(chart: &PolarChart) -> Self {
         chart.view.clone()
     }
 }
 
-impl Default for Chart {
+impl Default for PolarChart {
     fn default() -> Self {
-        Chart::new(&ConfigArc::default())
+        PolarChart::new(&ConfigArc::default())
     }
 }
 
-impl Drawable for Chart {
+impl Drawable for PolarChart {
     fn draw(&mut self, renderer: &mut dyn Renderer) -> renderer::Result<()> {
         self.view.drawable().draw(renderer)
-    }
-}
-
-pub trait IntoArtist {
-    type Artist : Artist<Data>;
-
-    fn into_artist(self) -> Self::Artist;
-}
-
-impl<A: Artist<Data>> IntoArtist for A {
-    type Artist = Self;
-
-    fn into_artist(self) -> Self::Artist {
-        self
     }
 }

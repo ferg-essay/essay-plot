@@ -39,7 +39,7 @@ impl TextCanvas {
         }
     }
 
-    pub(crate) fn update_pos(&mut self, renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
+    pub(crate) fn update_pos(&mut self, renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
         self.extent = match &self.text {
             None => Bounds::zero(),
             Some(text) => {

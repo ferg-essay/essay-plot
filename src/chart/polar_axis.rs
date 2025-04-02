@@ -9,91 +9,14 @@ use crate::{
 };
 
 use super::{
-    data_frame::DataFrame, tick_formatter::{Formatter, TickFormatter}, tick_locator::{MaxNLocator, TickLocator}, CartesianFrame, FrameArtist 
+    axis::{Axis, AxisTicks}, data_frame::DataFrame, polar_frame::PolarFrame, tick_formatter::{Formatter, TickFormatter}, tick_locator::{MaxNLocator, TickLocator}, FrameArtist, ShowGrid 
 };
-
-pub struct Axis {
-    pub(super) show_grid: ShowGrid,
-
-    pub(super) major: AxisTicks,
-    pub(super) minor: AxisTicks,
-
-    pub(super) locator: Box<dyn TickLocator>,
-    pub(super) formatter: Box<dyn TickFormatter>,
-
-    pub(super) is_visible: bool,
-}
-
-impl Axis {
-    pub fn new(cfg: &Config, prefix: &str) -> Self {
-        Self {
-            show_grid: ShowGrid::None,
-            major: AxisTicks::new(cfg, &cfg.join(prefix, "major")),
-            minor: AxisTicks::new(cfg, &cfg.join(prefix, "minor")),
-            locator: Box::new(MaxNLocator::new(None)),
-            formatter: Box::new(Formatter::Plain),
-            is_visible: true,
-        }
-    }
-
-    pub(crate) fn major(&self) -> &AxisTicks {
-        &self.major
-    }
-
-    pub(crate) fn major_mut(&mut self) -> &mut AxisTicks {
-        &mut self.major
-    }
-
-    pub(crate) fn _minor(&self) -> &AxisTicks {
-        &self.minor
-    }
-
-    pub(crate) fn minor_mut(&mut self) -> &mut AxisTicks {
-        &mut self.minor
-    }
-
-    pub fn value_delta(xvalues: &Vec<f32>) -> f32 {
-        let len = xvalues.len();
-
-        if len <= 1 {
-            return 1.;
-        }
-
-        let mut delta = (xvalues[len - 1] - xvalues[0]).abs();
-        for i in 0..len - 1 {
-            delta = (xvalues[i + 1] - xvalues[i]).abs().min(delta);
-        }
-
-        delta
-    }
-
-    pub(crate) fn get_show_grid(&self) -> &ShowGrid {
-        &self.show_grid
-    }
-
-    pub(crate) fn _visible(&mut self, is_visible: bool) {
-        self.is_visible = is_visible;
-    }
-
-    pub(crate) fn is_visible(&self) -> bool {
-        self.is_visible
-    }
-
-    fn format(&self, value: f32, delta: f32) -> String {
-        self.formatter.format(value, delta)
-    }
-
-    pub(crate) fn resize(&mut self, renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
-        self.major.update(renderer, pos);
-        self.minor.update(renderer, pos);
-    }
-}
 
 //
 // XAxis
 //
 
-pub struct XAxis {
+pub struct PolarXAxis {
     spine: Option<CanvasPatch>,
 
     axis: Axis,
@@ -104,7 +27,7 @@ pub struct XAxis {
 
 }
 
-impl XAxis {
+impl PolarXAxis {
     pub(crate) fn new(cfg: &Config, prefix: &str) -> Self {
         let mut x_axis = Self {
             spine: Some(CanvasPatch::new(paths::line([0., 0.], [1., 0.]))),
@@ -273,7 +196,7 @@ impl XAxis {
 // YAxis
 //
 
-pub struct YAxis {
+pub struct PolarYAxis {
     spine: Option<CanvasPatch>,
 
     axis: Axis,
@@ -283,7 +206,7 @@ pub struct YAxis {
     is_left: bool,
 }
 
-impl YAxis {
+impl PolarYAxis {
     pub(crate) fn new(cfg: &Config, prefix: &str) -> Self {
         let mut y_axis = Self {
             spine: Some(CanvasPatch::new(paths::line([0., 0.], [0., 1.]))),
@@ -452,95 +375,9 @@ impl YAxis {
     }
 }
 
-pub struct AxisTicks {
-    pub(super) grid_style: PathStyle,
-    pub(super) ticks_style: PathStyle,
-    pub(super) label_text: TextCanvas,
-    pub(super) size: f32,
-    pub(super) pad: f32,
-    pub(super) locator: Option<Box<dyn TickLocator>>,
-    pub(super) formatter: Option<Box<dyn TickFormatter>>,
-}
+frame_option_struct!(PolarAxisOpt, Axis, PolarFrame, get_axis_mut);
 
-impl AxisTicks {
-    pub(crate) fn new(cfg: &Config, prefix: &str) -> Self {
-        let mut ticks = Self {
-            grid_style: PathStyle::from_config(cfg, &cfg.join(prefix, "grid")),
-            ticks_style: PathStyle::from_config(cfg, &cfg.join(prefix, "ticks")),
-            size: match cfg.get_as_type(prefix, "size") {
-                Some(size) => size,
-                None => 0.,
-            },
-            pad: match cfg.get_as_type(prefix, "pad") {
-                Some(size) => size,
-                None => 0.,
-            },
-            label_text: TextCanvas::new(),
-            locator: None,
-            formatter: None,
-        };
-
-        match cfg.get_as_type::<f32>(prefix, "width") {
-            Some(width) => { ticks.ticks_style.line_width(width); }
-            None => {}
-        };
-
-        ticks.label_text.label("0.0");
-        
-        ticks
-    }
-
-    pub(crate) fn grid_style(&self) -> &PathStyle {
-        &self.grid_style
-    }
-
-    pub(crate) fn tick_style(&self) -> &PathStyle {
-        &self.ticks_style
-    }
-
-    pub(crate) fn label_style(&self) -> &TextStyle {
-        self.label_text.text_style()
-    }
-
-    pub(crate) fn label_style_mut(&mut self) -> &mut TextStyle {
-        self.label_text.text_style_mut()
-    }
-
-    pub(crate) fn _grid_style_mut(&mut self) -> &mut PathStyle {
-        &mut self.grid_style
-    }
-
-    pub(crate) fn format(&self, axis: &Axis, value: f32, delta: f32) -> String {
-        match &self.formatter {
-            Some(formatter) => {
-                formatter.format(value, delta)
-            }
-            None => { 
-                axis.format(value, delta) 
-            }
-        }
-    }
-
-    pub(crate) fn get_size(&self) -> f32 {
-        self.size
-    }
-
-    pub(crate) fn get_pad(&self) -> f32 {
-        self.pad
-    }
-
-    pub(crate) fn get_label_height(&self) -> f32 {
-        self.label_text.height()
-    }
-
-    pub(crate) fn update(&mut self, renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
-        self.label_text.update_pos(renderer, pos);
-    }
-}
-
-frame_option_struct!(AxisOpt, Axis, CartesianFrame, get_axis_mut);
-
-impl AxisOpt {
+impl PolarAxisOpt {
     pub fn show_grid(&mut self, show: impl Into<ShowGrid>) -> &mut Self {
         self.write(|axis| { axis.show_grid = show.into(); });
         self
@@ -565,36 +402,36 @@ impl AxisOpt {
         self
     }
 
-    pub fn major(&self) -> AxisTicksOpt {
+    pub fn major(&self) -> PolarAxisTicksOpt {
         let artist = match self.artist {
             FrameArtist::X => FrameArtist::XMajor,
             FrameArtist::Y => FrameArtist::YMajor,
             _ => panic!("invalid major()")
         };
 
-        AxisTicksOpt::new(&self.view, artist)
+        PolarAxisTicksOpt::new(&self.view, artist)
     }
 
-    pub fn major_grid(&self) -> AxisGridOpt {
+    pub fn major_grid(&self) -> PolarAxisGridOpt {
         let artist = match self.artist {
             FrameArtist::X => FrameArtist::XMajor,
             FrameArtist::Y => FrameArtist::YMajor,
             _ => panic!("invalid major()")
         };
 
-        AxisGridOpt::new(&self.view, artist)
+        PolarAxisGridOpt::new(&self.view, artist)
     }
 }
 
-frame_option_struct!(AxisGridOpt, AxisTicks, CartesianFrame, get_ticks_mut);
+frame_option_struct!(PolarAxisGridOpt, AxisTicks, PolarFrame, get_ticks_mut);
 
-impl AxisGridOpt {
+impl PolarAxisGridOpt {
     path_style_options!(grid_style);
 }
 
-frame_option_struct!(AxisTicksOpt, AxisTicks, CartesianFrame, get_ticks_mut);
+frame_option_struct!(PolarAxisTicksOpt, AxisTicks, PolarFrame, get_ticks_mut);
 
-impl AxisTicksOpt {
+impl PolarAxisTicksOpt {
     pub fn locator(&mut self, locator: impl TickLocator + 'static) -> &mut Self {
         self.write(|ticks| { 
             ticks.locator = Some(Box::new(locator)); 
@@ -611,42 +448,3 @@ impl AxisTicksOpt {
 
     path_style_options!(ticks_style);
 }
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum ShowGrid {
-    None,
-    Major,
-    Minor,
-    Both,
-}
-
-impl ShowGrid {
-    pub(crate) fn is_show_major(&self) -> bool {
-        match self {
-            ShowGrid::None => false,
-            ShowGrid::Major => true,
-            ShowGrid::Minor => false,
-            ShowGrid::Both => true,
-        }
-    }
-
-    pub(crate) fn _is_show_minor(&self) -> bool {
-        match self {
-            ShowGrid::None => false,
-            ShowGrid::Major => false,
-            ShowGrid::Minor => true,
-            ShowGrid::Both => true,
-        }
-    }
-}
-
-impl From<bool> for ShowGrid {
-    fn from(value: bool) -> Self {
-        if value {
-            Self::Major
-        } else {
-            Self::None
-        }
-    }
-}
-

@@ -31,6 +31,20 @@ pub trait Artist<M: Coord> : ArtistDraw<M> + Send + Sized {
     }
 }
 
+pub trait IntoArtist<M: Coord> {
+    type Artist : Artist<M>;
+
+    fn into_artist(self) -> Self::Artist;
+}
+
+impl<M: Coord, A: Artist<M>> IntoArtist<M> for A {
+    type Artist = Self;
+
+    fn into_artist(self) -> Self::Artist {
+        self
+    }
+}
+
 pub struct ArtistContainer<M: Coord> {
     artists: ContainerArc<M>,
 
@@ -76,18 +90,20 @@ impl<M: Coord> ArtistContainer<M> {
         opt
     }
     
-    pub fn bounds(&mut self, bounds: &Bounds<M>) -> Bounds<M> {
+    pub fn bounds(&mut self, bounds: Bounds<M>) -> Bounds<M> {
         let mut artists = self.artists.0.lock().unwrap();
 
-        let mut bounds = bounds.clone();
+        let mut bounds = bounds;
 
         for item in artists.iter_mut() {
             let sub_bounds = item.get_bounds();
 
             bounds = if bounds.is_none() {
                 sub_bounds
-            } else {
-                if sub_bounds.is_none() { bounds } else { bounds.union(&sub_bounds) }
+            } else if sub_bounds.is_none() { 
+                bounds
+            } else { 
+                bounds.union(&sub_bounds) 
             }
         }
 

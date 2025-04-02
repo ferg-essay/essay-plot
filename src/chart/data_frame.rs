@@ -31,7 +31,6 @@ pub(crate) struct DataFrame {
     aspect_mode: AspectMode,
     is_flip_y: bool,
 
-    // artists: PlotContainer,
     artist_items: ArtistContainer<Data>,
 
     to_canvas: Affine2d,
@@ -41,7 +40,7 @@ pub(crate) struct DataFrame {
 }
 
 impl DataFrame {
-    pub fn new(cfg: &ConfigArc) -> Self {
+    pub fn new(cfg: &ConfigArc, prefix: &str) -> Self {
         Self {
             pos_canvas: Bounds::none(),
 
@@ -51,15 +50,15 @@ impl DataFrame {
 
             x_lim: None,
             y_lim: None,
-            x_margin: cfg.get_as_type("frame", "x_margin"),
-            y_margin: cfg.get_as_type("frame", "y_margin"),
+            x_margin: cfg.get_as_type(prefix, "x_margin"),
+            y_margin: cfg.get_as_type(prefix, "y_margin"),
             scaling: Scaling::Auto,
             aspect: None,
             aspect_mode: AspectMode::BoundingBox,
             is_flip_y: false,
 
             // artists: PlotContainer::new(cfg),
-            artist_items: ArtistContainer::from_config(cfg, "frame"),
+            artist_items: ArtistContainer::from_config(cfg, prefix),
 
             style: PathStyle::default(),
 
@@ -258,16 +257,12 @@ impl DataFrame {
         }
     }
 
-    pub(crate) fn get_pos(&self) -> &Bounds<Canvas> {
-        &self.pos_canvas
+    pub(crate) fn get_pos(&self) -> Bounds<Canvas> {
+        self.pos_canvas
     }
 
-    pub(crate) fn get_view_bounds(&self) -> &Bounds<Data> {
-        if let Some(bounds) = &self.pan_zoom_bounds {
-            bounds
-        } else {
-            &self.view_bounds
-        }
+    pub(crate) fn get_view_bounds(&self) -> Bounds<Data> {
+        self.pan_zoom_bounds.unwrap_or(self.view_bounds)
     }
 
     pub(crate) fn get_canvas_transform(&self) -> &Affine2d {
@@ -281,7 +276,7 @@ impl DataFrame {
     fn bounds(&mut self) -> Bounds<Data> {
         let bounds = Bounds::none();
 
-        let bounds = self.artist_items.bounds(&bounds);
+        let bounds = self.artist_items.bounds(bounds);
 
         if bounds.is_none() {
             Bounds::new(Point(0., 0.), Point(1., 1.))

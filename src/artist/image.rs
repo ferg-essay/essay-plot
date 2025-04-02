@@ -106,7 +106,7 @@ impl ArtistDraw<Data> for Image {
         // todo [width, height, 4]
         let colors = Tensor::from(colors).reshape([self.data.rows(), self.data.cols(), 4]);
     
-        renderer.draw_image(&bounds, &colors)
+        renderer.draw_image(bounds, &colors)
     }
 }
 

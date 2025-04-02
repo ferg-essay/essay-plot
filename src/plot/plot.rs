@@ -3,28 +3,28 @@ use essay_tensor::{init::linspace, Tensor};
 use crate::{artist::{Lines2d, LinesOpt}, chart::Chart};
 
 pub fn plot(
-    graph: &mut Chart, 
+    chart: &mut Chart, 
     x: impl Into<Tensor>, 
     y: impl Into<Tensor>, 
 ) -> LinesOpt {
     let lines = Lines2d::from_xy(x, y);
 
     //self.artist(lines)
-    graph.artist(lines)
+    chart.artist(lines)
 }
 
 pub fn plot_xy(
-    graph: &mut Chart, 
+    chart: &mut Chart, 
     values: impl Into<Tensor>, 
 ) -> LinesOpt {
     let lines = Lines2d::from_value(values);
 
     //self.artist(lines)
-    graph.artist(lines)
+    chart.artist(lines)
 }
 
 pub fn plot_y(
-    graph: &mut Chart, 
+    chart: &mut Chart, 
     y: impl Into<Tensor>, 
 ) -> LinesOpt {
     let y = y.into();
@@ -33,5 +33,5 @@ pub fn plot_y(
     let lines = Lines2d::from_xy(x, y);
 
     //self.artist(lines)
-    graph.artist(lines)
+    chart.artist(lines)
 }

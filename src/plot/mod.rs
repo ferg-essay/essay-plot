@@ -1,6 +1,10 @@
 use essay_graphics::api::Point;
 use essay_tensor::Tensor;
-use crate::{artist::{ContainerOpt, HorizontalLineOpt, ImageOpt, LinesOpt, TextOpt}, chart::Chart};
+
+use crate::{
+    artist::{ContainerOpt, HorizontalLineOpt, ImageOpt, Lines2d, LinesOpt, TextOpt}, 
+    chart::{Chart, PolarChart}
+};
 
 mod bar;
 mod contour;
@@ -120,14 +124,17 @@ impl Chart {
     ) -> TextOpt {
         text::text(self, pos, text)
     }
+}
 
-    /*
-    pub fn bar_y(
+
+impl PolarChart {
+    pub fn plot(
         &mut self, 
+        x: impl Into<Tensor>,
         y: impl Into<Tensor>,
-    ) -> BarOpt {
-        bar::bar_y(self, y)
-    }
-    */
+    ) -> LinesOpt {
+        let lines = Lines2d::from_xy(x, y);
 
+        self.artist(lines)
+    }
 }

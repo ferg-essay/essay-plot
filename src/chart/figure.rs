@@ -4,7 +4,9 @@ use essay_graphics::wgpu::{WgpuBackend, WgpuHardcopy};
 use essay_graphics::api::renderer::Backend;
 
 use crate::chart::Chart;
-use crate::config::ConfigArc; // , frame::{Layout, LayoutArc}};
+use crate::config::ConfigArc;
+
+use super::polar_chart::PolarChart; // , frame::{Layout, LayoutArc}};
 
 pub struct Figure {
     size: (f32, f32),
@@ -36,6 +38,14 @@ impl Figure {
         chart
     }
 
+    pub fn polar(&mut self) -> PolarChart {
+        let chart = PolarChart::new(&self.config);
+
+        self.page = Some(Page::new(chart.clone()));
+
+        chart
+    }
+
     pub fn multichart<R>(&mut self, f: impl FnOnce(&mut SubFigure) -> R) -> R {
         let mut page_builder = PageBuilder::new();
 
@@ -50,22 +60,6 @@ impl Figure {
 
         result
     }
-
-    /*
-    pub fn horizontal(&mut self) -> SubFigure {
-        SubFigure {
-            config: &self.config,
-            sub_page: self.page.horizontal(),
-        }
-    }
-
-    pub fn vertical(&mut self) -> SubFigure {
-        SubFigure {
-            config: &self.config,
-            sub_page: self.page.vertical(),
-        }
-    }
-    */
 
     pub fn show(self) {
         let mut own = self;

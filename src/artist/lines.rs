@@ -181,7 +181,7 @@ impl ArtistDraw<Data> for Lines2d {
             return Ok(());
         }
 
-        let path = self.path.transform(&to_canvas);
+        let path = to_canvas.transform_path(&self.path);
 
         let style = self.style.push(style);
 

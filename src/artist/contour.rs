@@ -139,7 +139,7 @@ impl ArtistDraw<Data> for Contour {
 
         for level in &self.levels {
             for path in &level.paths {
-                let path : Path<Canvas> = path.transform(&to_canvas);
+                let path : Path<Canvas> = to_canvas.transform_path(path);
 
                 renderer.draw_path(&path, &style)?;
             }

@@ -1,11 +1,11 @@
 use std::{any::Any, marker::PhantomData, ops::Deref, sync::{Arc, Mutex}};
 
 use essay_graphics::api::{
-    renderer::{self, Canvas, Renderer, Result}, 
-    Affine2d, Bounds, Coord, PathOpt
+    renderer::{self, Canvas, Renderer, Result}, Affine2d, Bounds, Coord, Path, PathCode, PathOpt, Point
 };
+use essay_tensor::Tensor;
 
-use crate::chart::LegendHandler;
+use crate::chart::{Data, LegendHandler};
 use crate::config::{ConfigArc, StyleCycle};
 
 pub trait ArtistDraw<M: Coord> : Send {
@@ -298,15 +298,48 @@ impl ToCanvas {
         }
     }
 
-    pub fn pos(&self) -> &Bounds<Canvas> {
-        &self.pos_frame
+    pub fn pos(&self) -> Bounds<Canvas> {
+        self.pos_frame
     }
 
+    // todo: fix Coord
+    pub fn transform_path<M: Coord>(&self, path: &Path<M>) -> Path<Canvas> {
+        path.map(|point| { self.transform_point(point) })
+    }
+
+    #[inline]
+    pub fn transform_point(&self, point: Point) -> Point {
+        self.to_canvas.transform_point(point)
+    }
+
+    #[inline]
+    pub fn transform_tensor(&self, tensor: &Tensor) -> Tensor {
+        tensor.map_slice::<2>(|v: &[f32]| {
+            let Point(x, y) = self.to_canvas.transform_point(Point(v[0], v[1]));
+
+            [x, y]
+        })
+    }
+    
+    #[deprecated]
+    pub(crate) fn affine2d(&self) -> &Affine2d{
+        &self.to_canvas
+    }
+    
+    pub(crate) fn matmul(&self, transform: &Affine2d) -> Self {
+        Self {
+            pos_frame: self.pos_frame,
+            to_canvas: self.to_canvas.matmul(transform),
+        }
+    }
+    
+    /*
     pub fn to_canvas(&self) -> &Affine2d {
         &self.to_canvas
     }
+    */
 }
-
+/*
 impl Deref for ToCanvas {
     type Target = Affine2d;
 
@@ -314,3 +347,4 @@ impl Deref for ToCanvas {
         self.to_canvas()
     }
 }
+    */

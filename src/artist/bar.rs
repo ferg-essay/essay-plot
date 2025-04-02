@@ -159,7 +159,7 @@ impl ArtistDraw<Data> for Bar {
         let style = self.style.push(style);
 
         for path in &self.paths {
-            let c_path: Path<Canvas> = path.transform(to_canvas);
+            let c_path: Path<Canvas> = to_canvas.transform_path(path);
             renderer.draw_path(&c_path, &style)?;
         }
 

@@ -166,12 +166,12 @@ impl Drawable for PolarFrame {
         }
 
         let frame_to_canvas = ToCanvas::new(
-            self.pos.clone(), 
+            self.pos,
             self.to_canvas.clone()
         );
 
         let to_canvas = ToCanvas::new(
-            self.pos.clone(), 
+            self.pos,
             self.data.get_canvas_transform().clone()
         );
 
@@ -179,8 +179,7 @@ impl Drawable for PolarFrame {
 
         // self.x_axis.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
         // self.y_axis.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
-        let pos = self.data.get_pos().clone();
-        renderer.draw_with_closure(pos, Box::new(|r| {
+        renderer.draw_with_closure(self.data.get_pos(), Box::new(|r| {
             self.data.draw(r, &to_canvas, &self.path_style)
         }))?;
 

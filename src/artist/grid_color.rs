@@ -63,7 +63,7 @@ impl GridColor {
     fn draw_solid_shading(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         _style: &dyn PathOpt,
     ) -> Result<()> {
         let path = Path::<Data>::closed_poly(tf32!([
@@ -71,6 +71,7 @@ impl GridColor {
             [0.0, 1.0]
             ]));
             
+        let to_canvas = to_canvas.affine2d();
         let scale_canvas = to_canvas.strip_translation();
         let path: Path<Canvas> = path.transform(&scale_canvas);
         let xy = to_canvas.transform(&self.xy);
@@ -101,10 +102,10 @@ impl GridColor {
     fn draw_gouraud_shading(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &Affine2d,
+        to_canvas: &ToCanvas,
         _style: &dyn PathOpt,
     ) -> Result<()> {
-        let xy = to_canvas.transform(&self.xy);
+        let xy = to_canvas.transform_tensor(&self.xy);
 
         let norm = normalize_unit(&self.data);
         let cmap = &self.color_map;

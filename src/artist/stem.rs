@@ -103,7 +103,7 @@ impl ArtistDraw<Data> for Stem {
         let line_style = self.line_style.push(style);
 
         for path in &self.paths {
-            let path = path.transform(&to_canvas);
+            let path = to_canvas.transform_path(path);
             renderer.draw_path(&path, &line_style)?;
         }
         
@@ -118,7 +118,7 @@ impl ArtistDraw<Data> for Stem {
             PathCode::LineTo(Point(self.extent.xmax(), 0.)),
         ]);
 
-        let baseline: Path<Canvas> = baseline.transform(&to_canvas);
+        let baseline: Path<Canvas> = to_canvas.transform_path(&baseline);
         let baseline_style = self.baseline_style.push(style);
 
         renderer.draw_path(&baseline, &baseline_style)

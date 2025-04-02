@@ -61,7 +61,7 @@ impl ArtistDraw<Data> for Patch {
         style: &dyn PathOpt,
     ) -> Result<()> {
         let to_canvas = to_canvas.matmul(&self.transform);
-        let path = self.path.transform(&to_canvas);
+        let path = to_canvas.transform_path(&self.path);
         let style = self.style.push(style);
         renderer.draw_path(
             &path,
@@ -262,7 +262,7 @@ impl ArtistDraw<Canvas> for CanvasPatch {
         style: &dyn PathOpt,
     ) -> Result<()> {
         let to_canvas = to_canvas.matmul(&self.to_canvas);
-        let path = self.path.transform(&to_canvas);
+        let path = to_canvas.transform_path(&self.path);
         let style = self.style.push(style);
 
         renderer.draw_path(
@@ -295,7 +295,7 @@ impl ArtistDraw<Canvas> for PathPatch<Canvas> {
         to_canvas: &ToCanvas,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let path = self.path.transform(&to_canvas);
+        let path = to_canvas.transform_path(&self.path);
 
         renderer.draw_path(
             &path,
@@ -315,7 +315,7 @@ impl ArtistDraw<Data> for PathPatch<Data> {
         to_canvas: &ToCanvas,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let path = self.path.transform(&to_canvas);
+        let path = to_canvas.transform_path(&self.path);
         renderer.draw_path(
             &path,
             style, 
@@ -376,7 +376,7 @@ impl ArtistDraw<Canvas> for Line {
         style: &dyn PathOpt,
     ) -> Result<()> {
         if let Some(path) = &self.path {
-            let path = path.transform(&to_canvas);
+            let path = to_canvas.transform_path(path);
 
             renderer.draw_path(&path, style)?;
         }
@@ -447,7 +447,7 @@ impl ArtistDraw<Data> for Wedge {
         style: &dyn PathOpt,
     ) -> Result<()> {
         if let Some(path) = &self.path {
-            let path = path.transform(to_canvas);
+            let path = to_canvas.transform_path(path);
 
             renderer.draw_path(&path, style)?;
         }

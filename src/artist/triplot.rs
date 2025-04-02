@@ -63,7 +63,7 @@ impl ArtistDraw<Data> for TriPlot {
             }
 
             let path = Path::<Data>::new(codes);
-            let path = path.transform(to_canvas);
+            let path = to_canvas.transform_path(&path);
 
             renderer.draw_path(&path, style)?;
         }

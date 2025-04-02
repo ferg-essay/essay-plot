@@ -48,7 +48,7 @@ impl ArtistDraw<Data> for PathCollection {
         to_canvas: &ToCanvas,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let xy = to_canvas.transform(&self.xy);
+        let xy = to_canvas.transform_tensor(&self.xy);
 
         let style = self.style.push(style);
 

@@ -1,9 +1,9 @@
-use essay_graphics::api::Point;
+use essay_graphics::api::{Path, PathCode, Point};
 use essay_tensor::tensor::Tensor;
 
 use crate::{
-    artist::{ContainerOpt, HorizontalLineOpt, ImageOpt, Lines2d, LinesOpt, TextOpt}, 
-    chart::{Chart, PolarChart}
+    artist::{patch::PathPatch, ContainerOpt, HorizontalLineOpt, ImageOpt, Lines2d, LinesOpt, TextOpt}, 
+    chart::{Chart, PlotOpt, PolarChart}
 };
 
 mod bar;
@@ -136,5 +136,31 @@ impl PolarChart {
         let lines = Lines2d::from_xy(x, y);
 
         self.artist(lines)
+    }
+
+    pub fn fill(
+        &mut self, 
+        x: impl Into<Tensor>,
+        y: impl Into<Tensor>,
+    ) -> PlotOpt {
+        let x = x.into();
+        let y = y.into();
+
+        assert_eq!(x.shape(), y.shape());
+        assert_eq!(x.rank(), 1);
+ 
+        let mut vec = Vec::<PathCode>::new();
+
+        vec.push(PathCode::MoveTo(Point(x[0], y[0])));
+        
+        for (x, y) in x.iter().zip(y.iter()).skip(1) {
+            vec.push(PathCode::LineTo(Point(*x, *y)));
+        }
+    
+        vec.push(PathCode::ClosePoly(Point(x[0], y[0])));
+    
+        let patch = PathPatch::new(Path::new(vec));
+    
+        self.add_simple_artist(patch)
     }
 }

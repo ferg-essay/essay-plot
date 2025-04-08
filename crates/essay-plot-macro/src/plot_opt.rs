@@ -174,6 +174,15 @@ fn path_opt_methods(name: &Option<Ident>) -> TokenStream {
             self
         }
 
+        /// Sets the color's alpha
+        pub fn alpha(
+            &mut self, 
+            alpha: f32
+        ) -> &mut Self {
+            self.plot.write_artist(|a| { a.#name.alpha(alpha); });
+            self
+        }
+
         /// Sets the line style to Solid, Dashed, DashDot, etc.
         pub fn line_style(
             &mut self, 

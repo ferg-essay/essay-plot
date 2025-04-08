@@ -1,22 +1,20 @@
-use std::f32::consts::PI;
+use std::f32::consts::{PI, TAU};
 
-use essay_graphics::{
-    api::{
-        renderer::{Result, Canvas, Drawable, Renderer}, 
-        Affine2d, Bounds, Point 
-    }, 
-};
+use essay_graphics::api::{
+        renderer::{Canvas, Drawable, Renderer, Result}, Affine2d, Bounds, Path, Point, Size 
+    };
+use essay_tensor::tensor::Tensor;
 
 use crate::{
     artist::{
         ArtistDraw, Stale, TextCanvas
     }, 
     config::{Config, ConfigArc, PathStyle},
-    palette::Palette, transform::{ToCanvas, TransformAffine}, 
+    palette::Palette, transform::{ToCanvas, Transform, TransformAffine}, 
 };
 
 use super::{
-    axis::{Axis, AxisTicks, XAxis, YAxis}, cartesian_frame::{FrameMargins, FrameWithTextArtist}, data_frame::DataFrame, legend::Legend, Data, FrameArtist
+    axis::{Axis, AxisTicks, XAxis, YAxis}, cartesian_frame::{FrameMargins, FrameWithTextArtist}, data_frame::DataFrame, legend::Legend, Data, FrameArtist, Scaling
 };
 
 pub struct PolarFrame {
@@ -42,7 +40,7 @@ pub struct PolarFrame {
 
 impl PolarFrame {
     pub(crate) fn new(cfg: &ConfigArc) -> Self {
-        Self {
+        let mut frame = Self {
             config: cfg.clone(),
 
             pos: Bounds::none(),
@@ -61,7 +59,11 @@ impl PolarFrame {
             to_canvas: Affine2d::eye(),
 
             legend: Legend::new(cfg),
-        }
+        };
+
+        frame.data.scaling(Scaling::Image);
+
+        frame
     }
 
     pub(crate) fn config(&self) -> &ConfigArc {
@@ -169,11 +171,11 @@ impl Drawable for PolarFrame {
             &frame_transform,
         );
 
-        let data_transform = TransformAffine::<Data>::new(self.data.get_canvas_transform().clone());
+        let polar_transform = PolarTransform::new(self.data.data_bounds(), self.pos);
         let draw_to_canvas = ToCanvas::<Data>::new(
             stale,
             self.data.data_bounds(),
-            &data_transform,
+            &polar_transform,
         );
 
         self.title.draw(renderer, &frame_to_canvas, &self.path_style)?;
@@ -195,6 +197,74 @@ impl FrameWithTextArtist for PolarFrame {
 
             _ => panic!("Invalid text {:?}", artist)
         }
+    }
+}
+
+#[derive(Debug)]
+struct PolarTransform {
+    xf: f32,
+    yf: f32,
+
+    sx: f32,
+    sy: f32,
+    tx: f32,
+    ty: f32,
+}
+
+impl PolarTransform {
+    fn new(
+        data: Bounds<Data>,
+        pos: Bounds<Canvas>,
+    ) -> Self {
+        let pos = pos.with_aspect(1.);
+
+        let ([tx, ty], [sx, sy]) = pos.into();
+
+        let dx = data.width();
+        let ymin = data.xmin();
+        let ymax = data.ymax();
+        let dy = ymin.abs().max(ymax.abs());
+
+        let xform = Self {
+            xf: TAU / dx.max(f32::EPSILON),
+            yf: dy.max(f32::EPSILON).recip(),
+            sx: sx * 0.5,
+            sy: sy * 0.5,
+            tx: tx + sx * 0.5,
+            ty: ty + sy * 0.5,
+        };
+
+        xform
+    }
+
+    fn transform(&self, x: f32, y: f32) -> [f32; 2] {
+        let (sin, cos) = (x * self.xf).sin_cos();
+
+        [
+            self.tx + self.sx * cos * y * self.yf,
+            self.ty + self.sy * sin * y * self.yf,
+        ]
+    }
+}
+
+impl Transform<Data> for PolarTransform {
+    #[inline]
+    fn transform_point(&self, point: Point) -> Point {
+        let Point(x, y) = point;
+
+        self.transform(x, y).into()
+    }
+
+    #[inline]
+    fn transform_tensor(&self, tensor: &Tensor) -> Tensor {
+        tensor.map_row(|row| {
+            self.transform(row[0], row[1])
+        })
+    }
+
+    #[inline]
+    fn transform_path(&self, path: &Path<Data>) -> Path<Canvas> {
+        path.map(|Point(x, y)| self.transform(x, y).into())
     }
 }
 /*

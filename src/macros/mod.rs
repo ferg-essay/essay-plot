@@ -76,6 +76,11 @@ macro_rules! path_style_options {
             self.write(|ticks| { ticks.$field.edge_color(color); });
             self
         }
+
+        pub fn alpha(&mut self, alpha: f32) -> &mut Self {
+            self.write(|ticks| { ticks.$field.alpha(alpha); });
+            self
+        }
     
         pub fn line_width(&mut self, width: f32) -> &mut Self {
             self.write(|ticks| { ticks.$field.line_width(width); });

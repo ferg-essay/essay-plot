@@ -17,7 +17,7 @@ pub use colorcet::Colorcet;
 
 pub use colormap::ColorMap;
 
-pub use colormaps::ColorMaps;
+pub use colormaps::EssayColors;
 
 pub use diverging::Diverging;
 

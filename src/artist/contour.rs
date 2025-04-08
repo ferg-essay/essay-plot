@@ -6,7 +6,7 @@ use essay_tensor::tensor::Tensor;
 
 use crate::{
     chart::Data, 
-    palette::{ColorMap, ColorMaps},
+    palette::{ColorMap, EssayColors},
     config::PathStyle,
     contour::ContourGenerator
 };
@@ -44,7 +44,7 @@ impl Contour {
             data,
             _xy: Tensor::from(None),
             norm: Tensor::from(None),
-            color_map: ColorMaps::Default.into(),
+            color_map: EssayColors::Default.into(),
             levels: Vec::new(),
         }
     }

@@ -1,4 +1,4 @@
-use essay_plot::{artist::Shading, palette::ColorMaps, plot::grid_color, prelude::*};
+use essay_plot::{artist::Shading, palette::{EssayColors, Colorcet, Diverging, Sequential}, plot::grid_color, prelude::*};
 use essay_tensor::init::{linspace, meshgrid};
 
 fn main() { 
@@ -11,13 +11,13 @@ fn main() {
     let mut figure = Figure::new();
     let mut graph1 = figure.chart();
 
-    graph1.colorbar();
-    let mut graph2 = figure.chart();
+    //graph1.colorbar();
+    //let mut graph2 = figure.chart();
 
     grid_color(&mut graph1, &z)
         .shading(Shading::Flat)
-        .color_map(ColorMaps::RedYellow);
-    grid_color(&mut graph2, &z).shading(Shading::Gouraud);
+        .color_map(Diverging::RedYellowBlue);
+    //grid_color(&mut graph2, &z).shading(Shading::Gouraud);
     
     figure.show();
 }

@@ -7,7 +7,7 @@ use essay_tensor::tensor::Tensor;
 use crate::{
     artist::{Norms, Norm, Artist, ArtistDraw, ToCanvas},
     chart::{LegendHandler, Data},
-    palette::{ColorMap, ColorMaps},
+    palette::{ColorMap, EssayColors},
     config::ConfigArc,
     data_artist_option_struct,
 };
@@ -30,7 +30,7 @@ impl Image {
         let mut image = Self {
             data,
             norm: Norm::from(Norms::Linear),
-            color_map: ColorMaps::Default.into(), // ColorMaps::Default.into(),
+            color_map: EssayColors::Default.into(), // ColorMaps::Default.into(),
             extent: None,
         };
 

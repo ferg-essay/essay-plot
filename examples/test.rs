@@ -1,5 +1,5 @@
-use essay_plot::{artist::Shading, chart::{Chart, Scaling, ShowGrid}, palette::ColorMaps, plot::grid_color, prelude::*};
-use essay_tensor::{init::{linspace, meshgrid}, Tensor};
+use essay_plot::{artist::Shading, chart::{Chart, Scaling, ShowGrid}, palette::{ColorMap, Colorcet, Diverging, EssayColors, Sequential}, plot::grid_color, prelude::*};
+use essay_tensor::{init::{linspace, meshgrid}, tensor::Tensor};
 
 fn main() { 
     let mut figure = Figure::new();
@@ -7,6 +7,17 @@ fn main() {
     let mut vec = Vec::<f32>::new();
     let w = 20;
     let len = 150;
+    let colormaps = EssayColors::BlueOrange;
+    //let colormaps = EssayColors::WhiteBlue;
+    //let colormaps = Colorcet::D01a;
+
+    let colormap: ColorMap = colormaps.clone().into();
+
+    for i in 0..11 {
+        let v = i as f32 / 10.;
+        let color = colormap.map(v);
+        println!("{:.08x}", color.to_rgb());
+    }
 
     for _ in 0..20 {
       add_line(&mut vec, 0, len, w);
@@ -27,7 +38,7 @@ fn main() {
     let len = data.len();
     let data = data.reshape([len / 1000, 1000]);
     // let mut graph1 = figure.chart(());
-    draw_grid(&mut figure, (1., 0.), data, ColorMaps::BlueOrange);
+    draw_grid(&mut figure, (1., 0.), data, colormaps);
     // let mut graph2 = figure.chart(());
 
 
@@ -62,7 +73,7 @@ fn add_line(data: &mut Vec<f32>, start: usize, len: usize, w: usize) {
     }
 }
 
-fn draw_grid(figure: &mut Figure, pos: (f32, f32), data: Tensor, colormap: ColorMaps) {
+fn draw_grid(figure: &mut Figure, pos: (f32, f32), data: Tensor, colormap: impl Into<ColorMap>) {
     let mut chart = figure.chart();
 
     chart.scaling(Scaling::Image);

@@ -1,3 +1,5 @@
+use std::sync::OnceLock;
+
 use essay_graphics::api::Color;
 
 use super::{ColorMap, Palette};
@@ -5,6 +7,7 @@ use super::{ColorMap, Palette};
 /// https://colorcet.com
 /// Peter Kovesi. Good Colour Maps: How to Design Them.
 /// arXiv:1509.03700 [cs.GR] 2015
+#[derive(Clone, Debug, PartialEq)]
 pub enum Colorcet {
     /// Cyclic Magenta-Red-Yellow-Blue. Allows four phase visualization
     C1,
@@ -129,6 +132,14 @@ macro_rules! palette_csv {
     }
 }
 
+macro_rules! palette_csv_cache {
+    ($id:ident, $e:expr) => {
+        $id.get_or_init(|| PaletteCsv::read_palette(
+            include_bytes!(concat!("../../assets/palettes/", $e))
+        )).clone()
+    }
+}
+
 impl From<Colorcet> for Palette {
     fn from(value: Colorcet) -> Self {
         match value {
@@ -171,9 +182,9 @@ impl From<Colorcet> for Palette {
             Colorcet::D12 => palette_csv!("CET-D12.csv"),
             Colorcet::D13 => palette_csv!("CET-D13.csv"),
 
-            Colorcet::L01 => palette_csv!("CET-L01.csv"),
-            Colorcet::L02 => palette_csv!("CET-L02.csv"),
-            Colorcet::L03 => palette_csv!("CET-L03.csv"),
+            Colorcet::L01 => palette_csv_cache!(L01, "CET-L01.csv"),
+            Colorcet::L02 => palette_csv_cache!(L02, "CET-L02.csv"),
+            Colorcet::L03 => palette_csv_cache!(L03, "CET-L03.csv"),
             Colorcet::L04 => palette_csv!("CET-L04.csv"),
             Colorcet::L05 => palette_csv!("CET-L05.csv"),
             Colorcet::L06 => palette_csv!("CET-L06.csv"),
@@ -306,3 +317,13 @@ impl<'a> PaletteCsv<'a> {
         }
     }
 }
+
+macro_rules! palette_cache {
+    ($($id:ident)*) => {
+        $(
+            static $id: OnceLock<Palette> = OnceLock::new();
+        )*
+    }
+}
+
+palette_cache!(L01 L02 L03);

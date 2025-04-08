@@ -5,7 +5,7 @@ use essay_graphics::api::{
 use essay_tensor::{tensor::Tensor, ten};
 
 use crate::{
-    artist::{Norm, Norms}, chart::{Data, LegendHandler}, palette::{ColorMap, ColorMaps}, config::{ConfigArc, PathStyle}, data_artist_option_struct
+    artist::{Norm, Norms}, chart::{Data, LegendHandler}, palette::{ColorMap, EssayColors}, config::{ConfigArc, PathStyle}, data_artist_option_struct
 };
 
 use super::{Artist, ArtistDraw, ArtistView, ToCanvas};
@@ -34,7 +34,7 @@ impl GridColor {
         Self {
             data,
             xy: Tensor::from(None),
-            color_map: ColorMaps::Default.into(),
+            color_map: EssayColors::Default.into(),
             shading: Shading::Flat,
             norm: Norm::from(Norms::Linear),
             is_stale: true,
@@ -105,6 +105,7 @@ impl GridColor {
         let xy = to_canvas.transform_tensor(&self.xy);
 
         let norm = self.data.normalize_unit();
+        
         let cmap = &self.color_map;
 
         let mut vertices = Vec::<[f32; 2]>::new();

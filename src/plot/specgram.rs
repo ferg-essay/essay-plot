@@ -4,7 +4,7 @@ use essay_tensor::{array::{stack, stack_axis}, signal::rfft_norm, tensor::Tensor
 use crate::{
     artist::{Artist, ArtistDraw, ArtistView, GridColor, Norm, Norms, Shading, ToCanvas}, 
     chart::{Chart, Data, LegendHandler}, 
-    palette::{ColorMap, ColorMaps},
+    palette::{ColorMap, EssayColors},
     config::ConfigArc,
     data_artist_option_struct
 };
@@ -42,7 +42,7 @@ impl SpecGram {
 
         let mut grid_color = GridColor::new(spectrum);
         //grid_color.color_map(ColorMaps::BlueWhite2);
-        grid_color.color_map(ColorMaps::BlueOrange);
+        grid_color.color_map(EssayColors::BlueOrange);
         grid_color.norm(Norm::from(norms.clone()));
 
         let mut spec_gram = Self {

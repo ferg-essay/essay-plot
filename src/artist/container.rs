@@ -5,10 +5,10 @@ use essay_graphics::api::{
 use crate::{
     chart::{Data, LegendHandler}, 
     config::{ConfigArc, PathStyle, StyleCycle},
-    data_artist_option_struct
+    data_artist_option_struct, transform::ToCanvas
 };
 
-use super::{Artist, ArtistDraw, ArtistView, ToCanvas};
+use super::{Artist, ArtistDraw, ArtistView};
 
 pub struct Container<M: Coord> {
     artists: Vec<Box<dyn ArtistDraw<M>>>,
@@ -56,7 +56,7 @@ impl<M: Coord> ArtistDraw<M> for Container<M> {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<M>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         let style = self.style.push(style);

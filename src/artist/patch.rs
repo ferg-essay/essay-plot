@@ -5,12 +5,10 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    chart::{Data, IntoArtist, LegendHandler},
-    config::{ConfigArc, PathStyle},
-    data_artist_option_struct, path_style_options, transform_options
+    chart::{Data, IntoArtist, LegendHandler}, config::{ConfigArc, PathStyle}, data_artist_option_struct, path_style_options, transform::ToCanvas, transform_options
 };
 
-use super::{paths, Artist, ArtistDraw, ArtistView, ToCanvas};
+use super::{paths, Artist, ArtistDraw, ArtistView};
 
 pub trait PatchTrait<M: Coord> : Send {
     fn get_path(&mut self) -> &Path<M>;
@@ -57,10 +55,10 @@ impl ArtistDraw<Data> for Patch {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let to_canvas = to_canvas.matmul(&self.transform);
+        // todo: let to_canvas = to_canvas.matmul(&self.transform);
         let path = to_canvas.transform_path(&self.path);
         let style = self.style.push(style);
         renderer.draw_path(
@@ -258,11 +256,14 @@ impl ArtistDraw<Canvas> for CanvasPatch {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let to_canvas = to_canvas.matmul(&self.to_canvas);
-        let path = to_canvas.transform_path(&self.path);
+        let path = self.to_canvas.transform_path(&self.path);
+        let path = to_canvas.transform_path(&path);
+
+        // let to_canvas = to_canvas.matmul(&self.to_canvas);
+        // let path = to_canvas.transform_path(&self.path);
         let style = self.style.push(style);
 
         renderer.draw_path(
@@ -292,7 +293,7 @@ impl ArtistDraw<Canvas> for PathPatch<Canvas> {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         let path = to_canvas.transform_path(&self.path);
@@ -312,7 +313,7 @@ impl ArtistDraw<Data> for PathPatch<Data> {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         let path = to_canvas.transform_path(&self.path);
@@ -372,7 +373,7 @@ impl ArtistDraw<Canvas> for Line {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         if let Some(path) = &self.path {
@@ -443,7 +444,7 @@ impl ArtistDraw<Data> for Wedge {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         if let Some(path) = &self.path {

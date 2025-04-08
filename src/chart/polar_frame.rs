@@ -9,18 +9,14 @@ use essay_graphics::{
 
 use crate::{
     artist::{
-        ArtistDraw, TextCanvas, ToCanvas
+        ArtistDraw, Stale, TextCanvas
     }, 
     config::{Config, ConfigArc, PathStyle},
-    palette::Palette, 
+    palette::Palette, transform::{ToCanvas, TransformAffine}, 
 };
 
 use super::{
-    axis::{Axis, AxisTicks, XAxis, YAxis}, 
-    cartesian_frame::{FrameMargins, FrameWithTextArtist}, 
-    data_frame::DataFrame, 
-    legend::Legend, 
-    FrameArtist
+    axis::{Axis, AxisTicks, XAxis, YAxis}, cartesian_frame::{FrameMargins, FrameWithTextArtist}, data_frame::DataFrame, legend::Legend, Data, FrameArtist
 };
 
 pub struct PolarFrame {
@@ -165,25 +161,26 @@ impl Drawable for PolarFrame {
             self.resize(renderer);
         }
 
+        let stale = Stale::new_for_update();
+        let frame_transform = TransformAffine::new(self.to_canvas.clone());
         let frame_to_canvas = ToCanvas::new(
+            stale,
             self.pos,
-            self.to_canvas.clone()
+            &frame_transform,
         );
 
-        let to_canvas = ToCanvas::new(
-            self.pos,
-            self.data.get_canvas_transform().clone()
+        let data_transform = TransformAffine::<Data>::new(self.data.get_canvas_transform().clone());
+        let draw_to_canvas = ToCanvas::<Data>::new(
+            stale,
+            self.data.data_bounds(),
+            &data_transform,
         );
 
-        self.title.draw(renderer, &to_canvas, &self.path_style)?;
+        self.title.draw(renderer, &frame_to_canvas, &self.path_style)?;
 
-        // self.x_axis.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
-        // self.y_axis.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
         renderer.draw_with_closure(self.data.get_pos(), Box::new(|r| {
-            self.data.draw(r, &to_canvas, &self.path_style)
+            self.data.draw(r, &draw_to_canvas, &self.path_style)
         }))?;
-
-        // self.data.draw(renderer, &to_canvas, &self.path_style)?;
 
         self.legend.draw(renderer, &frame_to_canvas, &self.path_style)?;
 

@@ -1,9 +1,9 @@
 use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
 use essay_tensor::tensor::Tensor;
 
-use crate::{chart::Data, config::PathStyle, contour::TriContourGenerator, tri::Triangulation};
+use crate::{chart::Data, config::PathStyle, contour::TriContourGenerator, transform::ToCanvas, tri::Triangulation};
 
-use super::{ArtistDraw, ToCanvas};
+use super::ArtistDraw;
 
 pub struct Level {
     paths: Vec<Path<Data>>,
@@ -98,7 +98,7 @@ impl ArtistDraw<Data> for TriContour {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         _style: &dyn PathOpt,
     ) -> Result<()> {
         self.resize(renderer);

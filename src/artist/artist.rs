@@ -1,11 +1,11 @@
 use std::{any::Any, marker::PhantomData, sync::{Arc, Mutex}};
 
 use essay_graphics::api::{
-    renderer::{self, Canvas, Renderer, Result}, Affine2d, Bounds, Coord, Path, PathOpt, Point
+    renderer::{self, Renderer, Result}, 
+    Bounds, Coord, PathOpt
 };
-use essay_tensor::tensor::Tensor;
 
-use crate::chart::LegendHandler;
+use crate::{chart::LegendHandler, transform::ToCanvas};
 use crate::config::{ConfigArc, StyleCycle};
 
 pub trait ArtistDraw<M: Coord> : Send {
@@ -14,7 +14,7 @@ pub trait ArtistDraw<M: Coord> : Send {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<M>,
         style: &dyn PathOpt,
     ) -> Result<()>;
 }
@@ -113,7 +113,7 @@ impl<M: Coord> ArtistContainer<M> {
     pub fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<M>,
         style: &dyn PathOpt
     ) -> renderer::Result<()> {
         let mut vec = self.artists.0.lock().unwrap();
@@ -227,7 +227,7 @@ impl<M: Coord> ArtistItem<M> {
     pub fn draw(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<M>,
         style: &dyn PathOpt
     ) -> renderer::Result<()> {
         self.handle.draw(&mut self.any, renderer, to_canvas, style)
@@ -242,7 +242,7 @@ trait ArtistHandleTrait<M: Coord> : Send {
         &self, 
         artist_any: &mut Box<dyn Any + Send>,
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<M>,
         style: &dyn PathOpt,
     ) -> renderer::Result<()>;
 }
@@ -271,7 +271,7 @@ where
         &self, 
         artist_any: &mut Box<dyn Any + Send + 'static>,
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<M>,
         style: &dyn PathOpt,
     ) -> renderer::Result<()> {
         let artist = artist_any.downcast_mut::<A>().unwrap();
@@ -284,70 +284,6 @@ where
     }
 }
 
-
-pub struct ToCanvas {
-    id: Stale,
-    pos_frame: Bounds<Canvas>,
-    to_canvas: Affine2d,
-}
-
-impl ToCanvas {
-    pub fn new(pos_frame: Bounds<Canvas>, to_canvas: Affine2d) -> Self {
-        Self {
-            id: Stale::stale(),
-            pos_frame,
-            to_canvas
-        }
-    }
-
-    #[inline]
-    pub fn id(&self) -> Stale {
-        self.id
-    }
-
-    #[inline]
-    pub fn pos(&self) -> Bounds<Canvas> {
-        self.pos_frame
-    }
-
-    // todo: fix Coord
-    pub fn transform_path<M: Coord>(&self, path: &Path<M>) -> Path<Canvas> {
-        path.map(|point| { self.transform_point(point) })
-    }
-
-    #[inline]
-    pub fn transform_point(&self, point: Point) -> Point {
-        self.to_canvas.transform_point(point)
-    }
-
-    #[inline]
-    pub fn transform_tensor(&self, tensor: &Tensor) -> Tensor {
-        tensor.map_row(|v: &[f32]| {
-            let Point(x, y) = self.to_canvas.transform_point(Point(v[0], v[1]));
-
-            [x, y]
-        })
-    }
-    
-    #[deprecated]
-    pub(crate) fn affine2d(&self) -> &Affine2d{
-        &self.to_canvas
-    }
-    
-    pub(crate) fn matmul(&self, transform: &Affine2d) -> Self {
-        Self {
-            id: self.id, // todo: update id
-            pos_frame: self.pos_frame,
-            to_canvas: self.to_canvas.matmul(transform),
-        }
-    }
-    
-    /*
-    pub fn to_canvas(&self) -> &Affine2d {
-        &self.to_canvas
-    }
-    */
-}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Stale(u64);

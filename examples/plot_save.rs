@@ -3,7 +3,7 @@ use std::f32::consts::TAU;
 use essay_plot::{
     artist::{DrawStyle, Patch, Shading}, plot::grid_color, prelude::*
 };
-use essay_tensor::{prelude::*, init::{linspace, meshgrid}};
+use essay_tensor::{init::{linspace, meshgrid}, ten};
 
 fn main() {
     let t = 0;
@@ -26,7 +26,7 @@ fn main_plot() {
 
     chart.plot(&x, &y);
     
-    let patch = Patch::rect((0.5, 0.5), (2., 2.));
+    let patch = Patch::rect([0.5, 0.5], [2., 2.]);
     chart.artist(patch).color("red").edge_color("black");
     // graph.artist()
 
@@ -67,12 +67,12 @@ fn main_plot2() {
     });
 
     let x = linspace(0., 1., 10);
-    let odor = tf32!([
+    let odor = ten![
         0., 1., 1., 1., 1., 1., 1., 1., 1., 0.,
-    ]) * 0.9;
-    let failure = tf32!([
+    ] * 0.9f32;
+    let failure = ten![
         1., 1., 1., 1., 1., 1., 1., 1., 0., 0.,
-    ]);
+    ];
 
     graph1.title("Signal");
     graph1.ylim(0., 2.0);
@@ -84,27 +84,27 @@ fn main_plot2() {
     graph2.title("Timeout");
     graph2.ylim(0., 2.0);
     graph2.plot(&x, &odor).label("odor");
-    let x2 = tf32!([0., 0.1, 0.8, 1.0]);
-    let failure2 = tf32!([
+    let x2 = ten![0., 0.1, 0.8, 1.0];
+    let failure2 = ten![
         1., 1., 0., 0.,
-    ]);
+    ];
     graph2.plot(&x2, &failure2).label("LTD");
     graph2.x().visible(false);
     graph2.y().visible(false);
 
     graph3.title("Signal");
     graph3.plot(&x, &odor).label("odor");
-    let failure = tf32!([
+    let failure = ten![
         1., 1., 1., 1.,
-    ]);
+    ];
     graph3.plot(&x2, &failure).label("LTD").draw_style(DrawStyle::StepsMid);
 
-    let x3 = tf32!([
+    let x3 = ten![
         0., 0.6, 0.7, 1.,
-    ]);
-    let reward = tf32!([
+    ];
+    let reward = ten![
         0., 0.8, 0., 0.,
-    ]);
+    ];
     graph3.plot(&x3, &reward).label("reward").draw_style(DrawStyle::StepsMid);
     graph3.ylim(0., 2.0);
     graph3.x().visible(false);
@@ -116,12 +116,12 @@ fn main_plot2() {
     graph4.plot(&x, &odor).label("odor");
     graph4.plot(&x2, &failure2).label("LTD");
 
-    let x3 = tf32!([
+    let x3 = ten![
         0., 0.6, 0.7, 1.,
-    ]);
-    let reward = tf32!([
+    ];
+    let reward = ten![
         0., 0.8, 0., 0.,
-    ]);
+    ];
     graph4.plot(&x3, &reward).label("reward").draw_style(DrawStyle::StepsMid);
     graph4.ylim(0., 2.0);
     graph4.x().visible(false);

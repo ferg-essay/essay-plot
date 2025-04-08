@@ -10,8 +10,8 @@ use essay_graphics::{
 
 use crate::{
     artist::{
-        patch::CanvasPatch, paths, ArtistDraw, Colorbar, TextCanvas, ToCanvas
-    }, palette::Palette, config::{Config, ConfigArc, PathStyle}
+        patch::CanvasPatch, paths, ArtistDraw, Colorbar, Stale, TextCanvas
+    }, config::{Config, ConfigArc, PathStyle}, palette::Palette, transform::{ToCanvas, TransformAffine}
 };
 
 use super::{
@@ -207,17 +207,22 @@ impl Drawable for CartesianFrame {
             self.resize(renderer);
         }
 
+        let stale = Stale::new_for_update();
+        let frame_affine = TransformAffine::new(self.to_canvas.clone());
         let frame_to_canvas = ToCanvas::new(
+            stale,
             self.pos.clone(), 
-            self.to_canvas.clone()
+            &frame_affine,
         );
 
-        let to_canvas = ToCanvas::new(
-            self.pos.clone(), 
-            self.data.get_canvas_transform().clone()
+        let to_canvas_affine = TransformAffine::new(self.data.get_canvas_transform().clone());
+        let data_to_canvas = ToCanvas::new(
+            stale,
+            self.data.data_bounds(), 
+            &to_canvas_affine,
         );
 
-        self.title.draw(renderer, &to_canvas, &self.path_style)?;
+        self.title.draw(renderer, &frame_to_canvas, &self.path_style)?;
 
         self.bottom.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
         self.left.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
@@ -228,7 +233,7 @@ impl Drawable for CartesianFrame {
         // self.data.draw(renderer, &to_canvas, &self.path_style)?;
 
         renderer.draw_with_closure(self.data.get_pos(), Box::new(|r| {
-            self.data.draw(r, &to_canvas, &self.path_style)
+            self.data.draw(r, &data_to_canvas, &self.path_style)
         }))?;
 
         self.legend.draw(renderer, &frame_to_canvas, &self.path_style)?;
@@ -320,7 +325,7 @@ impl ArtistDraw<Canvas> for TopFrame {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         if let Some(patch) = &mut self.spine {
@@ -367,7 +372,7 @@ impl BottomFrame {
         &mut self, 
         renderer: &mut dyn Renderer,
         data: &DataFrame,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         let mut y = self.x_axis.draw(renderer, data, to_canvas, style)?;
@@ -433,7 +438,7 @@ impl LeftFrame {
         &mut self, 
         renderer: &mut dyn Renderer,
         data: &DataFrame,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         let mut x = self.y_axis.draw(renderer, data, to_canvas, style)?;
@@ -521,7 +526,7 @@ impl ArtistDraw<Canvas> for RightFrame {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         if let Some(patch) = &mut self.spine {
@@ -529,7 +534,8 @@ impl ArtistDraw<Canvas> for RightFrame {
         }
 
         if let Some(colorbar) = &mut self.colorbar {
-            colorbar.draw(renderer, to_canvas, style)?;
+            todo!();
+            // colorbar.draw(renderer, to_canvas, style)?;
         }
 
         Ok(())

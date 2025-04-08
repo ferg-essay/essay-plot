@@ -7,11 +7,11 @@ use essay_graphics::api::{
 use crate::{
     chart::{Data, LegendHandler}, 
     config::{ConfigArc, PathStyle},
-    data_artist_option_struct, path_style_options
+    data_artist_option_struct, path_style_options, transform::ToCanvas
 };
 
 use super::{
-    Artist, ArtistDraw, ArtistView, ToCanvas
+    Artist, ArtistDraw, ArtistView,
 };
 
 pub struct HorizontalLine {
@@ -57,7 +57,7 @@ impl ArtistDraw<Data> for HorizontalLine {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         if ! self.is_visible {

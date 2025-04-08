@@ -8,11 +8,11 @@ use essay_tensor::tensor::Tensor;
 use crate::{
     chart::{Data, LegendHandler}, 
     config::{ConfigArc, PathStyle},
-    data_artist_option_struct, path_style_options
+    data_artist_option_struct, path_style_options, transform::ToCanvas
 };
 
 use super::{
-    artist::Stale, markers::{IntoMarker, MarkerStyle}, Artist, ArtistDraw, ArtistView, PathCollection, ToCanvas
+    artist::Stale, markers::{IntoMarker, MarkerStyle}, Artist, ArtistDraw, ArtistView, PathCollection,
 };
 
 #[derive(Clone, PartialEq, Debug)]
@@ -181,7 +181,7 @@ impl ArtistDraw<Data> for Lines2d {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         if ! self.is_visible {

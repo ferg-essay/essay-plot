@@ -1,3 +1,4 @@
+pub mod transform;
 pub mod palette;
 pub mod config;
 pub mod tri;

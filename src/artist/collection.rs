@@ -3,9 +3,9 @@ use core::fmt;
 use essay_tensor::tensor::Tensor;
 use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
 
-use crate::{chart::Data, config::PathStyle};
+use crate::{chart::Data, config::PathStyle, transform::ToCanvas};
 
-use super::{ArtistDraw, ToCanvas};
+use super::ArtistDraw;
 
 ///
 /// Collection of a single path displayed at multiple locations with optional
@@ -45,7 +45,7 @@ impl ArtistDraw<Data> for PathCollection {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         let xy = to_canvas.transform_tensor(&self.xy);

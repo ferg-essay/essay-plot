@@ -6,10 +6,10 @@ use essay_tensor::{init::linspace, ten, tensor::Tensor};
 
 use crate::{
     chart::Data,
-    config::PathStyle,
+    config::PathStyle, transform::{ToCanvas, TransformAffine},
 };
 
-use super::{ArtistDraw, grid_color::GridColor, paths, ToCanvas};
+use super::{ArtistDraw, grid_color::GridColor, paths};
 
 pub struct Colorbar {
     bounds: Bounds<Data>,
@@ -58,12 +58,14 @@ impl ArtistDraw<Data> for Colorbar {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        _to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
+        let transform = TransformAffine::new(self.bounds.affine_to(&self.pos));
         let to_canvas = ToCanvas::new(
-            self.pos.clone(), 
-            self.bounds.affine_to(&self.pos)
+            to_canvas.stale(),
+            Bounds::from([0., 1.]),
+            &transform,    
         );
         // self.mesh.draw(renderer, &to_canvas, clip, style);
 

@@ -1,14 +1,13 @@
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer, Result}, 
-    Bounds, CapStyle, Color, JoinStyle, Path, PathOpt, Point
+    renderer::{Canvas, Renderer, Result}, Affine2d, Bounds, CapStyle, Color, JoinStyle, Path, PathOpt, Point
 };
 use essay_tensor::{tensor::Tensor, ten};
 
 use crate::{
-    artist::{Norm, Norms}, chart::{Data, LegendHandler}, palette::{ColorMap, EssayColors}, config::{ConfigArc, PathStyle}, data_artist_option_struct
+    artist::{Norm, Norms}, chart::{Data, LegendHandler}, config::{ConfigArc, PathStyle}, data_artist_option_struct, palette::{ColorMap, EssayColors}, transform::ToCanvas
 };
 
-use super::{Artist, ArtistDraw, ArtistView, ToCanvas};
+use super::{Artist, ArtistDraw, ArtistView};
 
 pub enum Shading {
     Flat,
@@ -63,18 +62,21 @@ impl GridColor {
     fn draw_solid_shading(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         _style: &dyn PathOpt,
     ) -> Result<()> {
         let path = Path::<Data>::closed_poly(ten![
             [0.0, 0.0], [1.0, 0.0], [1.0, 1.0],
             [0.0, 1.0]
-            ]);
+        ]);
+
+        let scale_canvas = Affine2d::eye();
+        if true { todo!() };
             
-        let to_canvas = to_canvas.affine2d();
-        let scale_canvas = to_canvas.strip_translation();
-        let path: Path<Canvas> = path.map(|pt| scale_canvas.transform_point(pt));
-        let xy = to_canvas.transform(&self.xy);
+        // let to_canvas = to_canvas.affine2d();
+        // let scale_canvas = to_canvas.strip_translation();
+        let path: Path<Canvas> = scale_canvas.transform_path(&path);
+        let xy = to_canvas.transform_tensor(&self.xy);
 
         // let norm = normalize_unit(&self.data);
 
@@ -99,7 +101,7 @@ impl GridColor {
     fn draw_gouraud_shading(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         _style: &dyn PathOpt,
     ) -> Result<()> {
         let xy = to_canvas.transform_tensor(&self.xy);
@@ -169,7 +171,7 @@ impl ArtistDraw<Data> for GridColor {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         if self.is_stale {

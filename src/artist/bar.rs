@@ -4,10 +4,10 @@ use essay_tensor::{tensor::Tensor, init::linspace};
 use crate::{
     chart::{Data, LegendHandler}, 
     config::{ConfigArc, PathStyle},
-    data_artist_option_struct, path_style_options
+    data_artist_option_struct, path_style_options, transform::ToCanvas
 };
 
-use super::{paths, Artist, ArtistDraw, ArtistView, ToCanvas};
+use super::{paths, Artist, ArtistDraw, ArtistView};
 
 pub struct Bar {
     height: Tensor,
@@ -153,7 +153,7 @@ impl ArtistDraw<Data> for Bar {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         let style = self.style.push(style);

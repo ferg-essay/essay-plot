@@ -6,9 +6,7 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    artist::{Artist, ArtistContainer, ArtistDraw, ToCanvas}, 
-    palette::Palette, 
-    config::{ConfigArc, PathStyle}
+    artist::{Artist, ArtistContainer, ArtistDraw}, config::{ConfigArc, PathStyle}, palette::Palette, transform::ToCanvas
 };
 
 use super::LegendHandler;
@@ -138,7 +136,7 @@ impl DataFrame {
 
         self.update_aspect();
 
-        self.to_canvas = self.get_view_bounds().affine_to(&self.pos_canvas);
+        self.to_canvas = self.data_bounds().affine_to(&self.pos_canvas);
 
         if self.is_flip_y {
             self.to_canvas = self.to_canvas
@@ -261,7 +259,7 @@ impl DataFrame {
         self.pos_canvas
     }
 
-    pub(crate) fn get_view_bounds(&self) -> Bounds<Data> {
+    pub(crate) fn data_bounds(&self) -> Bounds<Data> {
         self.pan_zoom_bounds.unwrap_or(self.view_bounds)
     }
 
@@ -286,15 +284,16 @@ impl DataFrame {
     }
 }
 
-impl ArtistDraw<Canvas> for DataFrame {
-    fn bounds(&mut self) -> Bounds<Canvas> {
-        self.pos_canvas.clone()
+impl ArtistDraw<Data> for DataFrame {
+    fn bounds(&mut self) -> Bounds<Data> {
+        // self.pos_canvas.clone()
+        todo!()
     }
 
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         // self.resize(renderer);

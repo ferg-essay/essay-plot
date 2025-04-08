@@ -4,9 +4,9 @@ use essay_graphics::api::{
 };
 use essay_tensor::tensor::Tensor;
 
-use crate::{artist::artist::Stale, chart::Data, tri::{triangulate, Triangulation}};
+use crate::{artist::artist::Stale, chart::Data, transform::ToCanvas, tri::{triangulate, Triangulation}};
 
-use super::{ArtistDraw, ToCanvas};
+use super::ArtistDraw;
 
 pub struct TriPlot {
     data: Tensor,
@@ -46,10 +46,10 @@ impl ArtistDraw<Data> for TriPlot {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        self.stale = to_canvas.id().eq_or(self.stale, || {
+        self.stale = to_canvas.stale().eq_or(self.stale, || {
             self.resize(renderer);
         });
 

@@ -143,20 +143,20 @@ macro_rules! palette_csv_cache {
 impl From<Colorcet> for Palette {
     fn from(value: Colorcet) -> Self {
         match value {
-            Colorcet::C1 => palette_csv!("CET-C1.csv"),
-            Colorcet::C1s => palette_csv!("CET-C1s.csv"),
-            Colorcet::C2 => palette_csv!("CET-C2.csv"),
-            Colorcet::C2s => palette_csv!("CET-C2s.csv"),
-            Colorcet::C3 => palette_csv!("CET-C3.csv"),
-            Colorcet::C3s => palette_csv!("CET-C3s.csv"),
-            Colorcet::C4 => palette_csv!("CET-C4.csv"),
-            Colorcet::C4s => palette_csv!("CET-C4s.csv"),
-            Colorcet::C5 => palette_csv!("CET-C5.csv"),
-            Colorcet::C5s => palette_csv!("CET-C5s.csv"),
-            Colorcet::C6 => palette_csv!("CET-C6.csv"),
-            Colorcet::C6s => palette_csv!("CET-C6s.csv"),
-            Colorcet::C7 => palette_csv!("CET-C7.csv"),
-            Colorcet::C7s => palette_csv!("CET-C7s.csv"),
+            Colorcet::C1 => palette_csv_cache!(C1, "CET-C1.csv"),
+            Colorcet::C1s => palette_csv_cache!(C1S, "CET-C1s.csv"),
+            Colorcet::C2 => palette_csv_cache!(C2, "CET-C2.csv"),
+            Colorcet::C2s => palette_csv_cache!(C2S, "CET-C2s.csv"),
+            Colorcet::C3 => palette_csv_cache!(C3, "CET-C3.csv"),
+            Colorcet::C3s => palette_csv_cache!(C3S, "CET-C3s.csv"),
+            Colorcet::C4 => palette_csv_cache!(C4, "CET-C4.csv"),
+            Colorcet::C4s => palette_csv_cache!(C4S, "CET-C4s.csv"),
+            Colorcet::C5 => palette_csv_cache!(C5, "CET-C5.csv"),
+            Colorcet::C5s => palette_csv_cache!(C5S, "CET-C5s.csv"),
+            Colorcet::C6 => palette_csv_cache!(C6, "CET-C6.csv"),
+            Colorcet::C6s => palette_csv_cache!(C6S, "CET-C6s.csv"),
+            Colorcet::C7 => palette_csv_cache!(C7, "CET-C7.csv"),
+            Colorcet::C7s => palette_csv_cache!(C7S, "CET-C7s.csv"),
 
             Colorcet::Cbc1 => palette_csv!("CET-CBC1.csv"),
             Colorcet::Cbc2 => palette_csv!("CET-CBC2.csv"),
@@ -326,4 +326,5 @@ macro_rules! palette_cache {
     }
 }
 
+palette_cache!(C1 C1S C2 C2S C3 C3S C4 C4S C5 C5S C6 C6S C7 C7S);
 palette_cache!(L01 L02 L03);

@@ -4,8 +4,8 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    artist::{ArtistDraw, ToCanvas}, 
-    config::{Config, PathStyle, StyleCycle},
+    artist::ArtistDraw, 
+    config::{Config, PathStyle, StyleCycle}, transform::ToCanvas,
 };
 
 use super::data_frame::DataFrame;
@@ -73,7 +73,7 @@ impl ArtistDraw<Canvas> for Legend {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        _to_canvas: &ToCanvas,
+        _to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         if self.handlers.len() == 0 {

@@ -6,10 +6,10 @@ use essay_graphics::api::{
 use crate::{
     chart::{Data, LegendHandler}, 
     config::{ConfigArc, PathStyle},
-    data_artist_option_struct, path_style_options
+    data_artist_option_struct, path_style_options, transform::ToCanvas
 };
 
-use super::{artist::ToCanvas, Artist, ArtistDraw, ArtistView};
+use super::{Artist, ArtistDraw, ArtistView};
 
 pub struct TextCanvas {
     pos: Bounds<Canvas>,
@@ -105,7 +105,7 @@ impl ArtistDraw<Canvas> for TextCanvas {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        _to_canvas: &ToCanvas,
+        _to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         if let Some(text) = &self.text {
@@ -202,7 +202,7 @@ impl ArtistDraw<Data> for Text {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         let pos = self.coords.to_canvas(self.pos, &to_canvas);
@@ -299,11 +299,11 @@ pub enum TextCoords {
 }
 
 impl TextCoords {
-    fn to_canvas(&self, pos: Point, to_canvas: &ToCanvas) -> Point {
+    fn to_canvas(&self, pos: Point, to_canvas: &ToCanvas<Data>) -> Point {
         match self {
             TextCoords::Data => to_canvas.transform_point(pos),
             TextCoords::FrameFraction => {
-                let bounds = to_canvas.pos();
+                let bounds = to_canvas.bounds();
 
                 Point(
                     bounds.xmin() + pos.x() * bounds.width(),

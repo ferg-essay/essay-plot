@@ -5,11 +5,7 @@ use essay_graphics::api::{
 use essay_tensor::tensor::Tensor;
 
 use crate::{
-    artist::{Norms, Norm, Artist, ArtistDraw, ToCanvas},
-    chart::{LegendHandler, Data},
-    palette::{ColorMap, EssayColors},
-    config::ConfigArc,
-    data_artist_option_struct,
+    artist::{Artist, ArtistDraw, Norm, Norms}, chart::{Data, LegendHandler}, config::ConfigArc, data_artist_option_struct, palette::{ColorMap, EssayColors}, transform::ToCanvas
 };
 
 use super::ArtistView;
@@ -80,7 +76,7 @@ impl ArtistDraw<Data> for Image {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         _style: &dyn PathOpt,
     ) -> Result<()> {
         //let to_canvas = to_canvas.translate(0., self.).scale(1., -1.);

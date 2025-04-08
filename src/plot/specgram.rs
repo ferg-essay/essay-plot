@@ -2,11 +2,7 @@ use essay_graphics::api::{renderer::{Renderer, Result}, Bounds, PathOpt};
 use essay_tensor::{array::{stack, stack_axis}, signal::rfft_norm, tensor::Tensor};
 
 use crate::{
-    artist::{Artist, ArtistDraw, ArtistView, GridColor, Norm, Norms, Shading, ToCanvas}, 
-    chart::{Chart, Data, LegendHandler}, 
-    palette::{ColorMap, EssayColors},
-    config::ConfigArc,
-    data_artist_option_struct
+    artist::{Artist, ArtistDraw, ArtistView, GridColor, Norm, Norms, Shading}, chart::{Chart, Data, LegendHandler}, config::ConfigArc, data_artist_option_struct, palette::{ColorMap, EssayColors}, transform::ToCanvas
 };
 
 pub fn specgram(
@@ -108,7 +104,7 @@ impl ArtistDraw<Data> for SpecGram {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         self.grid_color.draw(renderer, to_canvas, style)

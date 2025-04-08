@@ -11,10 +11,10 @@ use crate::{
     artist::Markers, 
     chart::{Data, LegendHandler}, 
     config::{ConfigArc, PathStyle},
-    data_artist_option_struct, path_style_options
+    data_artist_option_struct, path_style_options, transform::ToCanvas
 };
 
-use super::{Artist, ArtistDraw, ArtistView, PathCollection, ToCanvas};
+use super::{Artist, ArtistDraw, ArtistView, PathCollection};
 
 pub struct Stem {
     xy: Tensor,
@@ -95,7 +95,7 @@ impl ArtistDraw<Data> for Stem {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer, 
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
         self.resize(renderer);

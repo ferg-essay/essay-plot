@@ -5,13 +5,10 @@ use essay_graphics::api::{
 use essay_tensor::tensor::Tensor;
 
 use crate::{
-    chart::Data, 
-    palette::{ColorMap, EssayColors},
-    config::PathStyle,
-    contour::ContourGenerator
+    chart::Data, config::PathStyle, contour::ContourGenerator, palette::{ColorMap, EssayColors}, transform::ToCanvas
 };
 
-use super::{ArtistDraw, ToCanvas};
+use super::ArtistDraw;
 
 pub struct Level {
     paths: Vec<Path<Data>>,
@@ -109,7 +106,7 @@ impl ArtistDraw<Data> for Contour {
     fn draw(
         &mut self, 
         renderer: &mut dyn Renderer,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Data>,
         _style: &dyn PathOpt,
     ) -> Result<()> {
         //let path = Path::<Data>::closed_poly(tf32!([

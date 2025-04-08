@@ -4,8 +4,8 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    artist::{patch::CanvasPatch, paths, ArtistDraw, TextCanvas, ToCanvas}, 
-    config::{Config, PathStyle}, frame_option_struct, path_style_options
+    artist::{patch::CanvasPatch, paths, ArtistDraw}, 
+    config::{Config, PathStyle}, frame_option_struct, path_style_options, transform::ToCanvas
 };
 
 use super::{
@@ -54,8 +54,8 @@ impl PolarXAxis {
         self.major_ticks = Vec::new();
         self.major_labels = Vec::new();
 
-        let xmin = data.get_view_bounds().xmin();
-        let xmax = data.get_view_bounds().xmax();
+        let xmin = data.data_bounds().xmin();
+        let xmax = data.data_bounds().xmax();
 
         let xvalues : Vec<f32> = self.x_ticks(data).iter().map(|x| x.0).collect();
 
@@ -74,7 +74,7 @@ impl PolarXAxis {
     pub fn x_ticks(&self, data: &DataFrame) -> Vec<(f32, f32)> {
         let c_width = data.get_pos().width();
 
-        let view = data.get_view_bounds();
+        let view = data.data_bounds();
         let v_width = view.width();
 
         if view.is_none() {
@@ -99,7 +99,7 @@ impl PolarXAxis {
         &mut self, 
         renderer: &mut dyn Renderer,
         data: &DataFrame,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<f32> {
         let pos = data.get_pos();
@@ -232,8 +232,8 @@ impl PolarYAxis {
         self.major_ticks = Vec::new();
         self.major_labels = Vec::new();
 
-        let ymin = data.get_view_bounds().ymin();
-        let ymax = data.get_view_bounds().ymax();
+        let ymin = data.data_bounds().ymin();
+        let ymax = data.data_bounds().ymax();
 
         let yvalues : Vec<f32> = self.y_ticks(data).iter().map(|y| y.0).collect();
 
@@ -251,10 +251,10 @@ impl PolarYAxis {
     }
 
     pub fn y_ticks(&self, data: &DataFrame) -> Vec<(f32, f32)> {
-        let v_height = data.get_view_bounds().height();
+        let v_height = data.data_bounds().height();
         let c_height = data.get_pos().height();
 
-        let view = data.get_view_bounds();
+        let view = data.data_bounds();
 
         if view.is_none() {
             Vec::new()
@@ -278,7 +278,7 @@ impl PolarYAxis {
         &mut self, 
         renderer: &mut dyn Renderer,
         data: &DataFrame,
-        to_canvas: &ToCanvas,
+        to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<f32> {
         let pos = data.get_pos();

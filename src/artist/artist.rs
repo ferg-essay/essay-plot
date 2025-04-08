@@ -1,11 +1,11 @@
-use std::{any::Any, marker::PhantomData, ops::Deref, sync::{Arc, Mutex}};
+use std::{any::Any, marker::PhantomData, sync::{Arc, Mutex}};
 
 use essay_graphics::api::{
-    renderer::{self, Canvas, Renderer, Result}, Affine2d, Bounds, Coord, Path, PathCode, PathOpt, Point
+    renderer::{self, Canvas, Renderer, Result}, Affine2d, Bounds, Coord, Path, PathOpt, Point
 };
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
-use crate::chart::{Data, LegendHandler};
+use crate::chart::LegendHandler;
 use crate::config::{ConfigArc, StyleCycle};
 
 pub trait ArtistDraw<M: Coord> : Send {
@@ -286,6 +286,7 @@ where
 
 
 pub struct ToCanvas {
+    id: Stale,
     pos_frame: Bounds<Canvas>,
     to_canvas: Affine2d,
 }
@@ -293,11 +294,18 @@ pub struct ToCanvas {
 impl ToCanvas {
     pub fn new(pos_frame: Bounds<Canvas>, to_canvas: Affine2d) -> Self {
         Self {
+            id: Stale::stale(),
             pos_frame,
             to_canvas
         }
     }
 
+    #[inline]
+    pub fn id(&self) -> Stale {
+        self.id
+    }
+
+    #[inline]
     pub fn pos(&self) -> Bounds<Canvas> {
         self.pos_frame
     }
@@ -314,7 +322,7 @@ impl ToCanvas {
 
     #[inline]
     pub fn transform_tensor(&self, tensor: &Tensor) -> Tensor {
-        tensor.map_slice::<2>(|v: &[f32]| {
+        tensor.map_row(|v: &[f32]| {
             let Point(x, y) = self.to_canvas.transform_point(Point(v[0], v[1]));
 
             [x, y]
@@ -328,6 +336,7 @@ impl ToCanvas {
     
     pub(crate) fn matmul(&self, transform: &Affine2d) -> Self {
         Self {
+            id: self.id, // todo: update id
             pos_frame: self.pos_frame,
             to_canvas: self.to_canvas.matmul(transform),
         }
@@ -339,12 +348,47 @@ impl ToCanvas {
     }
     */
 }
-/*
-impl Deref for ToCanvas {
-    type Target = Affine2d;
 
-    fn deref(&self) -> &Self::Target {
-        self.to_canvas()
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Stale(u64);
+
+impl Stale {
+    const STALE: Stale = Stale(u64::MAX);
+
+    #[inline]
+    pub fn new_for_update() -> Self {
+        Self(0)
+    }
+
+    #[inline]
+    pub fn stale() -> Self {
+        Self::STALE
+    }
+
+    #[inline]
+    pub fn is_stale(&self) -> bool {
+        *self == Self::STALE
+    }
+
+    #[inline]
+    pub fn update(self) -> Self {
+        // invalid to call update on a stale value, which should cause a
+        // panic here
+        Self(self.0 + 1)
+    }
+
+    #[inline]
+    pub fn eq_or(&self, stale: Self, f: impl FnOnce()) -> Self {
+        if *self != stale || self.is_stale() {
+            (f)()
+        }
+
+        *self
     }
 }
-    */
+
+impl Default for Stale {
+    fn default() -> Self {
+        Self::stale()
+    }
+}

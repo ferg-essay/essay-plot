@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use essay_graphics::api::{path_opt::StyleErr, renderer::Canvas, Angle, CapStyle, Color, JoinStyle, Path, PathCode, Point};
-use essay_tensor::tf32;
+use essay_tensor::ten;
 
 use crate::config::PathStyle;
 
@@ -321,7 +321,7 @@ pub enum _FillStyle {
 }
 
 fn triangle_path() -> Path<Unit> {
-    Path::closed_poly(tf32!([
+    Path::closed_poly(ten!([
         [0., 1.], [-1., -1.], [1., -1.]
     ]))
 }
@@ -347,7 +347,7 @@ fn plus_path() -> Path<Unit> {
 }
 
 fn plus_filled_path() -> Path<Unit> {
-    Path::closed_poly(tf32!([
+    Path::closed_poly(ten![
         [-3., -1.],
         [-3., 1.],
         [-1., 1.],
@@ -360,7 +360,7 @@ fn plus_filled_path() -> Path<Unit> {
         [1., -3.],
         [-1., -3.],
         [-1., -1.],
-    ]) / 3.)
+    ] / 3.0f32)
 }
 
 fn tick_path() -> Path<Unit> {
@@ -385,13 +385,13 @@ fn horiz_path() -> Path<Unit> {
 }
 
 fn caret_path() -> Path<Unit> {
-    Path::closed_poly(tf32!([
+    Path::closed_poly(ten!([
         [0., 0.], [-0.86, 1.], [0.86, -1.]
     ]))
 }
 
 fn caret_base_path() -> Path<Unit> {
-    Path::closed_poly(tf32!([
+    Path::closed_poly(ten!([
         [-0.86, 0.], [0.86, 0.], [0., 1.]
     ]))
 }

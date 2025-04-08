@@ -3,7 +3,7 @@ use core::fmt;
 use essay_graphics::api::{
     renderer::{Canvas, Renderer, Result}, Bounds, Path, PathCode, PathOpt, Point
 };
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 use crate::{
     chart::{Data, LegendHandler}, 
@@ -12,7 +12,7 @@ use crate::{
 };
 
 use super::{
-    markers::{IntoMarker, MarkerStyle}, Artist, ArtistDraw, ArtistView, PathCollection, ToCanvas
+    artist::Stale, markers::{IntoMarker, MarkerStyle}, Artist, ArtistDraw, ArtistView, PathCollection, ToCanvas
 };
 
 #[derive(Clone, PartialEq, Debug)]
@@ -40,6 +40,8 @@ pub struct Lines2d {
 
     bounds: Bounds<Data>,
     is_stale: bool,
+
+    stale_id: Stale,
 }
 
 impl Lines2d {
@@ -80,6 +82,8 @@ impl Lines2d {
             is_stale: true,
 
             bounds,
+
+            stale_id: Stale::default(),
         }
     }
 
@@ -102,6 +106,7 @@ impl Lines2d {
         }
 
         self.is_stale = true;
+        self.stale_id = Stale::default();
 
         self
     }
@@ -113,6 +118,7 @@ impl Lines2d {
 
         self.marker = Some(marker);
         self.is_stale = true;
+        self.stale_id = Stale::default();
 
         self
     }
@@ -121,6 +127,7 @@ impl Lines2d {
         self.draw_style = draw_style;
         self.path = build_path(&self.xy, &self.draw_style);
         self.is_stale = true;
+        self.stale_id = Stale::default();
 
         self
     }
@@ -323,15 +330,15 @@ impl fmt::Debug for Lines2d {
 
 #[cfg(test)]
 mod test {
-    use essay_tensor::prelude::*;
+    use essay_tensor::ten;
 
     use super::Lines2d;
 
     #[test]
     fn test_lines() {
         let lines = Lines2d::from_xy(
-            tf32!([1., 2., 4., 8.]),
-            tf32!([10., 20., 40., 80.])
+            ten!([1., 2., 4., 8.]),
+            ten!([10., 20., 40., 80.])
         );
         println!("Lines {:?}", &lines);
     }

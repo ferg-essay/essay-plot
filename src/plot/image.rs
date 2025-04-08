@@ -1,4 +1,4 @@
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 use crate::{artist::{Image, ImageOpt}, chart::Chart};
 

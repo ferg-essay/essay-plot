@@ -1,8 +1,8 @@
-use essay_graphics::api::{affine2d, 
+use essay_graphics::api::{
     renderer::{Canvas, Renderer, Result}, 
     Bounds, JoinStyle, Path, PathOpt
 };
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 use crate::{
     artist::{
@@ -42,9 +42,7 @@ impl ScatterPlot {
     fn new(xy: Tensor) -> Self {
         let scale = 10.;
         let size = scale * scale;
-        let path = paths::unit_pos().transform(
-            &affine2d::scale(scale, scale)
-        );
+        let path = paths::unit_pos().scale(scale, scale);
 
         let collection = PathCollection::new(path, xy.clone());
         let mut style = PathStyle::new();

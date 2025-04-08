@@ -1,6 +1,6 @@
 use core::fmt;
 
-use essay_tensor::{Tensor, array::Axis};
+use essay_tensor::tensor::{Axis, Tensor};
 
 use essay_graphics::api::{
     renderer::{Canvas, Renderer, Result}, 
@@ -39,7 +39,7 @@ impl Stem {
         let y = y.into();
 
         assert_eq!(x.len(), y.len(), "stem data lengths must match x={:?} y={:?}", 
-            x.shape().as_slice(), y.shape().as_slice()
+            x.shape(), y.shape()
         );
 
         let xy = x.stack([y], Axis::axis(-1));

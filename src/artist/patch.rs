@@ -44,7 +44,7 @@ impl Patch {
     }
 
     pub fn stale(&mut self) {
-        self.xform_path = self.path.transform(&self.transform);
+        self.xform_path = self.path.map(|pt| self.transform.transform_point(pt));
         //self.bounds = self.xform_path.get_bounds();
     }
 }
@@ -423,7 +423,7 @@ impl PatchTrait<Data> for Wedge {
                 .scale(self.radius, self.radius)
                 .translate(self.center.x(), self.center.y());
 
-            let wedge = wedge.transform::<Data>(&transform);
+            let wedge = wedge.map(|pt| transform.transform_point(pt));
 
             self.path = Some(wedge);
         }

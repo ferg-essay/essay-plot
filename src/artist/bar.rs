@@ -1,5 +1,5 @@
 use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
-use essay_tensor::{Tensor, init::linspace};
+use essay_tensor::{tensor::Tensor, init::linspace};
 
 use crate::{
     chart::{Data, LegendHandler}, 
@@ -28,7 +28,7 @@ impl Bar {
     pub fn new(data: impl Into<Tensor>) -> Self {
         let data : Tensor = data.into();
 
-        assert!(data.rank() == 1, "bar requires 1D value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 1, "bar requires 1D value {:?}", data.shape());
 
         let mut bar = Self {
             height: data,
@@ -52,7 +52,7 @@ impl Bar {
         let data = data.into();
 
         assert!(self.height.shape() == data.shape(), "bar data shape must match initial data. new={:?} old={:?}",
-            data.shape().as_slice(), self.height.shape().as_slice());
+            data.shape(), self.height.shape());
 
         self.height = data;
         self.is_stale = true;
@@ -64,7 +64,7 @@ impl Bar {
 
         assert!(x.shape() == self.height.shape(), 
                 "bar x coords must match data. x={:?} data={:?}", 
-                x.shape().as_slice(), self.height.shape().as_slice());
+                x.shape(), self.height.shape());
 
         self.x = Some(x);
         self.update_bounds();
@@ -74,11 +74,11 @@ impl Bar {
         let width = width.into();
 
         if width.len() == 1 {
-            self.width = Some(Tensor::fill(width[0], self.height.len()));
+            self.width = Some(Tensor::fill(self.height.len(), width[0]));
         } else {
             assert!(width.shape() == self.height.shape(), 
                 "bar width must match data width={:?} data={:?}", 
-                width.shape().as_slice(), self.height.shape().as_slice());
+                width.shape(), self.height.shape());
 
             self.width = Some(width);
         }
@@ -89,11 +89,11 @@ impl Bar {
         let bottom = bottom.into();
 
         if bottom.len() == 1 {
-            self.bottom = Some(Tensor::fill(bottom[0], self.height.len()));
+            self.bottom = Some(Tensor::fill(self.height.len(), bottom[0]));
         } else {
             assert!(bottom.shape() == self.height.shape(), 
                 "bar bottom must match data. bottom={:?} data={:?}", 
-                bottom.shape().as_slice(), self.height.shape().as_slice());
+                bottom.shape(), self.height.shape());
 
             self.bottom = Some(bottom);
         }
@@ -106,14 +106,14 @@ impl Bar {
 
             let len = self.height.len();
 
-            let x = match &self.x {
+            let x: Tensor = match &self.x {
                 Some(x) => x.clone(),
                 None => linspace(0., len as f32 - 1., len)
             };
 
             let bottom = match &self.bottom {
                 Some(bottom) => bottom.clone(),
-                None => Tensor::fill(0., len),
+                None => Tensor::fill(len, 0.),
             };
 
             let min = x.reduce_min()[0];
@@ -121,13 +121,13 @@ impl Bar {
 
             let w2 = match &self.width {
                 Some(width) => width * 0.5,
-                None => Tensor::fill(0.4, [len]),
+                None => Tensor::fill(len, 0.4),
             };
 
             let y_min = bottom.reduce_min()[0];
             let y_max = (&bottom + &self.height).reduce_max()[0];
 
-            self.extent = Bounds::new((min - w2[0], y_min), (max + w2[len - 1], y_max));
+            self.extent = Bounds::new([min - w2[0], y_min], [max + w2[len - 1], y_max]);
 
             let mut paths = Vec::<Path<Data>>::new();
 
@@ -135,8 +135,8 @@ impl Bar {
                 let x = x[i];
 
                 paths.push(paths::rect(
-                    (x - w2[i], bottom[i]), 
-                    (x + w2[i], bottom[i] + self.height[i])
+                    [x - w2[i], bottom[i]], 
+                    [x + w2[i], bottom[i] + self.height[i]]
                 ));
             }
 

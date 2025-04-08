@@ -1,5 +1,5 @@
 use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
-use essay_tensor::{Tensor, math::normalize_unit};
+use essay_tensor::tensor::Tensor;
 
 use crate::{chart::Data, config::PathStyle, contour::TriContourGenerator, tri::Triangulation};
 
@@ -32,12 +32,12 @@ impl TriContour {
         let tri: Triangulation = tri.into();
         let data : Tensor = data.into();
 
-        assert!(data.rank() == 1, "contour requires 1d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 1, "contour requires 1d value {:?}", data.shape());
 
         Self {
             data,
             tri,
-            norm: Tensor::empty(),
+            norm: Tensor::from(None),
             // color_map: ColorMaps::Default.into(),
             bounds: Bounds::zero(),
             levels: Vec::new(),
@@ -45,7 +45,7 @@ impl TriContour {
     }
 
     pub(crate) fn _set_data(&mut self, data: Tensor) {
-        assert!(data.rank() == 2, "contour requires 2d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "contour requires 2d value {:?}", data.shape());
 
         self.data = data;
     }
@@ -58,7 +58,7 @@ impl TriContour {
 
         self.bounds = Bounds::<Data>::from(self.tri.vertices());
 
-        self.norm = normalize_unit(&self.data);
+        self.norm = self.data.normalize_unit();
 
         let mut cg = TriContourGenerator::new(&self.tri, self.data.clone());
 

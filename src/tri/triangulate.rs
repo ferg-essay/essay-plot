@@ -1,4 +1,4 @@
-use essay_tensor::{Tensor, tensor::TensorVec};
+use essay_tensor::tensor::Tensor;
 
 use super::triangulate;
 
@@ -8,12 +8,14 @@ pub struct Triangulation {
 }
 
 impl Triangulation {
-    pub fn new(xy: Tensor, triangles: Tensor<usize>) -> Self {
-        assert!(xy.rank() == 2, "xy must be a 2D list (rank-2) {:?}", xy.shape().as_slice());
-        assert!(xy.cols() == 2, "xy must be a 2D list (rank-2) {:?}", xy.shape().as_slice());
+    pub fn new(xy: impl Into<Tensor>, triangles: impl Into<Tensor<usize>>) -> Self {
+        let xy = xy.into();
+        let triangles = triangles.into();
+        assert!(xy.rank() == 2, "xy must be a 2D list (rank-2) {:?}", xy.shape());
+        assert!(xy.cols() == 2, "xy must be a 2D list (rank-2) {:?}", xy.shape());
 
-        assert!(triangles.rank() == 2, "triangles must be a list of triple indices (rank-2) {:?}", xy.shape().as_slice());
-        assert!(triangles.cols() == 3, "triangles must be a list of triple indices (rank-2) {:?}", xy.shape().as_slice());
+        assert!(triangles.rank() == 2, "triangles must be a list of triple indices (rank-2) {:?}", xy.shape());
+        assert!(triangles.cols() == 3, "triangles must be a list of triple indices (rank-2) {:?}", xy.shape());
 
         Self {
             xy,
@@ -30,7 +32,7 @@ impl Triangulation {
     }
 
     pub fn edges(&self) -> Tensor<usize> {
-        let mut edges = TensorVec::<[usize; 2]>::new();
+        let mut edges = Vec::<[usize; 2]>::new();
 
         for triangle in self.triangles.iter_row() {
             let (a, b, c) = (triangle[0], triangle[1], triangle[2]);
@@ -54,7 +56,7 @@ impl Triangulation {
             }
         }
 
-        edges.into_tensor()
+        Tensor::from(edges)
     }
 }
 

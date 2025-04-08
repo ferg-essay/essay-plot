@@ -1,46 +1,6 @@
 use core::fmt;
 
-use essay_graphics::api::Color;
-
-pub struct Lab(f32, f32, f32);
-
-impl Lab {
-    #[inline]
-    pub fn l(&self) -> f32 {
-        self.0
-    }
-
-    #[inline]
-    pub fn a(&self) -> f32 {
-        self.1
-    }
-
-    #[inline]
-    pub fn b(&self) -> f32 {
-        self.2
-    }
-}
-
-impl fmt::Debug for Lab {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Lab").field(&self.0).field(&self.1).field(&self.2).finish()
-    }
-}
-
-
-impl From<Lab> for Color {
-    fn from(value: Lab) -> Self {
-        Color::from_lab(value.l(), value.a(), value.b())
-    }
-}
-
-impl From<Color> for Lab {
-    fn from(color: Color) -> Self {
-        let [l, a, b] = color.to_lab();
-
-        Self(l, a, b)
-    }
-}
+use essay_graphics::api::{color::{Hsv, Hsva}, Color};
 
 ///
 /// Hue, saturation, value.
@@ -77,7 +37,7 @@ impl From<Hsl> for Color {
     fn from(value: Hsl) -> Color {
         let Hsl(h, s, v) = value;
 
-        Color::from_hsva(h / 360., s, v, 1.0)
+        Color::from(Hsva(h, s, v, 1.0))
     }
 }
 
@@ -90,166 +50,9 @@ impl From<Hsl> for Hsv {
     }
 }
 
-///
-/// Hue, saturation, value.
-/// 
-/// Note: hue is unit circle based: [0, 1], not degree based.
-/// 
-pub struct Hsv(pub f32, pub f32, pub f32);
-
-impl Hsv {
-    #[inline]
-    pub fn h(&self) -> f32 {
-        self.0
-    }
-
-    #[inline]
-    pub fn s(&self) -> f32 {
-        self.1
-    }
-
-    #[inline]
-    pub fn v(&self) -> f32 {
-        self.2
-    }
-}
-
-impl fmt::Debug for Hsv {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Hsv").field(&self.0).field(&self.1).field(&self.2).finish()
-    }
-}
-
-#[derive(Clone, Copy, PartialEq)]
-pub struct Hsva(pub f32, pub f32, pub f32, pub f32);
-
-impl Hsva {
-    #[inline]
-    pub fn h(&self) -> f32 {
-        self.0
-    }
-
-    #[inline]
-    pub fn s(&self) -> f32 {
-        self.1
-    }
-
-    #[inline]
-    pub fn v(&self) -> f32 {
-        self.2
-    }
-
-    #[inline]
-    pub fn a(&self) -> f32 {
-        self.3
-    }
-}
-
-impl fmt::Debug for Hsva {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Hsva")
-            .field(&self.0)
-            .field(&self.1)
-            .field(&self.2)
-            .field(&self.3)
-            .finish()
-    }
-}
-
-impl From<Hsva> for Color {
-    #[inline]
-    fn from(value: Hsva) -> Color {
-        Color::from(&value)
-    }
-}
-
-impl From<&Hsva> for Color {
-    #[inline]
-    fn from(value: &Hsva) -> Color {
-        let Hsva(h, s, v, a) = value;
-
-        /*
-        let h = h.clamp(0., 1.);
-        let s = s.clamp(0., 1.);
-        let v = v.clamp(0., 1.);
-        let a = a.clamp(0., 1.);
-
-        let i = (h * 6.) as u32;
-        let ff = h * 6. - i as f32;
-        let p = v * (1. - s);
-        let q = v * (1. - (s * ff));
-        let t = v * (1. - (s * (1. - ff)));
-
-        let (r, g, b) = match i {
-            0 => (v, t, p),
-            1 => (q, v, p),
-            2 => (p, v, t),
-            3 => (p, q, v),
-            4 => (t, p, v),
-            _ => (v, p, q),
-        };
-        */
-
-        Color::from_hsva(*h, *s, *v, *a)
-    }
-}
-
-impl From<Color> for Hsva {
-    fn from(color: Color) -> Hsva {
-        let (r, g, b, a) = (color.r8(), color.g8(), color.b8(), color.a8());
-
-        let r = r as f32 / 255.;
-        let g = g as f32 / 255.;
-        let b = b as f32 / 255.;
-        let a = a as f32 / 255.;
-
-        let max = r.max(g).max(b);
-        let min = r.min(g).min(b);
-
-        let c = max - min;
-        let s = c / max;
-
-        let r_s = (max - r) / c;
-        let g_s = (max - g) / c;
-        let b_s = (max - b) / c;
-
-        let h = if min == max {
-            0.
-        } else if max == r {
-            b_s - g_s
-        } else if max == g {
-            2. + r_s - b_s
-        } else {
-            4. + g_s - r_s
-        };
-
-        let h = (h / 6. + 1.) % 1.;
-
-        Hsva(h, s, max, a)
-    }
-}
-
-impl From<Hsv> for Color {
-    #[inline]
-    fn from(value: Hsv) -> Color {
-        Color::from(&value)
-    }
-}
-
-impl From<&Hsv> for Color {
-    #[inline]
-    fn from(value: &Hsv) -> Color {
-        let Hsv(h, s, v) = value;
-
-        Color::from(&Hsva(*h, *s, *v, 1.))
-    }
-}
-
 #[cfg(test)]
 mod test {
-    use essay_graphics::api::Color;
-
-    use crate::palette::Hsva;
+    use essay_graphics::api::{color::Hsva, Color};
 
     #[test]
     fn hsva_to_color() {

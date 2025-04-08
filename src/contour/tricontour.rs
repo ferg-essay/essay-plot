@@ -1,10 +1,10 @@
 use std::{collections::HashMap, ops::{Index, IndexMut}};
 
-use essay_tensor::{Tensor, tensor::TensorVec};
+use essay_tensor::tensor::Tensor;
 
-use crate::{tri::Triangulation};
+use crate::tri::Triangulation;
 
-use super::{tritile::{TileId, Tile, CrossEdge}};
+use super::tritile::{TileId, Tile, CrossEdge};
 
 pub struct TriContourGenerator {
     tiles: Tiles,
@@ -12,9 +12,9 @@ pub struct TriContourGenerator {
 
 impl TriContourGenerator {
     pub fn new(tri: &Triangulation, z: Tensor) -> Self {
-        assert!(z.rank() == 1, "contour z data must be 1D (rank 1) {:?}", z.shape().as_slice());
+        assert!(z.rank() == 1, "contour z data must be 1D (rank 1) {:?}", z.shape());
         assert_eq!(tri.vertices().rows(), z.len(), "contour z length must match vertices (vertices {:?}, z {:?})", 
-            tri.vertices().shape().as_slice(), z.shape().as_slice());
+            tri.vertices().shape(), z.shape());
 
         //let tile_cols = z.cols() - 1;
         //let tile_rows = z.rows() - 1;
@@ -131,7 +131,7 @@ impl Tiles {
                 path.reverse();
             };
 
-            Some(path.into_tensor())
+            Some(Tensor::from(path))
         } else if self[id].bc.is_cross() {
             let bc = self[id].bc;
             let (b, c) = (self[id].verts[1], self[id].verts[2]);
@@ -150,7 +150,7 @@ impl Tiles {
                 path.reverse();
             };
     
-            Some(path.into_tensor())
+            Some(Tensor::from(path))
         } else if self[id].ca.is_cross() {
             let ca = self[id].ca;
             let (c, a) = (self[id].verts[2], self[id].verts[0]);
@@ -169,7 +169,7 @@ impl Tiles {
                 path.reverse();
             };
     
-            Some(path.into_tensor())
+            Some(Tensor::from(path))
         } else {
             None
         }
@@ -207,13 +207,13 @@ impl IndexMut<TileId> for Tiles {
 }
 
 pub struct Cursor {
-    vec: TensorVec<[f32; 2]>,
+    vec: Vec<[f32; 2]>,
     id: TileId,
 }
 
 impl Cursor {
-    fn path_ab(tiles: &mut Tiles, id: TileId, a: VertId, b: VertId) -> TensorVec<[f32; 2]> {
-        let mut vec = TensorVec::<[f32; 2]>::new();
+    fn path_ab(tiles: &mut Tiles, id: TileId, a: VertId, b: VertId) -> Vec<[f32; 2]> {
+        let mut vec = Vec::<[f32; 2]>::new();
 
         let va = tiles.vertex(a);
         let vb = tiles.vertex(b);
@@ -223,8 +223,8 @@ impl Cursor {
         Self::path(tiles, vec, id)
     }
 
-    fn path_bc(tiles: &mut Tiles, id: TileId, b: VertId, c: VertId) -> TensorVec<[f32; 2]> {
-        let mut vec = TensorVec::<[f32; 2]>::new();
+    fn path_bc(tiles: &mut Tiles, id: TileId, b: VertId, c: VertId) -> Vec<[f32; 2]> {
+        let mut vec = Vec::<[f32; 2]>::new();
 
         let vb = tiles.vertex(b);
         let vc = tiles.vertex(c);
@@ -234,8 +234,8 @@ impl Cursor {
         Self::path(tiles, vec, id)
     }
 
-    fn path_ca(tiles: &mut Tiles, id: TileId, c: VertId, a: VertId) -> TensorVec<[f32; 2]> {
-        let mut vec = TensorVec::<[f32; 2]>::new();
+    fn path_ca(tiles: &mut Tiles, id: TileId, c: VertId, a: VertId) -> Vec<[f32; 2]> {
+        let mut vec = Vec::<[f32; 2]>::new();
 
         let vc = tiles.vertex(c);
         let va = tiles.vertex(a);
@@ -245,7 +245,7 @@ impl Cursor {
         Self::path(tiles, vec, id)
     }
 
-    fn path_dual(tiles: &mut Tiles, id: TileId, v0: VertId, v1: VertId) -> Option<TensorVec<[f32; 2]>> {
+    fn path_dual(tiles: &mut Tiles, id: TileId, v0: VertId, v1: VertId) -> Option<Vec<[f32; 2]>> {
         if id.is_none() {
             return None;
         }
@@ -275,7 +275,7 @@ impl Cursor {
         }
     }
 
-    fn path(tiles: &mut Tiles, vec: TensorVec<[f32; 2]>, id: TileId) -> TensorVec<[f32; 2]> {
+    fn path(tiles: &mut Tiles, vec: Vec<[f32; 2]>, id: TileId) -> Vec<[f32; 2]> {
         let mut cursor = Self {
             vec,
             id,
@@ -381,33 +381,33 @@ fn add_dual_map_item(
 
 #[cfg(test)]
 mod test {
-    use essay_tensor::{tf32, tensor::TensorVec};
+    use essay_tensor::ten;
 
     use crate::{contour::tritile::CrossEdge, tri::Triangulation};
 
-    use super::{TriContourGenerator};
+    use super::TriContourGenerator;
 
     fn gen_new(xyz: Vec<[f32; 3]>, tri: Vec<[u32; 3]>) -> TriContourGenerator {
-        let mut vec_xy = TensorVec::<[f32; 2]>::new();
-        let mut vec_z = TensorVec::<f32>::new();
+        let mut vec_xy = Vec::<[f32; 2]>::new();
+        let mut vec_z = Vec::<f32>::new();
 
         for [x, y, z] in xyz {
             vec_xy.push([x, y]);
             vec_z.push(z);
         }
 
-        let mut vec_tri = TensorVec::<[usize; 3]>::new();
+        let mut vec_tri = Vec::<[usize; 3]>::new();
 
         for tri in tri {
             vec_tri.push([tri[0] as usize, tri[1] as usize, tri[2] as usize]);
         }
 
         let tri = Triangulation::new(
-            vec_xy.into_tensor(), 
-            vec_tri.into_tensor()
+            vec_xy,
+            vec_tri
         );
 
-        TriContourGenerator::new(&tri, vec_z.into_tensor())
+        TriContourGenerator::new(&tri, vec_z.into())
     }
 
     // single title bisected by a cross
@@ -536,7 +536,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[1., 0.], [0., 1.]])]
+            vec![ten![[1., 0.], [0., 1.]]]
         );
 
         let mut cg = gen_new(
@@ -545,7 +545,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[1., 1.], [1., 0.]])]
+            vec![ten![[1., 1.], [1., 0.]]]
         );
 
         let mut cg = gen_new(
@@ -554,7 +554,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[0., 1.], [1., 1.]])]
+            vec![ten![[0., 1.], [1., 1.]]]
         );
 
         let mut cg = gen_new(
@@ -563,7 +563,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[0., 1.], [1., 0.]])]
+            vec![ten![[0., 1.], [1., 0.]]]
         );
 
         let mut cg = gen_new(
@@ -572,7 +572,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[1., 0.], [1., 1.]])]
+            vec![ten![[1., 0.], [1., 1.]]]
         );
 
         let mut cg = gen_new(
@@ -581,7 +581,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[1., 1.], [0., 1.]])]
+            vec![ten![[1., 1.], [0., 1.]]]
         );
 
     }
@@ -595,7 +595,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[1., 0.], [1., 1.], [0., 1.]])]
+            vec![ten![[1., 0.], [1., 1.], [0., 1.]]]
         );
 
         let mut cg = gen_new(
@@ -604,7 +604,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[2., 1.], [1., 0.]])]
+            vec![ten![[2., 1.], [1., 0.]]]
         );
 
         let mut cg = gen_new(
@@ -613,7 +613,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[1., 2.], [1., 1.], [2., 1.]])]
+            vec![ten![[1., 2.], [1., 1.], [2., 1.]]]
         );
 
         let mut cg = gen_new(
@@ -622,7 +622,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[0., 1.], [1., 2.]])]
+            vec![ten![[0., 1.], [1., 2.]]]
         );
 
         // flip direction/values
@@ -633,7 +633,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[0., 1.], [1., 1.], [1., 0.]])]
+            vec![ten![[0., 1.], [1., 1.], [1., 0.]]]
         );
 
         let mut cg = gen_new(
@@ -642,7 +642,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[1., 0.], [2., 1.]])]
+            vec![ten![[1., 0.], [2., 1.]]]
         );
 
         let mut cg = gen_new(
@@ -651,7 +651,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[2., 1.], [1., 1.], [1., 2.]])]
+            vec![ten![[2., 1.], [1., 1.], [1., 2.]]]
         );
 
         let mut cg = gen_new(
@@ -660,7 +660,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[1., 2.], [0., 1.]])]
+            vec![ten![[1., 2.], [0., 1.]]]
         );
     }
 
@@ -673,7 +673,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[2., 1.], [1., 1.], [0., 1.]])]
+            vec![ten![[2., 1.], [1., 1.], [0., 1.]]]
         );
 
         let mut cg = gen_new(
@@ -682,7 +682,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[1., 0.], [1., 1.], [1., 2.]])]
+            vec![ten![[1., 0.], [1., 1.], [1., 2.]]]
         );
 
         // flip low/high
@@ -692,7 +692,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[0., 1.], [1., 1.], [2., 1.]])]
+            vec![ten![[0., 1.], [1., 1.], [2., 1.]]]
         );
 
         let mut cg = gen_new(
@@ -701,7 +701,7 @@ mod test {
         );
         assert_eq!(
             cg.contour_lines(0.5),
-            vec![tf32!([[1., 2.], [1., 1.], [1., 0.]])]
+            vec![ten![[1., 2.], [1., 1.], [1., 0.]]]
         );
     }
 
@@ -715,8 +715,8 @@ mod test {
         assert_eq!(
             cg.contour_lines(0.5),
             vec![
-                tf32!([[1., 0.], [1., 1.], [0., 1.]]),
-                tf32!([[1., 2.], [1., 1.], [2., 1.]]),
+                ten![[1., 0.], [1., 1.], [0., 1.]],
+                ten![[1., 2.], [1., 1.], [2., 1.]],
                 ]
         );
 
@@ -727,8 +727,8 @@ mod test {
         assert_eq!(
             cg.contour_lines(0.5),
             vec![
-                tf32!([[2., 1.], [1., 0.]]),
-                tf32!([[0., 1.], [1., 2.]]),
+                ten![[2., 1.], [1., 0.]],
+                ten![[0., 1.], [1., 2.]],
                 ]
         );
     }

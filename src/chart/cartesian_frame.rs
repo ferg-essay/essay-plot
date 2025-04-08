@@ -140,12 +140,12 @@ impl CartesianFrame {
     fn resize(&mut self, renderer: &mut dyn Renderer) {
         let pos = renderer.pos();
 
-        let pos = Bounds::from((
-            pos.xmin() + pos.width() * self.margins.left,
-            pos.ymin() + pos.height() * self.margins.top,
-            pos.xmin() + pos.width() * self.margins.right,
-            pos.ymin() + pos.height() * self.margins.bottom,
-        ));
+        let pos = Bounds::from([
+            [pos.xmin() + pos.width() * self.margins.left,
+            pos.ymin() + pos.height() * self.margins.top],
+            [pos.xmin() + pos.width() * self.margins.right,
+            pos.ymin() + pos.height() * self.margins.bottom]
+        ]);
     
         self.pos = pos.clone();
     
@@ -154,10 +154,10 @@ impl CartesianFrame {
         // title exists outside the pos bounds
         self.title.update_pos(
             renderer,
-            Bounds::from((
-                pos.xmin(), pos.ymax(), 
-                pos.xmax(), pos.ymax() + title.height()
-            ))
+            Bounds::from([
+                [pos.xmin(), pos.ymax()], 
+                [pos.xmax(), pos.ymax() + title.height()]
+            ])
         );
     
         let pos_data = Bounds::<Canvas>::new(

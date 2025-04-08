@@ -1,6 +1,6 @@
-use essay_graphics::api::Color;
+use essay_graphics::api::{color::{Hsv, Xyz}, Color};
 
-use super::{color::Hsv, Palette};
+use super::Palette;
 
 #[derive(Clone)]
 pub struct ColorMap {
@@ -71,7 +71,7 @@ impl ColorMap {
         let b = (1. - offset) * c0[2] + offset * c1[2];
         let a = (1. - offset) * c0[3] + offset * c1[3];
 
-        let color = Color::from((r, g, b, a));
+        let color = Color::from([r, g, b, a]);
 
         color
 
@@ -107,21 +107,21 @@ pub fn raw_to_full(v: f32, raw_colors: &[(f32, Color)]) -> [f32; 4] {
     // colors in between because the bogus hue from white is interpolated
     // as if it's a fully saturated color.
 
-    let c0 = raw_colors[i].1.to_xyz();
-    let c1 = raw_colors[i + 1].1.to_xyz();
+    let Xyz(x0, y0, z0) = Xyz::from(raw_colors[i].1);
+    let Xyz(x1, y1, z1) = Xyz::from(raw_colors[i + 1].1);
 
     //let c0 = [c0.red(), c0.green(), c0.blue()];
     //let c1 = [c1.red(), c1.green(), c1.blue()];
 
-    let x = (1. - offset) * c0[0] + offset * c1[0];
-    let y = (1. - offset) * c0[1] + offset * c1[1];
-    let z = (1. - offset) * c0[2] + offset * c1[2];
+    let x = (1. - offset) * x0 + offset * x1;
+    let y = (1. - offset) * y0 + offset * y1;
+    let z = (1. - offset) * z0 + offset * z1;
     //let s0 = c0[1] / (c0[1] + c1[1]);
     //let s1 = c1[1] / (c0[1] + c1[1]);
     //let z = (1. - offset) * c0[2] * s0 + offset * c1[2] * s1;
     //[x, y, z, 1.]
 
-    let c = Color::from_xyz(x, y, z);
+    let c = Color::from(Xyz(x, y, z));
     [c.red(), c.green(), c.blue(), 1.]
 }
 
@@ -233,7 +233,7 @@ impl From<&[(f32, Hsv)]> for ColorMap {
         let mut colors = Vec::<(f32, Color)>::new();
 
         for (v, hsv) in value.iter() {
-            colors.push((*v, Color::from(hsv)));
+            colors.push((*v, Color::from(*hsv)));
         }
 
         ColorMap::from_colors(colors.as_slice())
@@ -245,7 +245,7 @@ impl<const N: usize> From<[(f32, Hsv); N]> for ColorMap {
         let mut colors = Vec::<(f32, Color)>::new();
 
         for (v, hsv) in value.iter() {
-            colors.push((*v, Color::from(hsv)));
+            colors.push((*v, Color::from(*hsv)));
         }
 
         ColorMap::from_colors(colors.as_slice())
@@ -258,7 +258,7 @@ impl From<&[Hsv]> for ColorMap {
 
         let factor = 1. / (value.len().max(2) - 1) as f32;
         for (i, hsv) in value.iter().enumerate() {
-            colors.push((i as f32 * factor, Color::from(hsv)));
+            colors.push((i as f32 * factor, Color::from(*hsv)));
         }
 
         ColorMap::from_colors(colors.as_slice())
@@ -271,7 +271,7 @@ impl<const N: usize> From<[Hsv; N]> for ColorMap {
 
         let factor = 1. / (value.len().max(2) - 1) as f32;
         for (i, hsv) in value.iter().enumerate() {
-            colors.push((i as f32 * factor, Color::from(hsv)));
+            colors.push((i as f32 * factor, Color::from(*hsv)));
         }
 
         ColorMap::from_colors(colors.as_slice())

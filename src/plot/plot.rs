@@ -1,4 +1,4 @@
-use essay_tensor::{init::linspace, Tensor};
+use essay_tensor::{init::linspace, tensor::Tensor};
 
 use crate::{artist::{Lines2d, LinesOpt}, chart::Chart};
 

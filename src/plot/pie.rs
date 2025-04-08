@@ -1,5 +1,5 @@
 use essay_graphics::api::{Angle, Point};
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 use crate::{artist::{patch, Container, ContainerOpt}, chart::Chart};
 

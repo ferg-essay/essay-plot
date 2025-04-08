@@ -2,7 +2,7 @@ use essay_graphics::api::{
     renderer::{Renderer, Result},
     Bounds, Point, PathOpt
 };
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 use crate::{
     artist::{Norms, Norm, Artist, ArtistDraw, ToCanvas},
@@ -25,7 +25,7 @@ impl Image {
     pub fn new(data: impl Into<Tensor>) -> Self {
         let data : Tensor = data.into();
 
-        assert!(data.rank() == 2, "image requires 2d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "image requires 2d value {:?}", data.shape());
 
         let mut image = Self {
             data,
@@ -130,7 +130,7 @@ data_artist_option_struct!(ImageOpt, Image);
 impl ImageOpt {
     pub fn data(&mut self, data: impl Into<Tensor>) -> &mut Self {
         let data = data.into();
-        assert!(data.rank() == 2, "Image data must be rank 2. Shape={:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "Image data must be rank 2. Shape={:?}", data.shape());
 
         self.write(|artist| {
             artist.set_data(data);

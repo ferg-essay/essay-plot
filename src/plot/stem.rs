@@ -1,6 +1,6 @@
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
-use crate::{artist::{Stem, StemOpt}, chart::{Chart}};
+use crate::{artist::{Stem, StemOpt}, chart::Chart};
 
 pub fn stem(
     graph: &mut Chart, 

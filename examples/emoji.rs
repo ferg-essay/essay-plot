@@ -14,7 +14,7 @@ fn main() {
     // graph.text((0., 1.), "hello").coord(TextCoords::FrameFraction).color("purple");
     //let family = "/Users/ferg/wsp/essay-mind/assets/font/NotoEmoji-Regular.ttf";
     let family = "/Users/ferg/wsp/essay-mind/assets/font/NotoEmoji-Bold.ttf";
-    graph.text((0.5, 0.5), "\u{1f980}\u{1f990}").family(family).color("red");
+    graph.text([0.5, 0.5], "\u{1f980}\u{1f990}").family(family).color("red");
 
     figure.show();
 }

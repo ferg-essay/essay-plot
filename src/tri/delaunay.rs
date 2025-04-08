@@ -1,7 +1,7 @@
 use core::fmt;
 
 use essay_graphics::api::Point;
-use essay_tensor::{Tensor, tensor::TensorVec};
+use essay_tensor::tensor::Tensor;
 
 use super::triangulate::Triangulation;
 
@@ -67,7 +67,7 @@ impl TriDelaunay {
     }
 
     fn to_triangulation(&self) -> Triangulation {
-        let mut xy_vec = TensorVec::<[f32; 2]>::new();
+        let mut xy_vec = Vec::<[f32; 2]>::new();
 
         let orig_xy = self.vertices.len() - 3;
         // let orig_xy = self.vertices.len();
@@ -77,7 +77,7 @@ impl TriDelaunay {
             xy_vec.push([point.0, point.1]);
         }
 
-        Triangulation::new(xy_vec.into_tensor(), self.triangles())
+        Triangulation::new(Tensor::from(xy_vec), self.triangles())
     }
 
     fn add_vertex(&mut self, p: VertId, start_edge: EdgeId) -> EdgeId {
@@ -239,7 +239,7 @@ impl TriDelaunay {
     }
 
     fn triangles(&self) -> Tensor<usize> {
-        let mut vec = TensorVec::<[usize; 3]>::new();
+        let mut vec = Vec::<[usize; 3]>::new();
 
         let ext_edges = 6;
         let tail_vert = self.vertices.len() - 3;
@@ -264,7 +264,7 @@ impl TriDelaunay {
             }
         }
 
-        vec.into_tensor()
+        Tensor::from(vec)
     }
 
     fn in_triangle_circle(&self, v: VertId, edge_id: EdgeId) -> f32 {
@@ -498,7 +498,7 @@ fn det(r0: [f32; 3], r1: [f32; 3], r2: [f32; 3]) -> f32 {
 #[cfg(test)]
 mod test {
     use essay_graphics::api::Point;
-    use essay_tensor::{tf32, Tensor};
+    use essay_tensor::{ten, tensor::Tensor};
 
     use crate::tri::{delaunay::{TriDelaunay, VertId, EdgeId, in_triangle}, triangulate::Triangulation};
 
@@ -506,17 +506,17 @@ mod test {
 
     #[test]
     fn init_triangle_points() {
-        let t = tf32!([[0., 0.], [1., 1.]]);
+        let t = ten![[0., 0.], [1., 1.]];
         let points = initial_points(&t);
         let (a, b, c) = (points[2], points[3], points[4]);
         assert_in_triangle(&t, a, b, c);
 
-        let t = tf32!([[1000., -1000.], [1001., 0.]]);
+        let t = ten![[1000., -1000.], [1001., 0.]];
         let points = initial_points(&t);
         let (a, b, c) = (points[2], points[3], points[4]);
         assert_in_triangle(&t, a, b, c);
 
-        let t = tf32!([[-1000., 1000.], [-1., 1001.]]);
+        let t = ten![[-1000., 1000.], [-1., 1001.]];
         let points = initial_points(&t);
         let (a, b, c) = (points[2], points[3], points[4]);
         assert_in_triangle(&t, a, b, c);
@@ -524,7 +524,7 @@ mod test {
 
     #[test]
     fn init_edges() {
-        let t = tf32!([[0., 0.], [1., 1.]]);
+        let t = ten![[0., 0.], [1., 1.]];
         let tri = TriDelaunay::new(&t);
         let edges = &tri.edges;
 
@@ -543,7 +543,7 @@ mod test {
     // initial point added to bounding triangles
     #[test]
     fn insert_point() {
-        let t = tf32!([[0., 0.], [1., 1.]]);
+        let t = ten![[0., 0.], [1., 1.]];
         let mut tri = TriDelaunay::new(&t);
 
         tri.add_edges(VertId(0), EdgeId(4));
@@ -571,7 +571,7 @@ mod test {
     // test if point in triangle-circle marked by an edge
     #[test]
     fn in_triangle_circle() {
-        let t = tf32!([[0., 0.], [1., 1.]]);
+        let t = ten![[0., 0.], [1., 1.]];
         let tri = TriDelaunay::new(&t);
 
         // p0 inside bounding triangle
@@ -594,7 +594,7 @@ mod test {
     // find enclosing triangle
     #[test]
     fn find_enclosing_triangle_initial() {
-        let t = tf32!([[0., 0.], [1., 1.]]);
+        let t = ten![[0., 0.], [1., 1.]];
         let tri = TriDelaunay::new(&t);
 
         // p0 inside bounding triangle
@@ -607,7 +607,7 @@ mod test {
     // create enclosing polygon
     #[test]
     fn create_enclosing_polygon_initial() {
-        let t = tf32!([[0., 0.], [1., 1.]]);
+        let t = ten![[0., 0.], [1., 1.]];
         let mut tri = TriDelaunay::new(&t);
 
         // p0 inside bounding triangle
@@ -617,7 +617,7 @@ mod test {
     // insert enclosing polygon
     #[test]
     fn add_point_initial() {
-        let t = tf32!([[0., 0.], [1., 1.]]);
+        let t = ten![[0., 0.], [1., 1.]];
         let mut tri = TriDelaunay::new(&t);
 
         tri.add_vertex(VertId(0), EdgeId(4));
@@ -645,7 +645,7 @@ mod test {
     // full build with two points
     #[test]
     fn two_points() {
-        let t = tf32!([[0., 1.], [2., 1.]]);
+        let t = ten![[0., 1.], [2., 1.]];
         let mut tri = TriDelaunay::new(&t);
 
         tri.build();
@@ -659,7 +659,7 @@ mod test {
     // full build with two points
     #[test]
     fn three_points() {
-        let t = tf32!([[0., 1.], [2., 1.], [1., 2.]]);
+        let t = ten![[0., 1.], [2., 1.], [1., 2.]];
         let mut tri_build = TriDelaunay::new(&t);
 
         tri_build.build();
@@ -684,7 +684,7 @@ mod test {
     // full build with two points
     #[test]
     fn quad() {
-        let t = tf32!([[0., 0.], [4., 0.], [2., 4.], [1.5, 2.]]);
+        let t = ten![[0., 0.], [4., 0.], [2., 4.], [1.5, 2.]];
         let mut tri_build = TriDelaunay::new(&t);
 
         tri_build.build();

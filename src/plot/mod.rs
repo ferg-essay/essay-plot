@@ -1,5 +1,5 @@
 use essay_graphics::api::Point;
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 use crate::{
     artist::{ContainerOpt, HorizontalLineOpt, ImageOpt, Lines2d, LinesOpt, TextOpt}, 

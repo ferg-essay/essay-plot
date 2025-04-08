@@ -1,4 +1,4 @@
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 use crate::{chart::Chart, artist::{Quiver, QuiverOpt}};
 

@@ -1,4 +1,4 @@
-use crate::palette::Hsv;
+use essay_graphics::api::color::Hsv;
 
 use super::ColorMap;
 

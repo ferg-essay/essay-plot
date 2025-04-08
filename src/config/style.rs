@@ -176,32 +176,32 @@ impl PathOpt for PathStyle {
         self.edge_color.or(self.color)
     }
 
-    fn get_line_width(&self) -> &Option<f32> {
-        &self.line_width
+    fn get_line_width(&self) -> Option<f32> {
+        self.line_width
     }
 
-    fn get_join_style(&self) -> &Option<JoinStyle> {
-        &self.join_style
+    fn get_join_style(&self) -> Option<JoinStyle> {
+        self.join_style
     }
 
-    fn get_cap_style(&self) -> &Option<CapStyle> {
-        &self.cap_style
+    fn get_cap_style(&self) -> Option<CapStyle> {
+        self.cap_style
     }
 
-    fn get_line_style(&self) -> &Option<LineStyle> {
-        &self.line_style
+    fn get_line_style(&self) -> Option<LineStyle> {
+        self.line_style.clone()
     }
 
-    fn get_alpha(&self) -> &Option<f32> {
-        &self.alpha
+    fn get_alpha(&self) -> Option<f32> {
+        self.alpha
     }
 
-    fn get_texture(&self) -> &Option<TextureId> {
-        &self.texture
+    fn get_texture(&self) -> Option<TextureId> {
+        self.texture
     }
 
-    fn get_hatch(&self) -> &Option<Hatch> {
-        &self.hatch
+    fn get_hatch(&self) -> Option<Hatch> {
+        self.hatch
     }
 }
 

@@ -9,9 +9,7 @@ mod colormaps;
 pub(super) mod palette_brewer;
 pub(super) mod palette_vega;
 
-pub use color::{
-    Hsv, Hsva, Hsl,
-};
+pub use color::Hsl;
 
 pub use category::Category;
 

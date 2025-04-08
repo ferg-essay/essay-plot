@@ -20,7 +20,7 @@ mod text;
 mod tricontour;
 
 pub use artist::{
-    Artist, ArtistDraw, ArtistContainer, ArtistView, IntoArtist, ToCanvas,
+    Artist, ArtistDraw, ArtistContainer, ArtistView, IntoArtist, Stale, ToCanvas,
 };
 
 pub use bar::{

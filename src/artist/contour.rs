@@ -2,7 +2,7 @@ use essay_graphics::api::{
     renderer::{Canvas, Renderer, Result}, 
     Bounds, Path, PathOpt, Point
 };
-use essay_tensor::{Tensor, tensor::TensorVec, math::normalize_unit};
+use essay_tensor::tensor::Tensor;
 
 use crate::{
     chart::Data, 
@@ -38,25 +38,25 @@ impl Contour {
     pub fn new(data: impl Into<Tensor>) -> Self {
         let data : Tensor = data.into();
 
-        assert!(data.rank() == 2, "contour requires 2d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "contour requires 2d value {:?}", data.shape());
 
         Self {
             data,
-            _xy: Tensor::empty(),
-            norm: Tensor::empty(),
+            _xy: Tensor::from(None),
+            norm: Tensor::from(None),
             color_map: ColorMaps::Default.into(),
             levels: Vec::new(),
         }
     }
 
     pub(crate) fn _set_data(&mut self, data: Tensor) {
-        assert!(data.rank() == 2, "contour requires 2d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "contour requires 2d value {:?}", data.shape());
 
         self.data = data;
     }
 
     fn _resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
-        let mut xy = TensorVec::<[f32; 2]>::new();
+        let mut xy = Vec::<[f32; 2]>::new();
         let (rows, cols) = (self.data.rows(), self.data.cols());
 
         for j in 0..rows {
@@ -65,7 +65,7 @@ impl Contour {
             }
         }
 
-        self.norm = normalize_unit(&self.data);
+        self.norm = self.data.normalize_unit();
 
         let mut cg = ContourGenerator::new(self.data.clone());
 
@@ -92,7 +92,7 @@ impl Contour {
 
         self.levels = levels;
 
-        self._xy = xy.into_tensor();
+        self._xy = Tensor::from(xy);
     }
 }
 
@@ -123,7 +123,7 @@ impl ArtistDraw<Data> for Contour {
 
         let colormap = &self.color_map;
 
-        let mut colors = TensorVec::<u32>::new();
+        let mut colors = Vec::<u32>::new();
         for v in self.norm.iter() {
             colors.push(colormap.map(*v).to_rgba());
         }

@@ -188,8 +188,8 @@ impl XAxis {
             let line_width = 1.;
 
             patch.set_pos([
-                (pos.xmin(), y - sign * line_width),
-                (pos.xmax(), y),
+                [pos.xmin(), y - sign * line_width],
+                [pos.xmax(), y],
             ]);
 
             patch.draw(renderer, to_canvas, style)?;

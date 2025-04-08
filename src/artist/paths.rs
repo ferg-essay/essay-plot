@@ -1,7 +1,7 @@
 use std::f32::consts::{PI, TAU};
 
 use essay_graphics::api::{renderer::Canvas, Angle, Bounds, Coord, Path, PathCode, Point};
-use essay_tensor::{init::linspace, tensor::TensorVec};
+use essay_tensor::{init::linspace, tensor::Tensor};
 
 ///
 /// Unit coordinates centered around 0: [-1, 1] x [-1, 1]
@@ -32,7 +32,7 @@ pub fn unit_pos() -> Path<Unit> {
 pub fn unit_polygon(n: usize) -> Path<Unit> {
     assert!(n > 2);
 
-    let mut tensor = TensorVec::<f32>::new();
+    let mut tensor = Vec::<f32>::new();
 
     for i in 0..n {
         let theta = (i as f32 * 360. / n as f32 + 90.).to_radians();
@@ -40,7 +40,7 @@ pub fn unit_polygon(n: usize) -> Path<Unit> {
         tensor.push(theta.cos());
         tensor.push(theta.sin());
     }
-    let tensor = tensor.into_tensor().reshape([n, 2]);
+    let tensor = Tensor::from(tensor).reshape([n, 2]);
 
     Path::closed_poly(tensor)
 }
@@ -48,7 +48,7 @@ pub fn unit_polygon(n: usize) -> Path<Unit> {
 pub fn unit_polygon_alt(n: usize) -> Path<Unit> {
     assert!(n > 2);
 
-    let mut tensor = TensorVec::<f32>::new();
+    let mut tensor = Vec::<f32>::new();
 
     for i in 0..n {
         let theta = (i as f32 * 360. / n as f32 + 180. / n as f32).to_radians();
@@ -56,13 +56,13 @@ pub fn unit_polygon_alt(n: usize) -> Path<Unit> {
         tensor.push(theta.cos());
         tensor.push(theta.sin());
     }
-    let tensor = tensor.into_tensor().reshape([n, 2]);
+    let tensor = Tensor::from(tensor).reshape([n, 2]);
     
     Path::closed_poly(tensor)
 }
 
 pub fn unit_star(n: usize, r_inner: f32) -> Path<Unit> {
-    let mut tensor = TensorVec::<f32>::new();
+    let mut tensor = Vec::<f32>::new();
 
     for i in 0..n {
         let theta = (i as f32 * 360. / n as f32 + 90.).to_radians();
@@ -75,7 +75,7 @@ pub fn unit_star(n: usize, r_inner: f32) -> Path<Unit> {
         tensor.push(theta2.cos() * r_inner);
         tensor.push(theta2.sin() * r_inner);
     }
-    let tensor = tensor.into_tensor().reshape([2 * n, 2]);
+    let tensor = Tensor::from(tensor).reshape([2 * n, 2]);
 
     Path::closed_poly(tensor)
 }

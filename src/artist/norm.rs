@@ -1,4 +1,4 @@
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 pub struct Norm {
     vmin: Option<f32>,

@@ -10,6 +10,7 @@ fn main() {
 
     let mut figure = Figure::new();
     let mut graph1 = figure.chart();
+
     graph1.colorbar();
     let mut graph2 = figure.chart();
 
@@ -17,6 +18,6 @@ fn main() {
         .shading(Shading::Flat)
         .color_map(ColorMaps::RedYellow);
     grid_color(&mut graph2, &z).shading(Shading::Gouraud);
-
+    
     figure.show();
 }

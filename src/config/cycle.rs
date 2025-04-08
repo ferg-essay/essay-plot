@@ -174,39 +174,39 @@ impl PathOpt for PropCycleChain<'_> {
             .or(self.prev.get_edge_color())
     }
 
-    fn get_line_style(&self) -> &Option<LineStyle> {
+    fn get_line_style(&self) -> Option<LineStyle> {
         if self.cycle.is_line_style_set() {
-            self.cycle.get_line_style(self.index)
+            self.cycle.get_line_style(self.index).clone()
         } else {
             self.prev.get_line_style()
         }
     }
 
-    fn get_line_width(&self) -> &Option<f32> {
+    fn get_line_width(&self) -> Option<f32> {
         if self.cycle.is_line_width_set() {
-            self.cycle.get_line_width(self.index)
+            self.cycle.get_line_width(self.index).clone()
         } else {
             self.prev.get_line_width()
         }
     }
 
-    fn get_join_style(&self) -> &Option<JoinStyle> {
+    fn get_join_style(&self) -> Option<JoinStyle> {
         self.prev.get_join_style()
     }
 
-    fn get_cap_style(&self) -> &Option<CapStyle> {
+    fn get_cap_style(&self) -> Option<CapStyle> {
         self.prev.get_cap_style()
     }
 
-    fn get_alpha(&self) -> &Option<f32> {
+    fn get_alpha(&self) -> Option<f32> {
         self.prev.get_alpha()
     }
 
-    fn get_texture(&self) -> &Option<TextureId> {
+    fn get_texture(&self) -> Option<TextureId> {
         self.prev.get_texture()
     }
 
-    fn get_hatch(&self) -> &Option<Hatch> {
+    fn get_hatch(&self) -> Option<Hatch> {
         self.prev.get_hatch()
     }
 }

@@ -1,8 +1,8 @@
 use essay_graphics::api::{
     renderer::{Canvas, Renderer, Result}, 
-    Affine2d, Bounds, CapStyle, Color, JoinStyle, Path, PathOpt, Point
+    Bounds, CapStyle, Color, JoinStyle, Path, PathOpt, Point
 };
-use essay_tensor::{Tensor, tensor::TensorVec, tf32, math::normalize_unit};
+use essay_tensor::{tensor::Tensor, ten};
 
 use crate::{
     artist::{Norm, Norms}, chart::{Data, LegendHandler}, palette::{ColorMap, ColorMaps}, config::{ConfigArc, PathStyle}, data_artist_option_struct
@@ -29,11 +29,11 @@ impl GridColor {
     pub fn new(data: impl Into<Tensor>) -> Self {
         let data : Tensor = data.into();
 
-        assert!(data.rank() == 2, "colormesh requires 2d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "colormesh requires 2d value {:?}", data.shape());
 
         Self {
             data,
-            xy: Tensor::empty(),
+            xy: Tensor::from(None),
             color_map: ColorMaps::Default.into(),
             shading: Shading::Flat,
             norm: Norm::from(Norms::Linear),
@@ -42,7 +42,7 @@ impl GridColor {
     }
 
     pub(crate) fn set_data(&mut self, data: Tensor) {
-        assert!(data.rank() == 2, "colormesh requires 2d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "colormesh requires 2d value {:?}", data.shape());
 
         self.data = data;
         self.is_stale = true;
@@ -66,27 +66,24 @@ impl GridColor {
         to_canvas: &ToCanvas,
         _style: &dyn PathOpt,
     ) -> Result<()> {
-        let path = Path::<Data>::closed_poly(tf32!([
+        let path = Path::<Data>::closed_poly(ten![
             [0.0, 0.0], [1.0, 0.0], [1.0, 1.0],
             [0.0, 1.0]
-            ]));
+            ]);
             
         let to_canvas = to_canvas.affine2d();
         let scale_canvas = to_canvas.strip_translation();
-        let path: Path<Canvas> = path.transform(&scale_canvas);
+        let path: Path<Canvas> = path.map(|pt| scale_canvas.transform_point(pt));
         let xy = to_canvas.transform(&self.xy);
 
         // let norm = normalize_unit(&self.data);
 
         let colormap = &self.color_map;
 
-        let mut colors = TensorVec::<u32>::new();
-        for v in self.data.iter() {
+        let colors = self.data.iter().map(|v| {
             let v = self.norm.norm(*v);
-            colors.push(colormap.map(v).to_rgba());
-        }
-
-        let colors = colors.into_tensor();
+            colormap.map(v).to_rgba()
+        }).collect();
 
         let mut style = PathStyle::new();
         style.edge_color(Color(0));
@@ -96,7 +93,7 @@ impl GridColor {
         style.join_style(JoinStyle::Bevel);
         style.cap_style(CapStyle::Butt);
 
-        renderer.draw_markers(&path, &xy, &tf32!(), &colors, &style)
+        renderer.draw_markers(&path, &xy, &Tensor::from(None), &colors, &style)
     }
 
     fn draw_gouraud_shading(
@@ -107,12 +104,12 @@ impl GridColor {
     ) -> Result<()> {
         let xy = to_canvas.transform_tensor(&self.xy);
 
-        let norm = normalize_unit(&self.data);
+        let norm = self.data.normalize_unit();
         let cmap = &self.color_map;
 
-        let mut vertices = TensorVec::<[f32; 2]>::new();
-        let mut colors = TensorVec::<u32>::new();
-        let mut triangles = TensorVec::<[u32; 3]>::new();
+        let mut vertices = Vec::<[f32; 2]>::new();
+        let mut colors = Vec::<u32>::new();
+        let mut triangles = Vec::<[u32; 3]>::new();
 
         let (rows, cols) = (norm.rows(), norm.cols());
 
@@ -142,11 +139,11 @@ impl GridColor {
             }
         }
 
-        let vertices = vertices.into_tensor();
-        let colors = colors.into_tensor();
-        let triangles = triangles.into_tensor();
+        let vertices = Tensor::from(vertices);
+        let colors = Tensor::from(colors);
+        let triangles = Tensor::from(triangles);
 
-        renderer.draw_triangles(vertices, colors, triangles)
+        renderer.draw_triangles(&vertices, &colors, &triangles)
     }
 
     pub(crate) fn set_norm(&mut self, min: f32, max: f32) {
@@ -177,7 +174,7 @@ impl ArtistDraw<Data> for GridColor {
         if self.is_stale {
             self.is_stale = false;
 
-            let mut xy = TensorVec::<[f32; 2]>::new();
+            let mut xy = Vec::<[f32; 2]>::new();
             let (rows, cols) = (self.data.rows(), self.data.cols());
 
             for j in 0..rows {
@@ -186,7 +183,7 @@ impl ArtistDraw<Data> for GridColor {
                 }
             }
 
-            self.xy = xy.into_tensor();
+            self.xy = Tensor::from(xy);
             self.norm.set_bounds(&self.data);
         }
 
@@ -222,7 +219,7 @@ data_artist_option_struct!(GridColorOpt, GridColor);
 impl GridColorOpt {
     pub fn data(&mut self, data: impl Into<Tensor>) -> &mut Self {
         let data = data.into();
-        assert!(data.rank() == 2, "ColorGrid data must be rank-2. Shape={:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "ColorGrid data must be rank-2. Shape={:?}", data.shape());
 
         self.write(|artist| {
             artist.data = data;

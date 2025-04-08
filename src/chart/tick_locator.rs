@@ -1,6 +1,6 @@
 // Locator(TickHelper)
 
-use essay_tensor::{Tensor, init::linspace, tf32};
+use essay_tensor::{init::linspace, ten, tensor::Tensor};
 
 pub trait TickLocator : Send {
     fn tick_values(&self, min: f32, max: f32) -> Tensor<f32>;
@@ -160,7 +160,7 @@ impl MaxNLocator {
             None => 0,
         };
 
-        let mut ticks: Tensor = tf32!([1.]);
+        let mut ticks: Tensor = ten![1.];
         
         for i in (0..=istep).rev() {
             let step = steps[i];
@@ -263,7 +263,7 @@ fn scale_range(vmin: f32, vmax: f32, n_bins: usize) -> (f32, f32) {
 
 #[cfg(test)]
 mod test {
-    use essay_tensor::tf32;
+    use essay_tensor::ten;
 
     use crate::chart::tick_locator::TickLocator;
 
@@ -294,22 +294,22 @@ mod test {
 
         assert_eq!(
             locator.tick_values(0., 1.0), 
-            tf32!([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+            ten![0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
         );
 
         assert_eq!(
             locator.tick_values(0., 10.0), 
-            tf32!([0.0, 2.0, 4.0, 6.0, 8.0, 10.0])
+            ten![0.0, 2.0, 4.0, 6.0, 8.0, 10.0]
         );
 
         assert_eq!(
             locator.tick_values(0., 0.1), 
-            tf32!([0.0, 0.02, 0.04, 0.06, 0.08, 0.099999994])
+            ten![0.0, 0.02, 0.04, 0.06, 0.08, 0.099999994]
         );
 
         assert_eq!(
             locator.tick_values(0., 1e6), 
-            tf32!([0.0, 2e5, 4e5, 6e5, 8e5, 10e5])
+            ten![0.0, 2e5, 4e5, 6e5, 8e5, 10e5]
         );
     }
 
@@ -320,12 +320,12 @@ mod test {
 
         assert_eq!(
             locator.tick_values(11., 12.0), 
-            tf32!([11.0, 11.2, 11.4, 11.6, 11.8, 12.0])
+            ten![11.0, 11.2, 11.4, 11.6, 11.8, 12.0]
         );
 
         assert_eq!(
             locator.tick_values(-1009., -1008.0), 
-            tf32!([-1009.0, -1008.8, -1008.6, -1008.4, -1008.2, -1008.0])
+            ten![-1009.0, -1008.8, -1008.6, -1008.4, -1008.2, -1008.0]
         );
     }
 
@@ -336,52 +336,52 @@ mod test {
 
         assert_eq!(
             locator.tick_values(10., 11.0), 
-            tf32!([10.0, 10.2, 10.4, 10.6, 10.8, 11.0])
+            ten![10.0, 10.2, 10.4, 10.6, 10.8, 11.0]
         );
 
         assert_eq!(
             locator.tick_values(10., 12.0), 
-            tf32!([10.0, 10.25, 10.5, 10.75, 11., 11.25, 11.5, 11.75, 12.])
+            ten![10.0, 10.25, 10.5, 10.75, 11., 11.25, 11.5, 11.75, 12.]
         );
 
         assert_eq!(
             locator.tick_values(10., 13.0), 
-            tf32!([10.0, 10.5, 11.0, 11.5, 12., 12.5, 13.0])
+            ten![10.0, 10.5, 11.0, 11.5, 12., 12.5, 13.0]
         );
 
         assert_eq!(
             locator.tick_values(10., 14.0), 
-            tf32!([10.0, 10.5, 11.0, 11.5, 12., 12.5, 13.0, 13.5, 14.])
+            ten![10.0, 10.5, 11.0, 11.5, 12., 12.5, 13.0, 13.5, 14.]
         );
 
         assert_eq!(
             locator.tick_values(10., 15.0), 
-            tf32!([10.0, 11., 12., 13., 14., 15.])
+            ten![10.0, 11., 12., 13., 14., 15.]
         );
 
         assert_eq!(
             locator.tick_values(10., 16.0), 
-            tf32!([10.0, 11., 12., 13., 14., 15., 16.])
+            ten![10.0, 11., 12., 13., 14., 15., 16.]
         );
 
         assert_eq!(
             locator.tick_values(10., 17.0), 
-            tf32!([10.0, 11., 12., 13., 14., 15., 16., 17.])
+            ten![10.0, 11., 12., 13., 14., 15., 16., 17.]
         );
 
         assert_eq!(
             locator.tick_values(10., 18.0), 
-            tf32!([10.0, 11., 12., 13., 14., 15., 16., 17., 18.])
+            ten![10.0, 11., 12., 13., 14., 15., 16., 17., 18.]
         );
 
         assert_eq!(
             locator.tick_values(10., 19.0), 
-            tf32!([10.0, 12., 14., 16., 18., 20.])
+            ten![10.0, 12., 14., 16., 18., 20.]
         );
 
         assert_eq!(
             locator.tick_values(10., 20.0), 
-            tf32!([10.0, 12., 14., 16., 18., 20.])
+            ten![10.0, 12., 14., 16., 18., 20.]
         );
     }
 
@@ -392,12 +392,12 @@ mod test {
 
         assert_eq!(
             locator.tick_values(-2., 6.), 
-            tf32!([-2., -1., 0., 1., 2., 3., 4., 5., 6.])
+            ten![-2., -1., 0., 1., 2., 3., 4., 5., 6.]
         );
 
         assert_eq!(
             locator.tick_values(-2.4, 6.28), 
-            tf32!([-2., -1., 0., 1., 2., 3., 4., 5., 6.])
+            ten![-2., -1., 0., 1., 2., 3., 4., 5., 6.]
         );
     }
 }

@@ -1,5 +1,5 @@
 use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 use crate::{
     chart::{Data, LegendHandler}, 
@@ -35,8 +35,8 @@ impl Quiver {
         // let uv = u.stack([v.clone()], ());
 
         assert_eq!(u.shape(), v.shape(), "quiver requires matching u,v shape. u={:?}, v={:?}", 
-            u.shape().as_slice(),
-            v.shape().as_slice(),
+            u.shape(),
+            v.shape(),
         );
 
         let mut quiver = Self {
@@ -55,7 +55,7 @@ impl Quiver {
     }
 
     pub(crate) fn uv(&mut self, uv: Tensor) {
-        assert!(uv.rank() == 3, "quiver requires rank-3 value {:?}", uv.shape().as_slice());
+        assert_eq!(uv.rank(), 3, "quiver requires rank-3 value {:?}", uv.shape());
 
         // self.uv = uv;
         self.update_bounds();
@@ -80,7 +80,7 @@ impl Quiver {
         let vh = lh * v;
 
         if u == 0. && v == 0. {
-            return paths::rect((x - 0.1 * wt, y - 0.1 * wt), (x + 0.1 * wt, y + 0.1 * wt))
+            return paths::rect([x - 0.1 * wt, y - 0.1 * wt], [x + 0.1 * wt, y + 0.1 * wt])
         }
 
         Path::move_to(x - xt, y - yt)
@@ -102,7 +102,7 @@ impl Quiver {
         let y_min = self.y.reduce_min()[0];
         let y_max = self.y.reduce_max()[0];
 
-        self.extent = Bounds::new((x_min, y_min), (x_max, y_max));
+        self.extent = Bounds::new([x_min, y_min], [x_max, y_max]);
 
         let magnitude = self.u.hypot(&self.v);
         let max = magnitude.reduce_max()[0].max(f32::EPSILON);

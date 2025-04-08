@@ -2,9 +2,9 @@ use essay_graphics::api::{
     renderer::{Renderer, Result}, 
     Bounds, Path, PathCode, PathOpt, Point
 };
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
-use crate::{chart::Data, tri::{Triangulation, triangulate}};
+use crate::{artist::artist::Stale, chart::Data, tri::{triangulate, Triangulation}};
 
 use super::{ArtistDraw, ToCanvas};
 
@@ -12,19 +12,21 @@ pub struct TriPlot {
     data: Tensor,
     triangulation: Option<Triangulation>,
     is_stale: bool,
+    stale: Stale,
 }
 
 impl TriPlot {
     pub fn new(data: impl Into<Tensor>) -> Self {
         let data : Tensor = data.into();
 
-        assert!(data.rank() == 2, "triplot requires 2d value {:?}", data.shape().as_slice());
-        assert!(data.cols() == 2, "triplot requires 2d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "triplot requires 2d value {:?}", data.shape());
+        assert!(data.cols() == 2, "triplot requires 2d value {:?}", data.shape());
 
         Self {
             data,
             triangulation: None,
             is_stale: true,
+            stale: Stale::default(),
         }
     }
 
@@ -47,7 +49,9 @@ impl ArtistDraw<Data> for TriPlot {
         to_canvas: &ToCanvas,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        self.resize(renderer);
+        self.stale = to_canvas.id().eq_or(self.stale, || {
+            self.resize(renderer);
+        });
 
         if let Some(tri) = &self.triangulation {
             let mut codes = Vec::<PathCode>::new();

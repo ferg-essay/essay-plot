@@ -1,6 +1,6 @@
 use core::fmt;
 
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
 
 use crate::{chart::Data, config::PathStyle};
@@ -30,8 +30,8 @@ impl PathCollection {
             path,
             bounds: Bounds::from(&xy),
             xy,
-            color: Tensor::empty(),
-            scale: Tensor::empty(),
+            color: Tensor::from(None),
+            scale: Tensor::from(None),
             style: PathStyle::new(), // needs to be loop
         }
     }

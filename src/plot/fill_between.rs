@@ -1,5 +1,5 @@
 use essay_graphics::api::{Path, PathCode, Point};
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 use crate::{
     artist::patch::PathPatch, 
@@ -16,11 +16,11 @@ pub fn fill_between(
     let y1 : Tensor = y1.into();
     let y2 : Tensor = y2.into();
 
-    assert!(x.rank() == 1, "require rank-1 tensor {:?}", x.shape().as_slice());
+    assert!(x.rank() == 1, "require rank-1 tensor {:?}", x.shape());
     assert_eq!(x.shape(), y1.shape(), "require matching sizes x={:?} y1={:?}",
-        x.shape().as_slice(), y1.shape().as_slice());
+        x.shape(), y1.shape());
     assert_eq!(x.shape(), y2.shape(), "require matching sizes x={:?} y2={:?}",
-        x.shape().as_slice(), y2.shape().as_slice());
+        x.shape(), y2.shape());
 
     let mut vec = Vec::<PathCode>::new();
 

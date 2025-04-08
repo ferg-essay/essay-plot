@@ -11,7 +11,7 @@ fn main() {
     graph.title("My Title"); // .color(0x008033).size(18.);
     graph.plot(&x, &y);
 
-    graph.text((0., 1.), "hello").coord(TextCoords::FrameFraction).color("purple");
+    graph.text([0., 1.], "hello").coord(TextCoords::FrameFraction).color("purple");
 
     figure.show();
 }

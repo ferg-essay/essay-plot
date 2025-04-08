@@ -94,10 +94,10 @@ impl Tests {
             Tests::A => todo!(),
             Tests::A_P => todo!(),
             Tests::CIRCLE => {
-                paths::circle().transform(&Affine2d::eye())
+                paths::circle().map(|pt| pt)
             },
             Tests::WEDGE => {
-                paths::wedge((Angle::Unit(0.0), Angle::Unit(0.25))).transform(&Affine2d::eye())
+                paths::wedge((Angle::Unit(0.0), Angle::Unit(0.25))).map(|pt| pt)
             },
             Tests::SEMICIRCLE => {
                 Path::move_to(0.0, 0.)

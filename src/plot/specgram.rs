@@ -1,5 +1,5 @@
 use essay_graphics::api::{renderer::{Renderer, Result}, Bounds, PathOpt};
-use essay_tensor::{array::stack, signal::rfft_norm, Tensor};
+use essay_tensor::{array::{stack, stack_axis}, signal::rfft_norm, tensor::Tensor};
 
 use crate::{
     artist::{Artist, ArtistDraw, ArtistView, GridColor, Norm, Norms, Shading, ToCanvas}, 
@@ -31,7 +31,7 @@ pub struct SpecGram {
 impl SpecGram {
     pub fn new(data: impl Into<Tensor>) -> Self {
         let data : Tensor = data.into();
-        assert!(data.rank() == 1, "specgram requires 1d value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 1, "specgram requires 1d value {:?}", data.shape());
 
         let nfft = 256;
         let overlap = 128;
@@ -97,7 +97,7 @@ fn calculate_spectrum(data: &Tensor, nfft: usize, overlap: usize) -> Tensor {
         i += delta;
     }
 
-    stack(values, 1)
+    stack_axis(1, values)
 }
 
 impl ArtistDraw<Data> for SpecGram {
@@ -135,7 +135,7 @@ data_artist_option_struct!(SpecGramOpt, SpecGram);
 impl SpecGramOpt {
     pub fn data(&mut self, data: impl Into<Tensor>) -> &mut Self {
         let data = data.into();
-        assert!(data.rank() == 1, "SpecGram data must be rank 1. Shape={:?}", data.shape().as_slice());
+        assert!(data.rank() == 1, "SpecGram data must be rank 1. Shape={:?}", data.shape());
 
         self.write(|artist| {
             artist.data = data;

@@ -1,5 +1,5 @@
 use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
-use essay_tensor::Tensor;
+use essay_tensor::tensor::Tensor;
 
 use crate::{
     chart::{Data, LegendHandler}, 
@@ -25,7 +25,7 @@ impl Histogram {
     pub fn new(data: impl Into<Tensor>) -> Self {
         let data : Tensor = data.into();
 
-        assert!(data.rank() == 1, "histogram requires 1D value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 1, "histogram requires 1D value {:?}", data.shape());
 
         let mut histogram = Self {
             data,
@@ -43,7 +43,7 @@ impl Histogram {
     }
 
     pub(crate) fn set_data(&mut self, data: Tensor) {
-        assert!(data.rank() == 1, "histogram requires 1D value {:?}", data.shape().as_slice());
+        assert!(data.rank() == 1, "histogram requires 1D value {:?}", data.shape());
 
         self.data = data;
         self.update_bounds();
@@ -62,14 +62,14 @@ impl Histogram {
             let (min, max) = (self.bins[0], self.bins[self.bins.len() - 1]);
             let c_max = self.count.reduce_max()[0];
 
-            self.extent = Bounds::new((min, 0.), (max, c_max));
+            self.extent = Bounds::new([min, 0.], [max, c_max]);
 
             let mut paths = Vec::<Path<Data>>::new();
 
             for i in 0..self.count.len() {
                 paths.push(paths::rect(
-                    (self.bins[i], 0.), 
-                    (self.bins[i + 1], self.count[i])
+                    [self.bins[i], 0.], 
+                    [self.bins[i + 1], self.count[i]]
                 ));
             }
 
@@ -124,7 +124,7 @@ impl HistogramOpt {
 
     pub fn data(&mut self, data: impl Into<Tensor>) -> &mut Self {
         let data = data.into();
-        assert!(data.rank() == 2, "Histogram data must be 1D. Shape={:?}", data.shape().as_slice());
+        assert!(data.rank() == 2, "Histogram data must be 1D. Shape={:?}", data.shape());
 
         self.write(|artist| {
             artist.set_data(data);

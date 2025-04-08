@@ -2,7 +2,7 @@ use essay_graphics::api::{
     renderer::{Canvas, Renderer, Result}, 
     Bounds, CapStyle, Color, PathOpt, Point
 };
-use essay_tensor::{Tensor, init::linspace, tf32};
+use essay_tensor::{init::linspace, ten, tensor::Tensor};
 
 use crate::{
     chart::Data,
@@ -23,8 +23,8 @@ impl Colorbar {
         Self {
             bounds: Bounds::zero(),
             pos: Bounds::zero(),
-            data: tf32!([0., 1.]),
-            mesh: GridColor::new(tf32!([[0.]])),
+            data: ten![0., 1.],
+            mesh: GridColor::new(ten![[0.]]),
         }
     }
 

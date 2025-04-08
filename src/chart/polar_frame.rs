@@ -1,16 +1,14 @@
 use std::f32::consts::{PI, TAU};
 
 use essay_graphics::api::{
-        renderer::{Canvas, Drawable, Renderer, Result}, Affine2d, Bounds, Path, Point, Size 
+        color::Grey, renderer::{self, Canvas, Drawable, Renderer, Result}, Affine2d, Bounds, Color, Path, Point, Size 
     };
 use essay_tensor::tensor::Tensor;
 
 use crate::{
     artist::{
-        ArtistDraw, Stale, TextCanvas
-    }, 
-    config::{Config, ConfigArc, PathStyle},
-    palette::Palette, transform::{ToCanvas, Transform, TransformAffine}, 
+        paths, ArtistDraw, Stale, TextCanvas
+    }, chart::cartesian_frame::CartesianTransform, config::{Config, ConfigArc, PathStyle}, palette::Palette, transform::{ToCanvas, Transform, TransformAffine} 
 };
 
 use super::{
@@ -33,6 +31,9 @@ pub struct PolarFrame {
     x_axis: XAxis,
     y_axis: YAxis,
 
+    x_rays: Vec<Path<Canvas>>,
+    y_circles: Vec<Path<Canvas>>,
+
     title: TextCanvas,
 
     legend: Legend,
@@ -45,10 +46,13 @@ impl PolarFrame {
 
             pos: Bounds::none(),
 
-            data: DataFrame::new(cfg, "frame"),
+            data: DataFrame::new(cfg, "polar"),
 
             x_axis: XAxis::new(cfg, "t_axis"),
             y_axis: YAxis::new(cfg, "r_axis"),
+
+            x_rays: Vec::new(),
+            y_circles: Vec::new(),
 
             title: TextCanvas::new(),
 
@@ -138,10 +142,13 @@ impl PolarFrame {
             Point(pos.xmin(), pos.ymin()), 
             Point(pos.xmax(), pos.ymax()),
         );
-    
+        let pos_data = pos_data.with_aspect(1.);
+
         self.data.update_pos(renderer, &pos_data);
+
+        self.update_axis();
     
-        let pos_data = self.data.get_pos().clone();
+        let pos_data = self.data.get_pos();
     
         let pos_legend = Bounds::<Canvas>::new(
             Point(pos_data.xmin(), pos_data.ymax()),
@@ -154,6 +161,59 @@ impl PolarFrame {
         self.y_axis.update_axis(&self.data);
     
         self.legend.update_handlers(&mut self.data);
+    }
+
+    fn update_axis(&mut self) {
+        let mut major = Vec::new();
+
+        let bounds: Bounds<Data> = ([-1., -1.], [2., 2.]).into();
+        let transform = CartesianTransform::bounds_to(bounds, self.data.get_pos());
+
+        let circle = paths::circle();
+
+        for y in [1., 0.75, 0.5, 0.25] {
+            let circle = circle.scale(y, y);
+            let circle = transform.transform_path(&circle);
+
+            major.push(circle);
+        }
+
+        self.y_circles = major;
+
+        let mut major = Vec::new();
+
+        let len = 6;
+        for x in 0..len {
+            let (sin, cos) = (x as f32 * TAU / len as f32).sin_cos();
+
+            let path = Path::move_to(0., 0.).line_to(cos, sin).to_path();
+            let path = transform.transform_path(&path);
+
+            major.push(path);
+        }
+
+        self.x_rays = major;
+    }
+
+    fn draw_axis(
+        &self, 
+        ui: &mut dyn Renderer, 
+    ) -> renderer::Result<()> {
+        let mut style = PathStyle::new();
+        style.edge_color(Grey(0.90));
+        style.face_color(Color::white());
+        style.line_width(2.);
+
+        for circle in &self.y_circles {
+            ui.draw_path(&circle, &style)?;
+        }
+        ui.flush();
+
+        for ray in &self.x_rays {
+            ui.draw_path(&ray, &style)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -171,7 +231,7 @@ impl Drawable for PolarFrame {
             &frame_transform,
         );
 
-        let polar_transform = PolarTransform::new(self.data.data_bounds(), self.pos);
+        let polar_transform = PolarTransform::new(self.data.data_bounds(), self.data.get_pos());
         let draw_to_canvas = ToCanvas::<Data>::new(
             stale,
             self.data.data_bounds(),
@@ -180,8 +240,9 @@ impl Drawable for PolarFrame {
 
         self.title.draw(renderer, &frame_to_canvas, &self.path_style)?;
 
-        renderer.draw_with_closure(self.data.get_pos(), Box::new(|r| {
-            self.data.draw(r, &draw_to_canvas, &self.path_style)
+        renderer.draw_with_closure(self.data.get_pos(), Box::new(|ui| {
+            self.draw_axis(ui)?;
+            self.data.draw(ui, &draw_to_canvas, &self.path_style)
         }))?;
 
         self.legend.draw(renderer, &frame_to_canvas, &self.path_style)?;
@@ -201,7 +262,7 @@ impl FrameWithTextArtist for PolarFrame {
 }
 
 #[derive(Debug)]
-struct PolarTransform {
+pub struct PolarTransform {
     xf: f32,
     yf: f32,
 
@@ -216,8 +277,6 @@ impl PolarTransform {
         data: Bounds<Data>,
         pos: Bounds<Canvas>,
     ) -> Self {
-        let pos = pos.with_aspect(1.);
-
         let ([tx, ty], [sx, sy]) = pos.into();
 
         let dx = data.width();

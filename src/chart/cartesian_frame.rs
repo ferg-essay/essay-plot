@@ -1,23 +1,23 @@
-use std::f32::consts::PI;
+use std::{f32::consts::PI, marker::PhantomData};
 
 use essay_graphics::{
     api::{
-        renderer::{Result, Canvas, Drawable, Renderer}, 
-        Affine2d, Bounds, Color, PathOpt, Point, VertAlign 
+        renderer::{Canvas, Drawable, Renderer, Result}, Affine2d, Bounds, Color, Coord, Path, PathOpt, Point, Size, VertAlign 
     }, 
     layout::View
 };
+use essay_tensor::tensor::Tensor;
 
 use crate::{
     artist::{
         patch::CanvasPatch, paths, ArtistDraw, Colorbar, Stale, TextCanvas
-    }, config::{Config, ConfigArc, PathStyle}, palette::Palette, transform::{ToCanvas, TransformAffine}
+    }, config::{Config, ConfigArc, PathStyle}, palette::Palette, transform::{ToCanvas, Transform, TransformAffine}
 };
 
 use super::{
     axis::{Axis, AxisTicks, XAxis, YAxis}, 
     data_frame::DataFrame, 
-    legend::Legend
+    legend::Legend, Data
 };
 
 pub struct CartesianFrame {
@@ -25,7 +25,7 @@ pub struct CartesianFrame {
 
     config: ConfigArc,
 
-    to_canvas: Affine2d,
+    to_canvas: CartesianTransform<Data>,
 
     margins: FrameMargins,
 
@@ -89,15 +89,12 @@ impl CartesianFrame {
 
             path_style: PathStyle::default(),
 
-            to_canvas: Affine2d::eye(),
+            to_canvas: CartesianTransform::default(),
 
             legend: Legend::new(cfg),
 
             _is_share_x: false,
             _is_share_y: false,
-            //is_frame_visible: true,
-            //aspect_ratio: None,
-            //box_aspect_ratio: None,
         }
     }
 
@@ -168,6 +165,7 @@ impl CartesianFrame {
         self.data.update_pos(renderer, &pos_data);
     
         let pos_data = self.data.get_pos().clone();
+        self.to_canvas = CartesianTransform::bounds_to(self.data.data_bounds(), pos_data);
     
         let pos_top = Bounds::<Canvas>::new(
             Point(pos_data.xmin(), pos_data.ymax()),
@@ -208,18 +206,18 @@ impl Drawable for CartesianFrame {
         }
 
         let stale = Stale::new_for_update();
-        let frame_affine = TransformAffine::new(self.to_canvas.clone());
+        let frame_affine = CartesianTransform::<Canvas>::default();
         let frame_to_canvas = ToCanvas::new(
             stale,
             self.pos.clone(), 
             &frame_affine,
         );
 
-        let to_canvas_affine = TransformAffine::new(self.data.get_canvas_transform().clone());
+        // let to_canvas_affine = TransformAffine::new(self.data.get_canvas_transform().clone());
         let data_to_canvas = ToCanvas::new(
             stale,
             self.data.data_bounds(), 
-            &to_canvas_affine,
+            &self.to_canvas,
         );
 
         self.title.draw(renderer, &frame_to_canvas, &self.path_style)?;
@@ -253,6 +251,96 @@ impl FrameWithTextArtist for CartesianFrame {
         }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct CartesianTransform<M: Coord> {
+    sx: f32,
+    sy: f32,
+    fx: f32,
+    fy: f32,
+    tx: f32,
+    ty: f32,
+    marker: PhantomData<fn(M)>,
+}
+
+impl<M: Coord> CartesianTransform<M> {
+    pub fn new(
+        from: Point,
+        to: Point,
+        scale: [f32; 2],
+    ) -> Self {
+        Self {
+            fx: from.0,
+            fy: from.1,
+            tx: to.0,
+            ty: to.1,
+            sx: scale[0],
+            sy: scale[0],
+            marker: Default::default(),
+        }
+    }
+
+    pub fn bounds_to(
+        src: Bounds<M>,
+        dst: Bounds<Canvas>,
+    ) -> Self {
+        let src_w = if src.width() == 0. { f32::EPSILON } else { src.width() };
+        let src_h = if src.height() == 0. { f32::EPSILON } else { src.height() };
+
+        Self {
+            fx: src.xmin(),
+            fy: src.ymin(),
+            tx: dst.xmin(),
+            ty: dst.ymin(),
+            sx: dst.width() / src_w,
+            sy: dst.height() / src_h,
+            marker: Default::default(),
+        }
+    }
+
+    fn transform(&self, x: f32, y: f32) -> [f32; 2] {
+        [
+            self.tx + self.sx * (x - self.fx),
+            self.ty + self.sy * (y - self.fy),
+        ]
+    }
+}
+
+impl<M: Coord> Transform<M> for CartesianTransform<M> {
+    #[inline]
+    fn transform_point(&self, point: Point) -> Point {
+        let Point(x, y) = point;
+
+        self.transform(x, y).into()
+    }
+
+    #[inline]
+    fn transform_tensor(&self, tensor: &Tensor) -> Tensor {
+        tensor.map_row(|row| {
+            self.transform(row[0], row[1])
+        })
+    }
+
+    #[inline]
+    fn transform_path(&self, path: &Path<M>) -> Path<Canvas> {
+        path.map(|Point(x, y)| self.transform(x, y).into())
+    }
+}
+
+impl<M: Coord> Default for CartesianTransform<M> {
+    fn default() -> Self {
+        Self { 
+            sx: 1.,
+            sy: 1.,
+            fx: 0.,
+            fy: 0.,
+            tx: 0.,
+            ty: 0.,
+            marker: Default::default(),
+        }
+    }
+}
+
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum FrameArtist {

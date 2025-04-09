@@ -16,6 +16,7 @@ mod matshow;
 mod pie;
 mod plot;
 mod quiver;
+mod radar;
 mod scatter;
 mod span;
 mod specgram;
@@ -41,6 +42,8 @@ pub use matshow::matshow;
 pub use plot::{plot, plot_y};
 
 pub use quiver::quiver;
+
+pub use radar::radar;
 
 pub use span::hline;
 
@@ -134,6 +137,15 @@ impl PolarChart {
         y: impl Into<Tensor>,
     ) -> LinesOpt {
         let lines = Lines2d::from_xy(x, y);
+
+        self.artist(lines)
+    }
+
+    pub fn plot_y(
+        &mut self,
+        y: impl Into<Tensor>,
+    ) -> LinesOpt {
+        let lines = Lines2d::from_y(y);
 
         self.artist(lines)
     }

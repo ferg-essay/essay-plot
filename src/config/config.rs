@@ -1,7 +1,13 @@
 use core::fmt;
-use std::{collections::HashMap, str::{Chars, FromStr}, iter::Peekable, ops::Deref, sync::Arc};
+use std::{collections::HashMap, iter::Peekable, ops::Deref, str::{Chars, FromStr}, sync::{Arc, OnceLock}};
 
-pub(crate) fn read_config() -> Config
+pub(crate) fn read_config() -> &'static Config {
+    DEFAULT_CONFIG.get_or_init(|| {
+        init_config()
+    })
+}
+
+fn init_config() -> Config
 {
     let data = include_bytes!("essay-plot.rc");
 
@@ -130,6 +136,7 @@ fn skip_space(iter: &mut Peekable<Chars>) -> Option<char> {
     None
 }
 
+#[derive(Clone)]
 pub struct Config {
     map: HashMap<String, String>,
 }
@@ -139,10 +146,6 @@ impl Config {
         Self {
             map: HashMap::new(),
         }
-    }
-
-    pub(crate) fn into_arc(self) -> ConfigArc {
-        ConfigArc(Arc::new(self))
     }
 
     fn add_value(&mut self, name: String, value: String) {
@@ -190,6 +193,12 @@ impl Config {
     }
 }
 
+impl Default for Config {
+    fn default() -> Self {
+        read_config().clone()
+    }
+}
+
 #[derive(Clone)]
 pub struct ConfigArc(Arc<Config>);
 
@@ -203,9 +212,11 @@ impl Deref for ConfigArc {
 
 impl Default for ConfigArc {
     fn default() -> Self {
-        read_config().into_arc()
+        ConfigArc(Arc::new(Config::default()))
     }
 }
+
+static DEFAULT_CONFIG: OnceLock<Config> = OnceLock::new();
 
 #[cfg(test)]
 mod test {

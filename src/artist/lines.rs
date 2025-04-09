@@ -3,7 +3,7 @@ use core::fmt;
 use essay_graphics::api::{
     renderer::{Canvas, Renderer, Result}, Bounds, Path, PathCode, PathOpt, Point
 };
-use essay_tensor::tensor::Tensor;
+use essay_tensor::{init::linspace, tensor::Tensor};
 
 use crate::{
     chart::{Data, LegendHandler}, 
@@ -50,6 +50,16 @@ impl Lines2d {
         let y = y.into();
 
         assert_eq!(x.len(), y.len());
+
+        let lines = x.stack([y], -1);
+
+        Self::from_value(lines)
+    }
+
+    pub fn from_y(y: impl Into<Tensor>) -> Self {
+        let y = y.into();
+
+        let x = linspace(0., y.len() as f32, y.len());
 
         let lines = x.stack([y], -1);
 
@@ -109,6 +119,10 @@ impl Lines2d {
         self.stale_id = Stale::default();
 
         self
+    }
+
+    pub fn get_xy(&mut self) -> Tensor {
+        self.xy.clone()
     }
 
     pub fn marker(&mut self, marker: impl IntoMarker) -> &mut Self {

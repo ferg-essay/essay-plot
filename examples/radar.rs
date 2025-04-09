@@ -15,21 +15,16 @@ fn main() {
             let mut chart = ui.polar();
 
             chart.angle_coord(AngleCoord::Radians);
-            chart.plot(&x, &one);
-            chart.plot(&x, (3. * &theta).sin());
-            chart.plot(&x, 2. * &theta.cos());
+            chart.radar(&one);
     
             let mut chart = ui.polar();
 
             chart.angle_coord(AngleCoord::Degrees);
-            chart.plot(&x, &one);
-            chart.plot(&x, (3. * &theta).sin());
-            chart.plot(&x, 2. * &theta.cos());
+            chart.radar(&one);
         });
 
         ui.horizontal(|ui| {
-            let x = ten![0., 1., 2., 3., 4.];
-            let y = ten![10., 5., 1., 5., 10.];
+            let y = ten![10., 4., 1., 5.];
 
             let mut chart = ui.polar();
 
@@ -39,26 +34,26 @@ fn main() {
                 (0., "A"), 
                 (1., "B"), 
                 (2., "C"), 
-                (2.4, "D"), 
-                (2.6, "E")]
-            );
-            chart.y().tick_labels(&[
-                (1., ""), 
-                (2., ""), 
-                (3., ""), 
-                (4., ""), 
-                (5., "J"), 
-                (7.5, "K"), 
-                (10., "L"), 
+                (3., "D"), 
             ]);
-            chart.plot(&x, &y);
+            chart.y().ticks(&[1., 2., 3., 4., 5., 7.5, 10.]);
+            chart.y().visible(false);
+            chart.radar(&y);
             
             let mut chart = ui.polar();
 
             chart.angle_coord(AngleCoord::Degrees);
-            chart.x().visible(false);
+            chart.x().tick_labels(&[
+                (0., "A"), 
+                (1., "B"), 
+                (2., "C"), 
+                (2.5, "D1"), 
+                (3.5, "D2"), 
+            ]);
+            chart.y().ticks(&[1., 2., 3., 4., 5., 7.5, 10.]);
             chart.y().visible(false);
-            chart.plot(&x, &y);
+            let mut radar = chart.radar(&y);
+            radar.set_y([10., 2., 3., 7.]);
         });
     });
 

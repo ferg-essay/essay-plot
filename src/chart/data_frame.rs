@@ -255,7 +255,7 @@ impl DataFrame {
         }
     }
 
-    pub(crate) fn get_pos(&self) -> Bounds<Canvas> {
+    pub(crate) fn pos(&self) -> Bounds<Canvas> {
         self.pos_canvas
     }
 

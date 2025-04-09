@@ -2,7 +2,8 @@ use std::{f32::consts::PI, marker::PhantomData};
 
 use essay_graphics::{
     api::{
-        renderer::{Canvas, Drawable, Renderer, Result}, Affine2d, Bounds, Color, Coord, Path, PathOpt, Point, Size, VertAlign 
+        renderer::{Canvas, Drawable, Renderer, Result}, 
+        Bounds, Color, Coord, Path, PathOpt, Point, VertAlign 
     }, 
     layout::View
 };
@@ -11,13 +12,14 @@ use essay_tensor::tensor::Tensor;
 use crate::{
     artist::{
         patch::CanvasPatch, paths, ArtistDraw, Colorbar, Stale, TextCanvas
-    }, config::{Config, ConfigArc, PathStyle}, palette::Palette, transform::{ToCanvas, Transform, TransformAffine}
+    }, 
+    config::{Config, ConfigArc, PathStyle}, 
+    palette::Palette, 
+    transform::{ToCanvas, Transform}
 };
 
 use super::{
-    axis::{Axis, AxisTicks, XAxis, YAxis}, 
-    data_frame::DataFrame, 
-    legend::Legend, Data
+    axis::{Axis, AxisTicks}, cartesian_axis::{XAxis, YAxis}, data_frame::DataFrame, legend::Legend, Data
 };
 
 pub struct CartesianFrame {
@@ -164,7 +166,7 @@ impl CartesianFrame {
     
         self.data.update_pos(renderer, &pos_data);
     
-        let pos_data = self.data.get_pos().clone();
+        let pos_data = self.data.pos().clone();
         self.to_canvas = CartesianTransform::bounds_to(self.data.data_bounds(), pos_data);
     
         let pos_top = Bounds::<Canvas>::new(
@@ -230,7 +232,7 @@ impl Drawable for CartesianFrame {
 
         // self.data.draw(renderer, &to_canvas, &self.path_style)?;
 
-        renderer.draw_with_closure(self.data.get_pos(), Box::new(|r| {
+        renderer.draw_with_closure(self.data.pos(), Box::new(|r| {
             self.data.draw(r, &data_to_canvas, &self.path_style)
         }))?;
 
@@ -264,7 +266,7 @@ pub struct CartesianTransform<M: Coord> {
 }
 
 impl<M: Coord> CartesianTransform<M> {
-    pub fn new(
+    pub fn _new(
         from: Point,
         to: Point,
         scale: [f32; 2],
@@ -467,8 +469,8 @@ impl BottomFrame {
         y -= renderer.to_px(self.sizes.label_pad);
 
         self.title.update_pos(renderer, Bounds::new(
-            Point(data.get_pos().xmin(), y),
-            Point(data.get_pos().xmax(), y),
+            Point(data.pos().xmin(), y),
+            Point(data.pos().xmax(), y),
         ));
     
         self.title.draw(renderer, to_canvas, style)
@@ -533,8 +535,8 @@ impl LeftFrame {
         x -= renderer.to_px(self.sizes.label_pad);
 
         self.title.update_pos(renderer, Bounds::new(
-            Point(x, data.get_pos().ymid()),
-            Point(x, data.get_pos().ymid()),
+            Point(x, data.pos().ymid()),
+            Point(x, data.pos().ymid()),
         ));
 
         self.title.draw(renderer, to_canvas, style)
@@ -621,7 +623,7 @@ impl ArtistDraw<Canvas> for RightFrame {
             patch.draw(renderer, to_canvas, style)?;
         }
 
-        if let Some(colorbar) = &mut self.colorbar {
+        if let Some(_colorbar) = &mut self.colorbar {
             todo!();
             // colorbar.draw(renderer, to_canvas, style)?;
         }

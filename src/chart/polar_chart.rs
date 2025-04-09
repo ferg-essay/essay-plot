@@ -4,7 +4,10 @@ use essay_graphics::{
 };
 
 use crate::{
-    artist::{Artist, ArtistDraw, IntoArtist}, chart::{AspectMode, AxisOpt, Data, FrameArtist, FrameTextOpt}, config::ConfigArc, palette::Palette
+    artist::{Artist, ArtistDraw, IntoArtist}, 
+    chart::{AspectMode, Data, FrameArtist, FrameTextOpt}, 
+    config::ConfigArc, 
+    palette::Palette
 };
 
 use super::{polar_frame::PolarFrame, style::PlotOptHandle, PlotOpt, PolarAxisOpt, Scaling};

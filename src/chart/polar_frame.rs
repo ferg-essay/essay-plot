@@ -1,18 +1,28 @@
-use std::f32::consts::{PI, TAU};
+use std::f32::consts::TAU;
 
 use essay_graphics::api::{
-        color::Grey, renderer::{self, Canvas, Drawable, Renderer, Result}, Affine2d, Bounds, Color, Path, Point, Size 
-    };
+        renderer::{Canvas, Drawable, Renderer, Result}, 
+        Affine2d, Bounds, Path, Point 
+};
 use essay_tensor::tensor::Tensor;
 
 use crate::{
     artist::{
         paths, ArtistDraw, Stale, TextCanvas
-    }, chart::cartesian_frame::CartesianTransform, config::{Config, ConfigArc, PathStyle}, palette::Palette, transform::{ToCanvas, Transform, TransformAffine} 
+    }, 
+    chart::cartesian_frame::CartesianTransform, 
+    config::{ConfigArc, PathStyle}, 
+    palette::Palette, 
+    transform::{ToCanvas, Transform, TransformAffine} 
 };
 
 use super::{
-    axis::{Axis, AxisTicks, XAxis, YAxis}, cartesian_frame::{FrameMargins, FrameWithTextArtist}, data_frame::DataFrame, legend::Legend, Data, FrameArtist, Scaling
+    axis::{Axis, AxisTicks}, 
+    cartesian_frame::{FrameMargins, FrameWithTextArtist}, 
+    data_frame::DataFrame, 
+    legend::Legend, 
+    polar_axis::{PolarXAxis, PolarYAxis}, 
+    Data, FrameArtist, Scaling
 };
 
 pub struct PolarFrame {
@@ -28,8 +38,8 @@ pub struct PolarFrame {
 
     data: DataFrame,
 
-    x_axis: XAxis,
-    y_axis: YAxis,
+    x_axis: PolarXAxis,
+    y_axis: PolarYAxis,
 
     x_rays: Vec<Path<Canvas>>,
     y_circles: Vec<Path<Canvas>>,
@@ -48,8 +58,8 @@ impl PolarFrame {
 
             data: DataFrame::new(cfg, "polar"),
 
-            x_axis: XAxis::new(cfg, "t_axis"),
-            y_axis: YAxis::new(cfg, "r_axis"),
+            x_axis: PolarXAxis::new(cfg, "axis"),
+            y_axis: PolarYAxis::new(cfg, "axis"),
 
             x_rays: Vec::new(),
             y_circles: Vec::new(),
@@ -78,7 +88,7 @@ impl PolarFrame {
         &mut self.data
     }
 
-    pub(crate) fn get_text_mut(&mut self, artist: FrameArtist) -> &mut TextCanvas {
+    pub(crate) fn _get_text_mut(&mut self, artist: FrameArtist) -> &mut TextCanvas {
         match artist {
             FrameArtist::Title => &mut self.title,
 
@@ -125,6 +135,12 @@ impl PolarFrame {
             pos.ymin() + pos.height() * self.margins.bottom],
         ]);
     
+        let pos_data = Bounds::<Canvas>::new(
+            Point(pos.xmin(), pos.ymin()), 
+            Point(pos.xmax(), pos.ymax()),
+        );
+        let pos_data = pos_data.with_aspect(1.);
+
         self.pos = pos.clone();
     
         let title = self.title.bounds();
@@ -138,17 +154,11 @@ impl PolarFrame {
             ])
         );
     
-        let pos_data = Bounds::<Canvas>::new(
-            Point(pos.xmin(), pos.ymin()), 
-            Point(pos.xmax(), pos.ymax()),
-        );
-        let pos_data = pos_data.with_aspect(1.);
-
         self.data.update_pos(renderer, &pos_data);
 
         self.update_axis();
     
-        let pos_data = self.data.get_pos();
+        let pos_data = self.data.pos();
     
         let pos_legend = Bounds::<Canvas>::new(
             Point(pos_data.xmin(), pos_data.ymax()),
@@ -157,8 +167,8 @@ impl PolarFrame {
         self.legend.resize(renderer, &pos_legend);
     
         // TODO:
-        self.x_axis.update_axis(&self.data);
-        self.y_axis.update_axis(&self.data);
+        self.x_axis.resize(&self.data);
+        self.y_axis.resize(&self.data);
     
         self.legend.update_handlers(&mut self.data);
     }
@@ -167,7 +177,7 @@ impl PolarFrame {
         let mut major = Vec::new();
 
         let bounds: Bounds<Data> = ([-1., -1.], [2., 2.]).into();
-        let transform = CartesianTransform::bounds_to(bounds, self.data.get_pos());
+        let transform = CartesianTransform::bounds_to(bounds, self.data.pos());
 
         let circle = paths::circle();
 
@@ -194,27 +204,6 @@ impl PolarFrame {
 
         self.x_rays = major;
     }
-
-    fn draw_axis(
-        &self, 
-        ui: &mut dyn Renderer, 
-    ) -> renderer::Result<()> {
-        let mut style = PathStyle::new();
-        style.edge_color(Grey(0.90));
-        style.face_color(Color::white());
-        style.line_width(2.);
-
-        for circle in &self.y_circles {
-            ui.draw_path(&circle, &style)?;
-        }
-        ui.flush();
-
-        for ray in &self.x_rays {
-            ui.draw_path(&ray, &style)?;
-        }
-
-        Ok(())
-    }
 }
 
 impl Drawable for PolarFrame {
@@ -231,7 +220,7 @@ impl Drawable for PolarFrame {
             &frame_transform,
         );
 
-        let polar_transform = PolarTransform::new(self.data.data_bounds(), self.data.get_pos());
+        let polar_transform = PolarTransform::new(self.data.data_bounds(), self.data.pos());
         let draw_to_canvas = ToCanvas::<Data>::new(
             stale,
             self.data.data_bounds(),
@@ -240,8 +229,11 @@ impl Drawable for PolarFrame {
 
         self.title.draw(renderer, &frame_to_canvas, &self.path_style)?;
 
-        renderer.draw_with_closure(self.data.get_pos(), Box::new(|ui| {
-            self.draw_axis(ui)?;
+        self.y_axis.draw(renderer, &self.path_style)?;
+        self.x_axis.draw(renderer, &self.path_style)?;
+
+        renderer.draw_with_closure(self.data.pos(), Box::new(|ui| {
+            // self.draw_axis(ui)?;
             self.data.draw(ui, &draw_to_canvas, &self.path_style)
         }))?;
 
@@ -326,84 +318,3 @@ impl Transform<Data> for PolarTransform {
         path.map(|Point(x, y)| self.transform(x, y).into())
     }
 }
-/*
-pub struct FrameSizes {
-    label_pad: f32,
-}
-
-impl FrameSizes {
-    fn new(cfg: &Config) -> Self {
-        Self {
-            label_pad: match cfg.get_as_type("frame", "label_pad") {
-                Some(pad) => pad,
-                None => 0.,
-            },
-        }
-    }
-}
-
-pub struct FrameTextOpt {
-    view: View<PolarFrame>,
-    artist: FrameArtist,
-}
-
-impl FrameTextOpt {
-    pub(crate) fn new(view: View<PolarFrame>, artist: FrameArtist) -> Self {
-        Self {
-            view,
-            artist,
-        }
-    }
-
-    fn write(&mut self, fun: impl FnOnce(&mut TextCanvas)) {
-        self.view.write(|frame| {
-            fun(frame.get_text_mut(self.artist))
-        })
-    }
-
-    pub fn label(&mut self, label: &str) -> &mut Self {
-        self.write(|text| { text.label(label); });
-        self
-    }
-
-    pub fn color(&mut self, color: impl Into<Color>) -> &mut Self {
-        self.write(|text| { text.path_style_mut().color(color); });
-        self
-    }
-
-    pub fn size(&mut self, size: f32) -> &mut Self {
-        self.write(|text| { text.text_style_mut().size(size); });
-        self
-    }
-}
-
-struct FrameMargins {
-    top: f32,
-    bottom: f32,
-    left: f32,
-    right: f32,
-}
-
-impl FrameMargins {
-    fn new(cfg: &Config) -> Self {
-        let bottom = cfg.get_as_type("figure.subplot", "bottom")
-            .unwrap_or(0.);
-
-        let top = cfg.get_as_type("figure.subplot", "top")
-            .unwrap_or(1.);
-
-        let left = cfg.get_as_type("figure.subplot", "left")
-            .unwrap_or(0.);
-
-        let right = cfg.get_as_type("figure.subplot", "right")
-            .unwrap_or(1.);
-
-        Self {
-            bottom,
-            top, 
-            left,
-            right, 
-        }
-    }
-}
-*/

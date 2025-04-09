@@ -1,194 +1,163 @@
+use std::f32::consts::{PI, TAU};
+
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer, Result}, 
-    Bounds, HorizAlign, Path, PathCode, PathOpt, Point, TextStyle, VertAlign
+    renderer::{self, Canvas, Renderer, Result}, 
+    Bounds, Color, HorizAlign, Path, PathOpt, Point, TextStyle, VertAlign
 };
 
 use crate::{
-    artist::{patch::CanvasPatch, paths, ArtistDraw}, 
-    config::{Config, PathStyle}, frame_option_struct, path_style_options, transform::ToCanvas
+    artist::paths,
+    config::Config, 
+    frame_option_struct, path_style_options,
 };
 
 use super::{
-    axis::{Axis, AxisTicks}, data_frame::DataFrame, polar_frame::PolarFrame, tick_formatter::{Formatter, TickFormatter}, tick_locator::{MaxNLocator, TickLocator}, FrameArtist, ShowGrid 
+    axis::{Axis, AxisTicks}, 
+    data_frame::DataFrame, polar_frame::PolarFrame, 
+    tick_formatter::TickFormatter,
+    tick_locator::TickLocator,
+    FrameArtist, 
+    ShowGrid 
 };
 
-//
-// XAxis
-//
-
 pub struct PolarXAxis {
-    spine: Option<CanvasPatch>,
-
     axis: Axis,
-    major_ticks: Vec<f32>,
-    major_labels: Vec<String>,
 
-    is_bottom: bool,
-
+    ticks: Vec<XTick>,
 }
 
 impl PolarXAxis {
     pub(crate) fn new(cfg: &Config, prefix: &str) -> Self {
-        let mut x_axis = Self {
-            spine: Some(CanvasPatch::new(paths::line([0., 0.], [1., 0.]))),
+        let x_axis = Self {
             axis: Axis::new(cfg, prefix),
 
-            major_ticks: Vec::new(),
-            major_labels: Vec::new(),
-
-            is_bottom: true,
+            ticks: Vec::new(),
         };
-
-        if x_axis.is_bottom {
-            x_axis.axis.major_mut().label_style_mut().valign(VertAlign::Top);
-            x_axis.axis.minor_mut().label_style_mut().valign(VertAlign::Top);
-        } else {
-            x_axis.axis.major_mut().label_style_mut().valign(VertAlign::Bottom);
-            x_axis.axis.minor_mut().label_style_mut().valign(VertAlign::Bottom);
-        }
 
         x_axis
     }
 
-    pub fn update_axis(&mut self, data: &DataFrame) {
-        self.major_ticks = Vec::new();
-        self.major_labels = Vec::new();
+    pub fn resize(&mut self, data: &DataFrame) {
+        self.ticks = Vec::new();
 
         let xmin = data.data_bounds().xmin();
         let xmax = data.data_bounds().xmax();
 
-        let xvalues : Vec<f32> = self.x_ticks(data).iter().map(|x| x.0).collect();
+        let xvalues = if let Some(ticks) = &self.axis.ticks  {
+            ticks.clone()
+        } else {
+            let dx = (xmax - xmin) / 6.;
+            (0..6).map(|i| i as f32 * dx).collect()
+        };
+
+        let xmin = data.data_bounds().xmin();
+        let xmax = data.data_bounds().xmax();
 
         let delta = Axis::value_delta(&xvalues);
 
-        for xv in xvalues {
-            if xmin <= xv && xv <= xmax {
-                self.major_ticks.push(xv);
-                self.major_labels.push(
-                    self.axis.major().format(&self.axis, xv, delta)
-                );
+        for (i, xv) in xvalues.iter().enumerate() {
+            if xmin <= *xv && *xv <= xmax {
+                let label = if let Some(label) = &self.axis.labels {
+                    Some(label[i].clone())
+                } else {
+                    Some(self.axis.major().format(&self.axis, *xv, delta))
+                };
+
+                let theta = TAU * *xv / (xmax - xmin).max(f32::EPSILON);
+
+                self.ticks.push(XTick::new(theta, data.pos(), label, true));
             };
-        }
-    }
-
-    pub fn x_ticks(&self, data: &DataFrame) -> Vec<(f32, f32)> {
-        let c_width = data.get_pos().width();
-
-        let view = data.data_bounds();
-        let v_width = view.width();
-
-        if view.is_none() {
-            Vec::new()
-        } else {
-            let (vmin, vmax) = (view.xmin(), view.xmax());
-            let (min, max) = self.axis.locator.view_limits(vmin, vmax);
-
-            // self.locator.tick_values(min, max)
-
-            let mut x_vec = Vec::<(f32, f32)>::new();
-
-            for x in self.axis.locator.tick_values(min, max).iter() {
-                x_vec.push((*x, ((x - vmin) * c_width / v_width).round()));
-            }
-
-            x_vec
         }
     }
 
     pub(crate) fn draw(
         &mut self, 
-        renderer: &mut dyn Renderer,
-        data: &DataFrame,
-        to_canvas: &ToCanvas<Canvas>,
-        style: &dyn PathOpt,
-    ) -> Result<f32> {
-        let pos = data.get_pos();
-
-        let mut y = if self.is_bottom { pos.ymin() } else { pos.ymax() };
-        let sign = if self.is_bottom { -1.0f32 } else { 1.0f32 };
-
-        if let Some(patch) = &mut self.spine {
-            let line_width = 1.;
-
-            patch.set_pos([
-                [pos.xmin(), y - sign * line_width],
-                [pos.xmax(), y],
-            ]);
-
-            patch.draw(renderer, to_canvas, style)?;
-        }
-
-        // let mut y = data.get_pos().ymin();
-
-        if self.axis.is_visible() {
-            self.draw_ticks(renderer, &data, style)?;
-
-            y += sign * renderer.to_px(self.axis.major().get_size());
-            y += sign * renderer.to_px(self.axis.major().get_pad());
-            y += sign * self.axis.major().get_label_height();
-        }
-
-        Ok(y)
-    }
-
-    fn draw_ticks(
-        &mut self, 
-        renderer: &mut dyn Renderer, 
-        data: &DataFrame,
+        ui: &mut dyn Renderer,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let pos = &data.get_pos();
+        let major_style = self.axis.major().grid_style.push(style);
+        for tick in &self.ticks {
+            tick.draw_grid(ui, &major_style)?;
+        }
 
-        let yv = if self.is_bottom { pos.ymin() } else { pos.ymax() };
-        let sign = if self.is_bottom { -1.0f32 } else { 1.0f32 };
-
-        let to_canvas = data.get_canvas_transform();
-
-        for (xv, label) in self.major_ticks.iter().zip(self.major_labels.iter()) {
-            let point = to_canvas.transform_point(Point(*xv, yv));
-
-            let x = point.x();
-            let mut y = yv;
-            let major = self.axis.major();
-
-            // Grid
-            if self.axis.get_show_grid().is_show_major() {
-                let style = major.grid_style().push(style);
-                // grid
-                let grid = Path::<Canvas>::move_to(x, pos.ymin())
-                    .line_to(x, pos.ymax())
-                    .to_path();
-
-                renderer.draw_path(&grid, &style)?;
-            }
-
-            // Tick
-            {
-                let style = major.tick_style().push(style);
-                let tick_length = renderer.to_px(major.get_size());
-
-                let tick = Path::<Canvas>::move_to(x, y)
-                    .line_to(x, y + sign * tick_length).to_path();
-
-                renderer.draw_path(&tick, &style)?;
-
-                y += sign * tick_length;
-                y += sign * renderer.to_px(major.get_pad());
-            }
-
-            // Label
-            renderer.draw_text(Point(x, y), label, 0., style, major.label_style())?;
+        for tick in &self.ticks {
+            self.axis.major().grid_style.push(style);
+            tick.draw_text(ui, style)?;
         }
 
         Ok(())
     }
 
-    pub(crate) fn resize(&mut self, renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
-        self.axis.resize(renderer, pos);
-    }
-
     pub(crate) fn axis_mut(&mut self) -> &mut Axis {
         &mut self.axis
+    }
+}
+
+#[derive(Debug)]
+struct XTick {
+    pos: Point,
+    label: Option<String>,
+    halign: HorizAlign,
+    valign: VertAlign,
+    grid: Option<Path<Canvas>>,
+}
+
+impl XTick {
+    fn new(theta: f32, pos: Bounds<Canvas>, label: Option<String>, is_grid: bool) -> Self {
+        let (sin, cos) = theta.sin_cos();
+
+        let y_max = pos.width() * 0.5;
+        let (xmid, ymid) = (pos.xmid(), pos.ymid());
+
+        let grid = if is_grid {
+            Some(Path::move_to(xmid, ymid)
+                .line_to(xmid + cos * y_max, ymid + sin * y_max)
+                .to_path()
+            )
+        } else {
+            None
+        };
+
+        let pad = 4.;
+        let pos = Point(xmid + cos * (y_max + pad), ymid + sin * (y_max + pad));
+
+        let (halign, valign) = text_angle_align(theta);
+
+        Self {
+            pos,
+            label,
+            halign,
+            valign,
+            grid,
+        }
+    }
+
+    fn draw_text(
+        &self, 
+        ui: &mut dyn Renderer,
+        style: &dyn PathOpt,
+    ) -> renderer::Result<()> {
+        if let Some(label) = &self.label {
+            let mut text_style = TextStyle::new();
+            text_style.halign(self.halign);
+            text_style.valign(self.valign);
+
+            ui.draw_text(self.pos, label, 0., style, &text_style)?;
+        }
+
+        Ok(())
+    }
+
+    fn draw_grid(
+        &self, 
+        ui: &mut dyn Renderer, 
+        style: &dyn PathOpt
+    ) -> renderer::Result<()> {
+        if let Some(path) = &self.grid {
+            ui.draw_path(path, style)?;
+        }    
+
+        Ok(())
     }
 }
 
@@ -197,182 +166,174 @@ impl PolarXAxis {
 //
 
 pub struct PolarYAxis {
-    spine: Option<CanvasPatch>,
-
     axis: Axis,
-    major_ticks: Vec<f32>,
-    major_labels: Vec<String>,
 
-    is_left: bool,
+    ticks: Vec<YTick>,
 }
 
 impl PolarYAxis {
     pub(crate) fn new(cfg: &Config, prefix: &str) -> Self {
-        let mut y_axis = Self {
-            spine: Some(CanvasPatch::new(paths::line([0., 0.], [0., 1.]))),
+        let y_axis = Self {
             axis: Axis::new(cfg, prefix),
 
-            major_ticks: Vec::new(),
-            major_labels: Vec::new(),
-
-            is_left: true,
+            ticks: Vec::new(),
         };
-
-        y_axis.axis.major_mut().label_style_mut().valign(VertAlign::Center);
-        if y_axis.is_left {
-            y_axis.axis.major_mut().label_style_mut().halign(HorizAlign::Right);
-        } else {
-            y_axis.axis.major_mut().label_style_mut().halign(HorizAlign::Left);
-        }
 
         y_axis
     }
 
-    pub fn update_axis(&mut self, data: &DataFrame) {
-        self.major_ticks = Vec::new();
-        self.major_labels = Vec::new();
+    pub fn resize(&mut self, data: &DataFrame) {
+        self.ticks = Vec::new();
 
         let ymin = data.data_bounds().ymin();
         let ymax = data.data_bounds().ymax();
+        let ymax = ymin.abs().max(ymax.abs()); // * 0.5;
 
-        let yvalues : Vec<f32> = self.y_ticks(data).iter().map(|y| y.0).collect();
-
-        let delta = Axis::value_delta(&yvalues);
-
-        for yv in yvalues {
-            if ymin <= yv && yv <= ymax {
-                self.major_ticks.push(yv);
-                let tick_v = yv;
-                self.major_labels.push(
-                    self.axis.major().format(&self.axis, tick_v, delta)
-                );
-            };
-        }
-    }
-
-    pub fn y_ticks(&self, data: &DataFrame) -> Vec<(f32, f32)> {
-        let v_height = data.data_bounds().height();
-        let c_height = data.get_pos().height();
-
-        let view = data.data_bounds();
-
-        if view.is_none() {
-            Vec::new()
+        let y_values = if let Some(ticks) = &self.axis.ticks  {
+            ticks.clone()
         } else {
-            let (vmin, vmax) = (view.ymin(), view.ymax());
-            let (min, max) = self.axis.locator.view_limits(vmin, vmax);
+            let len = 4;
+            let dy = ymax / len as f32;
+            (1..len + 1).map(|i| i as f32 * dy).collect()
+        };
 
-            // self.locator.tick_values(min, max)
+        let delta = Axis::value_delta(&y_values);
 
-            let mut y_vec = Vec::<(f32, f32)>::new();
+        for (i, yv) in y_values.iter().enumerate() {
+            if yv.abs() <= ymax {
+                let label = if let Some(label) = &self.axis.labels {
+                    Some(label[i].clone())
+                } else {
+                    Some(self.axis.major().format(&self.axis, *yv, delta))
+                };
 
-            for y in self.axis.locator.tick_values(min, max).iter() {
-                y_vec.push((*y, ((y - vmin) * c_height / v_height).round()));
-            }
+                let angle = PI / 2.;
 
-            y_vec
+                self.ticks.push(YTick::new(*yv / ymax, data.pos(), angle, label, true));
+            };
         }
     }
 
     pub(crate) fn draw(
         &mut self, 
-        renderer: &mut dyn Renderer,
-        data: &DataFrame,
-        to_canvas: &ToCanvas<Canvas>,
-        style: &dyn PathOpt,
-    ) -> Result<f32> {
-        let pos = data.get_pos();
-
-        let mut x = if self.is_left { pos.xmin() } else { pos.xmax() };
-        let sign = if self.is_left { -1.0f32 } else { 1.0f32 };
-
-        if let Some(patch) = &mut self.spine {
-            let line_width = 1.;
-
-            patch.set_pos(Bounds::new(
-                Point(x, pos.ymin()),
-                Point(x - sign * line_width, pos.ymax()),
-            ));
-
-            x += sign * line_width;
-
-            patch.draw(renderer, to_canvas, style)?;
-        }
-
-        if self.axis.is_visible() {
-            self.draw_ticks(renderer, &data, style)?;
-
-            let width = self.major_labels.iter().map(|s| s.len()).max().unwrap();
-        
-            x += sign * renderer.to_px(self.axis.major().get_size());
-            x += sign * renderer.to_px(self.axis.major().get_pad());
-            x += sign * 0.5 * width as f32 * self.axis.major().get_label_height();
-        }
-
-        Ok(x)
-    }
-
-    fn draw_ticks(
-        &mut self, 
-        renderer: &mut dyn Renderer, 
-        data: &DataFrame,
+        ui: &mut dyn Renderer,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let pos = &data.get_pos();
+        let mut path_style = self.axis.major().grid_style().clone();
+        path_style.face_color(Color(0xffffff00));
 
-        let xv = if self.is_left { pos.xmin() } else { pos.xmax() };
-        let sign: f32 = if self.is_left { -1. } else { 1. };
-        let to_canvas = data.get_canvas_transform();
+        let grid_style = path_style.push(style);
+        
+        for tick in &self.ticks {
+            tick.draw_grid(ui, &grid_style)?;
+        }
 
-        for (yv, label) in self.major_ticks.iter().zip(self.major_labels.iter()) {
-            let point = to_canvas.transform_point(Point(xv, *yv));
-
-            let y = point.y();
-            let mut x = xv;
-            let major = self.axis.major();
-
-            // Grid
-            if self.axis.get_show_grid().is_show_major() {
-                let style = major.grid_style().push(style);
-                // grid
-                let grid = Path::<Canvas>::new(vec![
-                    PathCode::MoveTo(Point(pos.xmin(), y)),
-                    PathCode::LineTo(Point(pos.xmax(), y)),
-                ]);
-
-                renderer.draw_path(&grid, &style)?;
-            }
-
-            // Tick
-            {
-                let style = major.tick_style().push(style);
-                let tick_length = renderer.to_px(major.get_size());
-                
-                let tick = Path::<Canvas>::new(vec![
-                    PathCode::MoveTo(Point(x + sign * tick_length, y)),
-                    PathCode::LineTo(Point(x, y)),
-                ]);
-
-                renderer.draw_path(&tick, &style)?;
-
-                x += sign * tick_length;
-                x += sign * renderer.to_px(major.get_pad());
-            }
-
-            // Label
-            renderer.draw_text(Point(x, y), label, 0., style, major.label_style())?;
+        ui.flush(); // todo: fix bezier requirement for flush
+        
+        for tick in &self.ticks {
+            tick.draw_text(ui, style)?;
         }
 
         Ok(())
     }
 
-    pub(crate) fn update(&mut self, renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
-        self.axis.resize(renderer, pos);
-    }
-
     pub(crate) fn axis_mut(&mut self) -> &mut Axis {
         &mut self.axis
     }
+}
+
+#[derive(Debug)]
+struct YTick {
+    pos: Point,
+    label: Option<String>,
+    halign: HorizAlign,
+    valign: VertAlign,
+    grid: Option<Path<Canvas>>,
+}
+
+impl YTick {
+    fn new(y: f32, pos: Bounds<Canvas>, angle: f32, label: Option<String>, is_grid: bool) -> Self {
+        let y_max = pos.width() * 0.5;
+        let (xmid, ymid) = (pos.xmid(), pos.ymid());
+
+        let grid = if is_grid {
+            let r = y_max * y;
+            let circle = paths::circle()
+                .scale::<Canvas>(r, r)
+                .translate(xmid, ymid);
+
+            Some(circle)
+        } else {
+            None
+        };
+
+        let (sin, cos) = angle.sin_cos();
+
+        let pad = 4.;
+        let pos = Point(xmid + y * cos * (y_max + pad), ymid + y * sin * (y_max + pad));
+
+        let (halign, valign) = text_angle_align(angle);
+
+        Self {
+            pos,
+            label,
+            halign,
+            valign,
+            grid,
+        }
+    }
+
+    fn draw_text(
+        &self, 
+        ui: &mut dyn Renderer,
+        style: &dyn PathOpt,
+    ) -> renderer::Result<()> {
+        if let Some(label) = &self.label {
+            let mut text_style = TextStyle::new();
+            text_style.halign(self.halign);
+            text_style.valign(self.valign);
+
+            ui.draw_text(self.pos, label, 0., style, &text_style)?;
+        }
+
+        Ok(())
+    }
+
+    fn draw_grid(
+        &self, 
+        ui: &mut dyn Renderer, 
+        style: &dyn PathOpt
+    ) -> renderer::Result<()> {
+        if let Some(path) = &self.grid {
+            ui.draw_path(path, style)?;
+        }    
+
+        Ok(())
+    }
+}
+
+fn text_angle_align(theta: f32) -> (HorizAlign, VertAlign) {
+    let center = PI / 12.;
+
+    let halign = if PI / 2. - center < theta && theta < PI / 2. + center {
+        HorizAlign::Center
+    } else if PI / 2. < theta && theta < 3. * PI / 2. {
+        HorizAlign::Right
+    } else {
+        HorizAlign::Left
+    };
+
+    let valign = if theta < center || TAU - center < theta {
+        VertAlign::Center
+    } else if PI - center < theta && theta < PI + center {
+        VertAlign::Center
+    } else if theta < PI {
+        VertAlign::Bottom
+    } else {
+        VertAlign::Top
+    };
+
+    (halign, valign)
 }
 
 frame_option_struct!(PolarAxisOpt, Axis, PolarFrame, get_axis_mut);

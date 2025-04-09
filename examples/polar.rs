@@ -1,5 +1,5 @@
 use essay_plot::prelude::*;
-use essay_tensor::{init::linspace, ten, tensor::Tensor};
+use essay_tensor::{init::linspace, tensor::Tensor};
 
 fn main() {
     let mut figure = Figure::new();

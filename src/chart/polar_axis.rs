@@ -28,11 +28,13 @@ pub struct PolarXAxis {
 
 impl PolarXAxis {
     pub(crate) fn new(cfg: &Config, prefix: &str) -> Self {
-        let x_axis = Self {
+        let mut x_axis = Self {
             axis: Axis::new(cfg, prefix),
 
             ticks: Vec::new(),
         };
+
+        x_axis.axis_mut().show_grid = ShowGrid::Major;
 
         x_axis
     }
@@ -76,14 +78,18 @@ impl PolarXAxis {
         ui: &mut dyn Renderer,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let major_style = self.axis.major().grid_style.push(style);
-        for tick in &self.ticks {
-            tick.draw_grid(ui, &major_style)?;
+        if self.axis.show_grid.is_show_major() {
+            let major_style = self.axis.major().grid_style.push(style);
+            for tick in &self.ticks {
+                tick.draw_grid(ui, &major_style)?;
+            }
         }
 
-        for tick in &self.ticks {
-            self.axis.major().grid_style.push(style);
-            tick.draw_text(ui, style)?;
+        if self.axis.is_visible {
+            for tick in &self.ticks {
+                self.axis.major().grid_style.push(style);
+                tick.draw_text(ui, style)?;
+            }
         }
 
         Ok(())
@@ -174,11 +180,13 @@ pub struct PolarYAxis {
 
 impl PolarYAxis {
     pub(crate) fn new(cfg: &Config, prefix: &str) -> Self {
-        let y_axis = Self {
+        let mut y_axis = Self {
             axis: Axis::new(cfg, prefix),
 
             ticks: Vec::new(),
         };
+
+        y_axis.axis_mut().show_grid = ShowGrid::Major;
 
         y_axis
     }
@@ -212,7 +220,7 @@ impl PolarYAxis {
                     AngleCoord::Radians => angle_coord.max() / 4.,
                     AngleCoord::Degrees => -90.,
                 };
-                
+
                 let angle = angle_coord.to_radians(angle);
 
                 self.ticks.push(YTick::new(*yv / ymax, data.pos(), angle, label, true));
@@ -225,19 +233,23 @@ impl PolarYAxis {
         ui: &mut dyn Renderer,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let mut path_style = self.axis.major().grid_style().clone();
-        path_style.face_color(Color(0xffffff00));
+        if self.axis.get_show_grid().is_show_major() {
+            let mut path_style = self.axis.major().grid_style().clone();
+            path_style.face_color(Color(0xffffff00));
 
-        let grid_style = path_style.push(style);
+            let grid_style = path_style.push(style);
         
-        for tick in &self.ticks {
-            tick.draw_grid(ui, &grid_style)?;
+            for tick in &self.ticks {
+                tick.draw_grid(ui, &grid_style)?;
+            }
+
+            ui.flush(); // todo: fix bezier requirement for flush
         }
-
-        ui.flush(); // todo: fix bezier requirement for flush
         
-        for tick in &self.ticks {
-            tick.draw_text(ui, style)?;
+        if self.axis.is_visible {
+            for tick in &self.ticks {
+                tick.draw_text(ui, style)?;
+            }
         }
 
         Ok(())
@@ -353,6 +365,21 @@ impl PolarAxisOpt {
 
     pub fn visible(&mut self, is_visible: bool) -> &mut Self {
         self.write(|axis| { axis.is_visible = is_visible; });
+        self
+    }
+
+    pub fn ticks(&mut self, ticks: &[f32]) -> &mut Self {
+        self.write(|axis| { 
+            axis.ticks = Some(Vec::from(ticks));
+        });
+        self
+    }
+
+    pub fn tick_labels(&mut self, ticks: &[(f32, &str)]) -> &mut Self {
+        self.write(|axis| { 
+            axis.ticks = Some(ticks.iter().map(|t| t.0).collect());
+            axis.labels = Some(ticks.iter().map(|t| String::from(t.1)).collect());
+        });
         self
     }
 

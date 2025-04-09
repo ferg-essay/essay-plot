@@ -1,4 +1,4 @@
-use std::{f32::consts::TAU, marker::PhantomData, ops::Deref};
+use std::{f32::consts::TAU, marker::PhantomData};
 
 use essay_graphics::api::{renderer::Canvas, Affine2d, Bounds, Coord, Path, Point};
 use essay_tensor::tensor::Tensor;

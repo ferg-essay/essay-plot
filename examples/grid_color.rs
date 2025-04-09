@@ -1,4 +1,9 @@
-use essay_plot::{artist::Shading, palette::{EssayColors, Colorcet, Diverging, Sequential}, plot::grid_color, prelude::*};
+use essay_plot::{
+    artist::Shading, 
+    palette::Diverging, 
+    plot::grid_color, 
+    prelude::*
+};
 use essay_tensor::init::{linspace, meshgrid};
 
 fn main() { 

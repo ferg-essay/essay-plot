@@ -1,7 +1,13 @@
 use essay_graphics::api::{renderer::{self, Renderer}, Bounds, Path, PathOpt};
 use essay_tensor::{init::linspace, tensor::Tensor};
 
-use crate::{artist::{Artist, ArtistDraw, ArtistView, Lines2d, LinesOpt}, chart::{Chart, Data, PolarChart}, config::{ConfigArc, PathStyle}, data_artist_option_struct, path_style_options, transform::ToCanvas};
+use crate::{
+    artist::{Artist, ArtistDraw, ArtistView, Lines2d}, 
+    chart::{Data, PolarChart}, 
+    config::{ConfigArc, PathStyle}, 
+    data_artist_option_struct, path_style_options, 
+    transform::ToCanvas
+};
 
 pub fn radar(
     polar: &mut PolarChart, 
@@ -29,7 +35,7 @@ impl PolarChart {
     }
 }
 
-struct Radar {
+pub struct Radar {
     lines: Lines2d,
     fill: Path<Data>,
 

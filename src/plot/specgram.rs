@@ -1,5 +1,5 @@
 use essay_graphics::api::{renderer::{Renderer, Result}, Bounds, PathOpt};
-use essay_tensor::{array::{stack, stack_axis}, signal::rfft_norm, tensor::Tensor};
+use essay_tensor::{array::stack_axis, signal::rfft_norm, tensor::Tensor};
 
 use crate::{
     artist::{Artist, ArtistDraw, ArtistView, GridColor, Norm, Norms, Shading}, chart::{Chart, Data, LegendHandler}, config::ConfigArc, data_artist_option_struct, palette::{ColorMap, EssayColors}, transform::ToCanvas

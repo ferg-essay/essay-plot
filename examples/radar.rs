@@ -1,5 +1,3 @@
-use std::f32::consts::PI;
-
 use essay_plot::{prelude::*, transform::AngleCoord};
 use essay_tensor::{init::linspace, ten, tensor::Tensor};
 
@@ -9,8 +7,6 @@ fn main() {
         ui.horizontal(|ui| {
             let x = linspace(0., 100., 40);
             let one = Tensor::ones(x.shape());
-    
-            let theta = PI * &x / 100.;
     
             let mut chart = ui.polar();
 

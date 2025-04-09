@@ -1,4 +1,4 @@
-use essay_plot::prelude::*;
+use essay_plot::{chart::ShowGrid, prelude::*};
 use essay_tensor::init::linspace;
 
 fn main() {
@@ -11,6 +11,9 @@ fn main() {
 
     chart.plot(&x, &x.sin());
     chart.plot(&x, &x.cos());
+
+    // chart.x().major_grid().color("purple");
+    chart.x().show_grid(ShowGrid::Major);
 
     figure.show();
 }

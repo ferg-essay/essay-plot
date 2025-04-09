@@ -188,7 +188,7 @@ impl CartesianFrame {
         self.legend.resize(renderer, &pos_legend);
     
         // TODO:
-        self.bottom.update_axis(&self.data);
+        self.bottom.update_axis(&self.data, &self.to_canvas);
         self.bottom.resize(renderer, pos_data);
     
         self.left.update_axis(&self.data);
@@ -232,8 +232,9 @@ impl Drawable for CartesianFrame {
 
         // self.data.draw(renderer, &to_canvas, &self.path_style)?;
 
-        renderer.draw_with_closure(self.data.pos(), Box::new(|r| {
-            self.data.draw(r, &data_to_canvas, &self.path_style)
+        renderer.draw_with_closure(self.data.pos(), Box::new(|ui| {
+            self.data.draw(ui, &data_to_canvas, &self.path_style)?;
+            Ok(())
         }))?;
 
         self.legend.draw(renderer, &frame_to_canvas, &self.path_style)?;
@@ -454,8 +455,8 @@ impl BottomFrame {
         frame
     }
 
-    pub fn update_axis(&mut self, data: &DataFrame) {
-        self.x_axis.update_axis(data); 
+    pub fn update_axis(&mut self, data: &DataFrame, to_canvas: &dyn Transform<Data>) {
+        self.x_axis.update_axis(data, to_canvas); 
     }
 
     fn draw(
@@ -465,7 +466,7 @@ impl BottomFrame {
         to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let mut y = self.x_axis.draw(renderer, data, to_canvas, style)?;
+        let mut y = self.x_axis.draw(renderer, data, style)?;
         y -= renderer.to_px(self.sizes.label_pad);
 
         self.title.update_pos(renderer, Bounds::new(

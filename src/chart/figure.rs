@@ -111,6 +111,14 @@ impl SubFigure<'_> {
         chart
     }
 
+    pub fn polar(&mut self) -> PolarChart {
+        let chart = PolarChart::new(&self.config);
+
+        self.sub_page.view(chart.clone());
+
+        chart
+    }
+
     pub fn horizontal<R>(&mut self, f: impl FnOnce(&mut SubFigure) -> R) -> R {
         self.sub_page.horizontal(|page_builder| {
             let mut sub = SubFigure {

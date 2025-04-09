@@ -1,9 +1,9 @@
-use std::{marker::PhantomData, ops::Deref};
+use std::{f32::consts::TAU, marker::PhantomData, ops::Deref};
 
 use essay_graphics::api::{renderer::Canvas, Affine2d, Bounds, Coord, Path, Point};
 use essay_tensor::tensor::Tensor;
 
-use crate::artist::Stale;
+use crate::{artist::Stale, chart::Data};
 
 pub trait Transform<M: Coord> {
     fn transform_point(&self, point: Point) -> Point;
@@ -38,6 +38,101 @@ impl<M: Coord> Transform<M> for TransformAffine<M> {
 
     fn transform_path(&self, path: &Path<M>) -> Path<Canvas> {
         self.affine.transform_path(path)
+    }
+}
+
+#[derive(Debug)]
+pub struct PolarTransform {
+    xf: f32,
+    yf: f32,
+
+    sx: f32,
+    sy: f32,
+    tx: f32,
+    ty: f32,
+
+    angle_coord: AngleCoord,
+}
+
+impl PolarTransform {
+    pub fn new(
+        data: Bounds<Data>,
+        pos: Bounds<Canvas>,
+        angle_coord: AngleCoord,
+    ) -> Self {
+        let ([tx, ty], [sx, sy]) = pos.into();
+
+        let dx = data.width();
+        let ymin = data.xmin();
+        let ymax = data.ymax();
+        let dy = ymin.abs().max(ymax.abs());
+
+        let xform = Self {
+            xf: angle_coord.max() / dx.max(f32::EPSILON),
+            yf: dy.max(f32::EPSILON).recip(),
+            sx: sx * 0.5,
+            sy: sy * 0.5,
+            tx: tx + sx * 0.5,
+            ty: ty + sy * 0.5,
+
+            angle_coord,
+        };
+
+        xform
+    }
+
+    fn transform(&self, x: f32, y: f32) -> [f32; 2] {
+        let (sin, cos) = self.angle_coord.to_radians(x * self.xf).sin_cos();
+
+        [
+            self.tx + self.sx * cos * y * self.yf,
+            self.ty + self.sy * sin * y * self.yf,
+        ]
+    }
+}
+
+impl Transform<Data> for PolarTransform {
+    #[inline]
+    fn transform_point(&self, point: Point) -> Point {
+        let Point(x, y) = point;
+
+        self.transform(x, y).into()
+    }
+
+    #[inline]
+    fn transform_tensor(&self, tensor: &Tensor) -> Tensor {
+        tensor.map_row(|row| {
+            self.transform(row[0], row[1])
+        })
+    }
+
+    #[inline]
+    fn transform_path(&self, path: &Path<Data>) -> Path<Canvas> {
+        path.map(|Point(x, y)| self.transform(x, y).into())
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum AngleCoord {
+    Radians,
+    Degrees,
+}
+
+impl AngleCoord {
+    #[inline]
+    pub fn to_radians(&self, angle: f32) -> f32 {
+        match self {
+            AngleCoord::Radians => angle,
+            AngleCoord::Degrees => (- angle + 90.).to_radians()
+        }
+    }
+
+    #[inline]
+    pub fn max(&self) -> f32 {
+        match self {
+            AngleCoord::Radians => TAU,
+            AngleCoord::Degrees => 360.,
+        }
     }
 }
 

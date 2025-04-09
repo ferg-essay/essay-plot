@@ -8,7 +8,7 @@ use essay_graphics::api::{
 use crate::{
     artist::paths,
     config::Config, 
-    frame_option_struct, path_style_options,
+    frame_option_struct, path_style_options, transform::AngleCoord,
 };
 
 use super::{
@@ -37,7 +37,7 @@ impl PolarXAxis {
         x_axis
     }
 
-    pub fn resize(&mut self, data: &DataFrame) {
+    pub fn resize(&mut self, data: &DataFrame, angle_coord: AngleCoord) {
         self.ticks = Vec::new();
 
         let xmin = data.data_bounds().xmin();
@@ -63,7 +63,8 @@ impl PolarXAxis {
                     Some(self.axis.major().format(&self.axis, *xv, delta))
                 };
 
-                let theta = TAU * *xv / (xmax - xmin).max(f32::EPSILON);
+                let angle = angle_coord.max() * *xv / (xmax - xmin).max(f32::EPSILON);
+                let theta = angle_coord.to_radians(angle);
 
                 self.ticks.push(XTick::new(theta, data.pos(), label, true));
             };
@@ -182,7 +183,7 @@ impl PolarYAxis {
         y_axis
     }
 
-    pub fn resize(&mut self, data: &DataFrame) {
+    pub fn resize(&mut self, data: &DataFrame, angle_coord: AngleCoord) {
         self.ticks = Vec::new();
 
         let ymin = data.data_bounds().ymin();
@@ -207,7 +208,12 @@ impl PolarYAxis {
                     Some(self.axis.major().format(&self.axis, *yv, delta))
                 };
 
-                let angle = PI / 2.;
+                let angle = match angle_coord {
+                    AngleCoord::Radians => angle_coord.max() / 4.,
+                    AngleCoord::Degrees => -90.,
+                };
+                
+                let angle = angle_coord.to_radians(angle);
 
                 self.ticks.push(YTick::new(*yv / ymax, data.pos(), angle, label, true));
             };
@@ -252,7 +258,7 @@ struct YTick {
 }
 
 impl YTick {
-    fn new(y: f32, pos: Bounds<Canvas>, angle: f32, label: Option<String>, is_grid: bool) -> Self {
+    fn new(y: f32, pos: Bounds<Canvas>, theta: f32, label: Option<String>, is_grid: bool) -> Self {
         let y_max = pos.width() * 0.5;
         let (xmid, ymid) = (pos.xmid(), pos.ymid());
 
@@ -267,12 +273,12 @@ impl YTick {
             None
         };
 
-        let (sin, cos) = angle.sin_cos();
+        let (sin, cos) = theta.sin_cos();
 
         let pad = 4.;
         let pos = Point(xmid + y * cos * (y_max + pad), ymid + y * sin * (y_max + pad));
 
-        let (halign, valign) = text_angle_align(angle);
+        let (halign, valign) = text_angle_align(theta);
 
         Self {
             pos,
@@ -313,6 +319,7 @@ impl YTick {
 }
 
 fn text_angle_align(theta: f32) -> (HorizAlign, VertAlign) {
+    let theta = (theta + TAU) % TAU;
     let center = PI / 12.;
 
     let halign = if PI / 2. - center < theta && theta < PI / 2. + center {

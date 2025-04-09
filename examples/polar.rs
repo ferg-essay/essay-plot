@@ -1,19 +1,32 @@
-use essay_plot::prelude::*;
+use std::f32::consts::{PI, TAU};
+
+use essay_plot::{prelude::*, transform::AngleCoord};
 use essay_tensor::{init::linspace, tensor::Tensor};
 
 fn main() {
     let mut figure = Figure::new();
-    let mut chart = figure.polar();
+    figure.multichart(|ui| {
+        let x = linspace(0., 100., 40);
+        let one = Tensor::ones(x.shape());
+    
+        let theta = PI * &x / 100.;
+    
+        let mut chart = ui.polar();
 
-    let x = linspace(0., 6.28, 40);
-    let one = Tensor::ones(x.shape());
+        chart.angle_coord(AngleCoord::Radians);
+        chart.plot(&x, &one);
+        chart.plot(&x, (3. * &theta).sin());
+        chart.plot(&x, 2. * &theta.cos());
+    
+    
+        let mut chart = ui.polar();
 
-    chart.plot(&x, &one);
-    chart.plot(&x, (2. * &x).sin());
-    chart.plot(&x, 2. * &x.cos());
-    //chart.plot(&x, &x.clone());
-    //chart.fill(&x, &x.clone()).alpha(0.2);
-    //chart.plot(&x, &x.cos());
+        chart.angle_coord(AngleCoord::Degrees);
+        chart.plot(&x, &one);
+        chart.plot(&x, (3. * &theta).sin());
+        chart.plot(&x, 2. * &theta.cos());
+    
+    });
 
     figure.show();
 }

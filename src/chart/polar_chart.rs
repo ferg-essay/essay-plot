@@ -7,7 +7,7 @@ use crate::{
     artist::{Artist, ArtistDraw, IntoArtist}, 
     chart::{AspectMode, Data, FrameArtist, FrameTextOpt}, 
     config::ConfigArc, 
-    palette::Palette
+    palette::Palette, transform::AngleCoord
 };
 
 use super::{polar_frame::PolarFrame, style::PlotOptHandle, PlotOpt, PolarAxisOpt, Scaling};
@@ -65,6 +65,14 @@ impl PolarChart {
     pub fn scaling(&mut self, scaling: Scaling) -> &mut Self {
         self.view.write(|f| { 
             f.data_mut().scaling(scaling); 
+        });
+
+        self
+    }
+
+    pub fn angle_coord(&mut self, angle_coord: AngleCoord) -> &mut Self {
+        self.view.write(|f| { 
+            f.angle_coord(angle_coord);
         });
 
         self

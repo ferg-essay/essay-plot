@@ -68,6 +68,11 @@ pub struct CartesianFrame {
     // yscale
     // yticks
     // zorder
+
+    stale_for_update: Stale,
+    stale: Stale,
+    pos_cache: Bounds<Canvas>,
+    data_cache: Bounds<Data>,
 }
 
 impl CartesianFrame {
@@ -96,6 +101,11 @@ impl CartesianFrame {
 
             _is_share_x: false,
             _is_share_y: false,
+
+            stale_for_update: Stale::new_for_update(),
+            stale: Stale::default(),
+            pos_cache: Bounds::none(),
+            data_cache: Bounds::none(),
         }
     }
 
@@ -135,8 +145,27 @@ impl CartesianFrame {
         self.data.color_cycle(cycle);
     }
 
-    fn resize(&mut self, renderer: &mut dyn Renderer) {
-        let pos = renderer.pos();
+    fn check_cache(&mut self, ui: &mut dyn Renderer) -> bool {
+        if self.stale != self.stale_for_update
+            || self.pos_cache != ui.pos()
+            || self.data_cache != self.data.data_bounds() {
+            self.stale_for_update = self.stale_for_update.update();
+            self.stale = self.stale_for_update;
+            self.pos_cache = ui.pos();
+            self.data_cache = self.data.data_bounds();
+
+            false
+        } else {
+            true
+        }
+    }
+
+    fn resize(&mut self, ui: &mut dyn Renderer) {
+        if self.check_cache(ui) {
+            return;
+        }
+
+        let pos = ui.pos();
 
         let pos = Bounds::from([
             [pos.xmin() + pos.width() * self.margins.left,
@@ -151,7 +180,7 @@ impl CartesianFrame {
     
         // title exists outside the pos bounds
         self.title.update_pos(
-            renderer,
+            ui,
             Bounds::from([
                 [pos.xmin(), pos.ymax()], 
                 [pos.xmax(), pos.ymax() + title.height()]
@@ -163,7 +192,7 @@ impl CartesianFrame {
             Point(pos.xmax(), pos.ymax()),
         );
     
-        self.data.update_pos(renderer, &pos_data);
+        self.data.update_pos(ui, &pos_data);
     
         let pos_data = self.data.pos().clone();
         self.to_canvas = CartesianTransform::bounds_to(self.data.data_bounds(), pos_data);
@@ -172,70 +201,63 @@ impl CartesianFrame {
             Point(pos_data.xmin(), pos_data.ymax()),
             Point(pos_data.xmax(), pos_data.ymax()),
         );
-        self.top.resize(renderer, pos_top);
+        self.top.resize(ui, pos_top);
     
         let pos_right = Bounds::<Canvas>::new(
             Point(pos_data.xmax(), pos_data.ymin()),
             Point(pos_data.xmax(), pos_data.ymax()),
         );
-        self.right.resize(renderer, &pos_right);
+        self.right.resize(ui, &pos_right);
     
         let pos_legend = Bounds::<Canvas>::new(
             Point(pos_data.xmin(), pos_data.ymax()),
             Point(pos_data.xmin(), pos_data.ymax()),
         );
-        self.legend.resize(renderer, &pos_legend);
+        self.legend.resize(ui, &pos_legend);
     
-        // TODO:
-        self.bottom.resize(renderer, &self.data, &self.to_canvas);
+        self.bottom.resize(ui, &self.data, &self.to_canvas);
+        self.left.resize(ui, &self.data, &self.to_canvas);
     
-        self.left.update_axis(&self.data, &self.to_canvas);
-        self.left.resize(renderer, pos_data);
-    
-        self.top.resize(renderer, pos_data);
-        self.right.resize(renderer, &pos_data);
+        self.top.resize(ui, pos_data);
+        self.right.resize(ui, &pos_data);
     
         self.legend.update_handlers(&mut self.data);
     }
 }
 
 impl Drawable for CartesianFrame {
-    fn draw(&mut self, renderer: &mut dyn Renderer) -> Result<()> {
-        if self.pos != renderer.pos() {
-            self.resize(renderer);
+    fn draw(&mut self, ui: &mut dyn Renderer) -> Result<()> {
+        if self.pos != ui.pos() {
+            self.resize(ui);
         }
 
-        let stale = Stale::new_for_update();
         let frame_affine = CartesianTransform::<Canvas>::default();
         let frame_to_canvas = ToCanvas::new(
-            stale,
+            self.stale,
             self.pos.clone(), 
             &frame_affine,
         );
 
-        // let to_canvas_affine = TransformAffine::new(self.data.get_canvas_transform().clone());
         let data_to_canvas = ToCanvas::new(
-            stale,
+            self.stale,
             self.data.data_bounds(), 
             &self.to_canvas,
         );
 
-        self.title.draw(renderer, &frame_to_canvas, &self.path_style)?;
+        self.title.draw(ui, &frame_to_canvas, &self.path_style)?;
 
-        self.bottom.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
-        self.left.draw(renderer, &self.data, &frame_to_canvas, &self.path_style)?;
+        self.bottom.draw(ui, &self.data, &frame_to_canvas, &self.path_style)?;
+        self.left.draw(ui, &frame_to_canvas, &self.path_style)?;
 
-        self.top.draw(renderer, &frame_to_canvas, &self.path_style)?;
-        self.right.draw(renderer,  &frame_to_canvas, &self.path_style)?;
+        self.top.draw(ui, &frame_to_canvas, &self.path_style)?;
+        self.right.draw(ui,  &frame_to_canvas, &self.path_style)?;
 
-        // self.data.draw(renderer, &to_canvas, &self.path_style)?;
-
-        renderer.draw_with_closure(self.data.pos(), Box::new(|ui| {
+        ui.draw_with_closure(self.data.pos(), Box::new(|ui| {
             self.data.draw(ui, &data_to_canvas, &self.path_style)?;
             Ok(())
         }))?;
 
-        self.legend.draw(renderer, &frame_to_canvas, &self.path_style)?;
+        self.legend.draw(ui, &frame_to_canvas, &self.path_style)?;
 
         Ok(())
     }
@@ -428,43 +450,34 @@ impl LeftFrame {
         frame
     }
 
-    pub fn update_axis(
+    fn axis_mut(&mut self) -> &mut Axis {
+        self.y_axis.axis_mut()
+    }
+
+    fn resize(
         &mut self, 
+        ui: &mut dyn Renderer, 
         data: &DataFrame,
-        to_canvas: &dyn Transform<Data>
+        to_canvas: &dyn Transform<Data>,
     ) {
-        self.y_axis.update_axis(data, to_canvas);
+        let x = self.y_axis.resize(ui, data, to_canvas)
+            - ui.to_px(self.sizes.label_pad);
+
+        self.title.update_pos(ui, Bounds::new(
+            Point(x, data.pos().ymid()),
+            Point(x, data.pos().ymid()),
+        ));
     }
 
     fn draw(
         &mut self, 
-        renderer: &mut dyn Renderer,
-        data: &DataFrame,
+        ui: &mut dyn Renderer,
         to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let mut x = self.y_axis.draw(renderer, data, style)?;
-        x -= renderer.to_px(self.sizes.label_pad);
+        self.y_axis.draw(ui, style)?;
 
-        self.title.update_pos(renderer, Bounds::new(
-            Point(x, data.pos().ymid()),
-            Point(x, data.pos().ymid()),
-        ));
-
-        self.title.draw(renderer, to_canvas, style)
-    }
-
-    fn _label(&mut self, text: &str) -> &mut TextCanvas {
-        self.title.label(text)
-    }
-
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
-        self.title.update_pos(renderer, pos);
-        self.y_axis.update(renderer, pos);
-    }
-
-    fn axis_mut(&mut self) -> &mut Axis {
-        self.y_axis.axis_mut()
+        self.title.draw(ui, to_canvas, style)
     }
 }
 

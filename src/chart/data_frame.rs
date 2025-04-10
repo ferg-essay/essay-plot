@@ -6,7 +6,7 @@ use essay_graphics::api::{
 };
 
 use crate::{
-    artist::{Artist, ArtistContainer, ArtistDraw}, config::{ConfigArc, PathStyle}, palette::Palette, transform::ToCanvas
+    artist::{Artist, ArtistContainer, ArtistDraw, Stale}, config::{ConfigArc, PathStyle}, palette::Palette, transform::ToCanvas
 };
 
 use super::LegendHandler;
@@ -35,6 +35,7 @@ pub(crate) struct DataFrame {
     style: PathStyle,
 
     _is_stale: bool,
+    stale_data_bounds: Stale,
 }
 
 impl DataFrame {
@@ -62,6 +63,8 @@ impl DataFrame {
 
             to_canvas: Affine2d::eye(),
             _is_stale: true,
+
+            stale_data_bounds: Stale::new_for_update(),
         }
     }
 
@@ -124,11 +127,7 @@ impl DataFrame {
     }
 
     pub(super) fn update_pos(&mut self, _renderer: &mut dyn Renderer, pos: &Bounds<Canvas>) {
-        //for item in &mut self.artist_items {
-        //    item.resize(renderer, pos);
-        //}
-
-        self.data_bounds = self.bounds();
+        self.update_data_bounds();
     
         self.update_view();
 
@@ -267,16 +266,15 @@ impl DataFrame {
         self.artist_items.get_handlers()
     }
     
-    fn bounds(&mut self) -> Bounds<Data> {
-        let bounds = Bounds::none();
+    fn update_data_bounds(&mut self) {
+        let bounds = self.artist_items.bounds(Bounds::none())
+            .or(Bounds::unit());
 
-        let bounds = self.artist_items.bounds(bounds);
-
-        if bounds.is_none() {
-            Bounds::new(Point(0., 0.), Point(1., 1.))
-        } else {
-            bounds
+        if bounds != self.data_bounds {
+            self.stale_data_bounds = self.stale_data_bounds.update();
         }
+
+        self.data_bounds = bounds;
     }
 }
 

@@ -16,6 +16,8 @@ fn main() {
             chart.plot(&x, &x.cos());
             chart.x().show_grid(ShowGrid::Major);
             chart.y().show_grid(ShowGrid::Major);
+            chart.x_label("X-Axis");
+            chart.y_label("Y-Axis");
             //chart.x().show_grid(ShowGrid::Major);
             //chart.y().show_grid(ShowGrid::Major);
 
@@ -27,6 +29,8 @@ fn main() {
             chart.y().show_grid(ShowGrid::Major);
             chart.x().visible(false);
             chart.y().visible(false);
+            chart.x_label("X-Axis");
+            chart.y_label("Y-Axis");
         });
 
         ui.horizontal(|ui| {

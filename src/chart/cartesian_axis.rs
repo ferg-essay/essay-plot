@@ -286,11 +286,14 @@ impl YAxis {
         y_axis
     }
 
-    pub fn update_axis(
+    pub fn resize(
         &mut self, 
+        ui: &mut dyn Renderer,
         data: &DataFrame,
         to_canvas: &dyn Transform<Data>,
-    ) {
+    ) -> f32 {
+        self.axis.resize(ui, data.pos());
+
         self.major_ticks = Vec::new();
         self.major_labels = Vec::new();
         self.major_ticks2 = Vec::new();
@@ -301,6 +304,8 @@ impl YAxis {
         let yvalues : Vec<f32> = self.y_ticks(data);
 
         let delta = Axis::value_delta(&yvalues);
+
+        let mut width = 0;
 
         for (i, yv) in yvalues.iter().enumerate() {
             if ymin <= *yv && *yv <= ymax {
@@ -313,10 +318,23 @@ impl YAxis {
                     self.axis.major().format(&self.axis, tick_v, delta)
                 };
 
+                width = width.max(label.len());
+
                 self.major_labels.push(label.clone());
                 self.major_ticks2.push(YTick::new(*yv, data, to_canvas, Some(label), true));
             };
         }
+
+        let pos = data.pos();
+        let (mut x, sign) = if self.is_left { (pos.xmin(), -1.) } else { (pos.xmax(), 1.) };
+        
+        if self.axis.is_visible {
+            x += sign * ui.to_px(self.axis.major().get_size());
+            x += sign * ui.to_px(self.axis.major().get_pad());
+            x += sign * 0.5 * width as f32 * self.axis.major().get_label_height();
+        }
+
+        x
     }
 
     pub fn y_ticks(&self, data: &DataFrame) -> Vec<f32> {
@@ -337,14 +355,8 @@ impl YAxis {
     pub(crate) fn draw(
         &mut self, 
         ui: &mut dyn Renderer,
-        data: &DataFrame,
         style: &dyn PathOpt,
-    ) -> renderer::Result<f32> {
-        let pos = data.pos();
-
-        let mut x = if self.is_left { pos.xmin() } else { pos.xmax() };
-        let sign = if self.is_left { -1.0f32 } else { 1.0f32 };
-
+    ) -> renderer::Result<()> {
         // Grid
         if self.axis.get_show_grid().is_show_major() {
             let style = self.axis.major().grid_style().push(style);
@@ -359,20 +371,9 @@ impl YAxis {
                 tick.draw_tick(ui, style)?;
                 tick.draw_text(ui, style, self.axis.major().label_style())?;
             }
-            // self.draw_ticks(renderer, &data, style)?;
-
-            let width = self.major_labels.iter().map(|s| s.len()).max().unwrap();
-        
-            x += sign * ui.to_px(self.axis.major().get_size());
-            x += sign * ui.to_px(self.axis.major().get_pad());
-            x += sign * 0.5 * width as f32 * self.axis.major().get_label_height();
         }
 
-        Ok(x)
-    }
-
-    pub(crate) fn update(&mut self, renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
-        self.axis.resize(renderer, pos);
+        Ok(())
     }
 
     pub(crate) fn axis_mut(&mut self) -> &mut Axis {

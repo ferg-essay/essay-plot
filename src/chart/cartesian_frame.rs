@@ -1,13 +1,12 @@
-use std::{f32::consts::PI, marker::PhantomData};
+use std::f32::consts::PI;
 
 use essay_graphics::{
     api::{
         renderer::{Canvas, Drawable, Renderer, Result}, 
-        Bounds, Color, Coord, Path, PathOpt, Point, VertAlign 
+        Bounds, Color, PathOpt, Point, VertAlign 
     }, 
     layout::View
 };
-use essay_tensor::tensor::Tensor;
 
 use crate::{
     artist::{
@@ -15,7 +14,7 @@ use crate::{
     }, 
     config::{Config, ConfigArc, PathStyle}, 
     palette::Palette, 
-    transform::{ToCanvas, Transform}
+    transform::{CartesianTransform, ToCanvas, Transform}
 };
 
 use super::{
@@ -188,10 +187,9 @@ impl CartesianFrame {
         self.legend.resize(renderer, &pos_legend);
     
         // TODO:
-        self.bottom.update_axis(&self.data, &self.to_canvas);
-        self.bottom.resize(renderer, pos_data);
+        self.bottom.resize(renderer, &self.data, &self.to_canvas);
     
-        self.left.update_axis(&self.data);
+        self.left.update_axis(&self.data, &self.to_canvas);
         self.left.resize(renderer, pos_data);
     
         self.top.resize(renderer, pos_data);
@@ -254,96 +252,6 @@ impl FrameWithTextArtist for CartesianFrame {
         }
     }
 }
-
-#[derive(Debug, Clone)]
-pub struct CartesianTransform<M: Coord> {
-    sx: f32,
-    sy: f32,
-    fx: f32,
-    fy: f32,
-    tx: f32,
-    ty: f32,
-    marker: PhantomData<fn(M)>,
-}
-
-impl<M: Coord> CartesianTransform<M> {
-    pub fn _new(
-        from: Point,
-        to: Point,
-        scale: [f32; 2],
-    ) -> Self {
-        Self {
-            fx: from.0,
-            fy: from.1,
-            tx: to.0,
-            ty: to.1,
-            sx: scale[0],
-            sy: scale[0],
-            marker: Default::default(),
-        }
-    }
-
-    pub fn bounds_to(
-        src: Bounds<M>,
-        dst: Bounds<Canvas>,
-    ) -> Self {
-        let src_w = if src.width() == 0. { f32::EPSILON } else { src.width() };
-        let src_h = if src.height() == 0. { f32::EPSILON } else { src.height() };
-
-        Self {
-            fx: src.xmin(),
-            fy: src.ymin(),
-            tx: dst.xmin(),
-            ty: dst.ymin(),
-            sx: dst.width() / src_w,
-            sy: dst.height() / src_h,
-            marker: Default::default(),
-        }
-    }
-
-    fn transform(&self, x: f32, y: f32) -> [f32; 2] {
-        [
-            self.tx + self.sx * (x - self.fx),
-            self.ty + self.sy * (y - self.fy),
-        ]
-    }
-}
-
-impl<M: Coord> Transform<M> for CartesianTransform<M> {
-    #[inline]
-    fn transform_point(&self, point: Point) -> Point {
-        let Point(x, y) = point;
-
-        self.transform(x, y).into()
-    }
-
-    #[inline]
-    fn transform_tensor(&self, tensor: &Tensor) -> Tensor {
-        tensor.map_row(|row| {
-            self.transform(row[0], row[1])
-        })
-    }
-
-    #[inline]
-    fn transform_path(&self, path: &Path<M>) -> Path<Canvas> {
-        path.map(|Point(x, y)| self.transform(x, y).into())
-    }
-}
-
-impl<M: Coord> Default for CartesianTransform<M> {
-    fn default() -> Self {
-        Self { 
-            sx: 1.,
-            sy: 1.,
-            fx: 0.,
-            fy: 0.,
-            tx: 0.,
-            ty: 0.,
-            marker: Default::default(),
-        }
-    }
-}
-
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum FrameArtist {
@@ -455,8 +363,12 @@ impl BottomFrame {
         frame
     }
 
-    pub fn update_axis(&mut self, data: &DataFrame, to_canvas: &dyn Transform<Data>) {
-        self.x_axis.update_axis(data, to_canvas); 
+    fn resize(&mut self, ui: &mut dyn Renderer, data: &DataFrame, to_canvas: &dyn Transform<Data>) {
+        let pos = data.pos();
+        
+        self.title.update_pos(ui, pos);
+        self.x_axis.resize(ui, pos);
+        self.x_axis.update_axis(data, to_canvas);
     }
 
     fn draw(
@@ -479,11 +391,6 @@ impl BottomFrame {
 
     fn _title(&mut self, text: &str) -> &mut TextCanvas {
         self.title.label(text)
-    }
-
-    fn resize(&mut self, renderer: &mut dyn Renderer, pos: Bounds<Canvas>) {
-        self.title.update_pos(renderer, pos);
-        self.x_axis.resize(renderer, pos);
     }
 
     fn axis_mut(&mut self) -> &mut Axis {
@@ -521,8 +428,12 @@ impl LeftFrame {
         frame
     }
 
-    pub fn update_axis(&mut self, data: &DataFrame) {
-        self.y_axis.update_axis(data);
+    pub fn update_axis(
+        &mut self, 
+        data: &DataFrame,
+        to_canvas: &dyn Transform<Data>
+    ) {
+        self.y_axis.update_axis(data, to_canvas);
     }
 
     fn draw(
@@ -532,7 +443,7 @@ impl LeftFrame {
         to_canvas: &ToCanvas<Canvas>,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let mut x = self.y_axis.draw(renderer, data, to_canvas, style)?;
+        let mut x = self.y_axis.draw(renderer, data, style)?;
         x -= renderer.to_px(self.sizes.label_pad);
 
         self.title.update_pos(renderer, Bounds::new(

@@ -9,10 +9,9 @@ use crate::{
     artist::{
         paths, ArtistDraw, Stale, TextCanvas
     }, 
-    chart::cartesian_frame::CartesianTransform, 
     config::{ConfigArc, PathStyle}, 
     palette::Palette, 
-    transform::{AngleCoord, PolarTransform, ToCanvas, Transform, TransformAffine} 
+    transform::{AngleCoord, CartesianTransform, PolarTransform, ToCanvas, Transform, TransformAffine} 
 };
 
 use super::{

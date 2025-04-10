@@ -263,10 +263,6 @@ impl DataFrame {
         self.pan_zoom_bounds.unwrap_or(self.view_bounds)
     }
 
-    pub(crate) fn get_canvas_transform(&self) -> &Affine2d {
-        &self.to_canvas
-    }
-
     pub(crate) fn get_handlers(&mut self) -> Vec<LegendHandler> {
         self.artist_items.get_handlers()
     }

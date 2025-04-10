@@ -217,13 +217,12 @@ impl AxisOpt {
         self
     }
 
-    pub fn ticks_labels(&mut self, ticks: &[f32], labels: &[&str]) -> &mut Self {
-        assert_eq!(ticks.len(), labels.len(), "ticks and labels must have the same length");
-
-        let labels = labels.iter().map(|s| String::from(*s)).collect();
+    pub fn tick_labels(&mut self, tick_labels: &[(f32, &str)]) -> &mut Self {
+        let ticks = tick_labels.iter().map(|t| t.0).collect();
+        let labels = tick_labels.iter().map(|t| String::from(t.1)).collect();
 
         self.write(|axis| {
-            axis.ticks = Some(Vec::from(ticks));
+            axis.ticks = Some(ticks);
             axis.labels = Some(labels);
         });
 

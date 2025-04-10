@@ -13,7 +13,97 @@ pub trait Transform<M: Coord> {
     fn transform_path(&self, path: &Path<M>) -> Path<Canvas>;
 }
 
-pub struct TransformAffine<M: Coord> {
+#[derive(Debug, Clone)]
+pub struct CartesianTransform<M: Coord> {
+    sx: f32,
+    sy: f32,
+    fx: f32,
+    fy: f32,
+    tx: f32,
+    ty: f32,
+    marker: PhantomData<fn(M)>,
+}
+
+impl<M: Coord> CartesianTransform<M> {
+    pub fn _new(
+        from: Point,
+        to: Point,
+        scale: [f32; 2],
+    ) -> Self {
+        Self {
+            fx: from.0,
+            fy: from.1,
+            tx: to.0,
+            ty: to.1,
+            sx: scale[0],
+            sy: scale[0],
+            marker: Default::default(),
+        }
+    }
+
+    pub fn bounds_to(
+        src: Bounds<M>,
+        dst: Bounds<Canvas>,
+    ) -> Self {
+        let src_w = if src.width() == 0. { f32::EPSILON } else { src.width() };
+        let src_h = if src.height() == 0. { f32::EPSILON } else { src.height() };
+
+        Self {
+            fx: src.xmin(),
+            fy: src.ymin(),
+            tx: dst.xmin(),
+            ty: dst.ymin(),
+            sx: dst.width() / src_w,
+            sy: dst.height() / src_h,
+            marker: Default::default(),
+        }
+    }
+
+    fn transform(&self, x: f32, y: f32) -> [f32; 2] {
+        [
+            self.tx + self.sx * (x - self.fx),
+            self.ty + self.sy * (y - self.fy),
+        ]
+    }
+}
+
+impl<M: Coord> Transform<M> for CartesianTransform<M> {
+    #[inline]
+    fn transform_point(&self, point: Point) -> Point {
+        let Point(x, y) = point;
+
+        self.transform(x, y).into()
+    }
+
+    #[inline]
+    fn transform_tensor(&self, tensor: &Tensor) -> Tensor {
+        tensor.map_row(|row| {
+            self.transform(row[0], row[1])
+        })
+    }
+
+    #[inline]
+    fn transform_path(&self, path: &Path<M>) -> Path<Canvas> {
+        path.map(|Point(x, y)| self.transform(x, y).into())
+    }
+}
+
+impl<M: Coord> Default for CartesianTransform<M> {
+    fn default() -> Self {
+        Self { 
+            sx: 1.,
+            sy: 1.,
+            fx: 0.,
+            fy: 0.,
+            tx: 0.,
+            ty: 0.,
+            marker: Default::default(),
+        }
+    }
+}
+
+
+pub(crate) struct TransformAffine<M: Coord> {
     affine: Affine2d,
     marker: PhantomData<fn(M)>,
 }

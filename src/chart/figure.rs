@@ -1,4 +1,4 @@
-use essay_graphics::layout::{Page, PageBuilder};
+use essay_graphics::layout::{BuildTabs, Page, Page2, PageBuilder, PageBuilder2};
 use essay_graphics::wgpu::{WgpuBackend, WgpuHardcopy};
 
 use essay_graphics::api::renderer::Backend;
@@ -15,7 +15,7 @@ pub struct Figure {
     backend: Box<dyn Backend>,
 
     config: ConfigArc,
-    page: Option<Page>,
+    page: Option<Page2>,
 }
 
 impl Figure {
@@ -33,7 +33,7 @@ impl Figure {
     pub fn chart(&mut self) -> Chart {
         let chart = Chart::new(&self.config);
 
-        self.page = Some(Page::new(chart.clone()));
+        self.page = Some(Page2::new(chart.clone()));
 
         chart
     }
@@ -41,24 +41,24 @@ impl Figure {
     pub fn polar(&mut self) -> PolarChart {
         let chart = PolarChart::new(&self.config);
 
-        self.page = Some(Page::new(chart.clone()));
+        self.page = Some(Page2::new(chart.clone()));
 
         chart
     }
 
     pub fn multichart<R>(&mut self, f: impl FnOnce(&mut SubFigure) -> R) -> R {
-        let mut page_builder = PageBuilder::new();
-
-        let mut builder = SubFigure {
-            config: &self.config,
-            sub_page: &mut page_builder,
-        };
+        let mut result = None;
         
-        let result = (f)(&mut builder);
+        self.page = Some(Page2::build(|ui| {
+            let mut builder = SubFigure {
+                config: &self.config,
+                sub_page: ui,
+            };
 
-        self.page = Some(page_builder.build());
+            result = Some((f)(&mut builder));
+        }));
 
-        result
+        result.unwrap()
     }
 
     pub fn show(self) {
@@ -99,7 +99,7 @@ impl Figure {
 
 pub struct SubFigure<'a> {
     config: &'a ConfigArc,
-    sub_page: &'a mut PageBuilder,
+    sub_page: &'a mut PageBuilder2,
 }
 
 impl SubFigure<'_> {
@@ -138,6 +138,39 @@ impl SubFigure<'_> {
             };
 
             (f)(&mut sub)
+        })
+    }
+
+    pub fn tabs<R>(&mut self, add_content: impl FnOnce(&mut Tabs) -> R) -> R {
+        let mut result = None;
+
+        self.sub_page.tabs(|ui| {
+            let mut tabs = Tabs {
+                config: &self.config,
+                tabs: ui,
+            };
+
+            result = Some((add_content)(&mut tabs));
+        });
+
+        result.unwrap()
+    }
+}
+
+pub struct Tabs<'a> {
+    config: &'a ConfigArc,
+    tabs: &'a mut BuildTabs,
+}
+
+impl<'a> Tabs<'a> {
+    pub fn tab(&mut self, label: &str, add_content: impl FnOnce(&mut SubFigure)) {
+        self.tabs.tab(String::from(label), |ui| {
+            let mut sub = SubFigure {
+                config: &self.config,
+                sub_page: ui,
+            };
+
+            (add_content)(&mut sub);
         })
     }
 }

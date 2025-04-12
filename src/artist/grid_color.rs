@@ -29,7 +29,7 @@ impl GridColor {
         let data : Tensor = data.into();
 
         assert!(data.rank() == 2, "colormesh requires 2d value {:?}", data.shape());
-
+        
         Self {
             data,
             xy: Tensor::from(None),
@@ -61,7 +61,7 @@ impl GridColor {
 
     fn draw_solid_shading(
         &mut self, 
-        renderer: &mut dyn Renderer,
+        ui: &mut dyn Renderer,
         to_canvas: &ToCanvas<Data>,
         _style: &dyn PathOpt,
     ) -> Result<()> {
@@ -70,20 +70,21 @@ impl GridColor {
             [0.0, 1.0]
         ]);
 
-        let scale_canvas = Affine2d::eye();
-        if true { todo!() };
+        let sx = ui.pos().width() / to_canvas.bounds().width().max(f32::EPSILON);
+        let sy = ui.pos().height() / to_canvas.bounds().height().max(f32::EPSILON);
+        //let scale_canvas = Affine2d::eye();
             
         // let to_canvas = to_canvas.affine2d();
         // let scale_canvas = to_canvas.strip_translation();
-        let path: Path<Canvas> = scale_canvas.transform_path(&path);
+        let path: Path<Canvas> = path.scale(sx, sy); // to_canvas.transform_path(&path);
         let xy = to_canvas.transform_tensor(&self.xy);
-
         // let norm = normalize_unit(&self.data);
 
         let colormap = &self.color_map;
 
         let colors = self.data.iter().map(|v| {
             let v = self.norm.norm(*v);
+
             colormap.map(v).to_rgba()
         }).collect();
 
@@ -95,7 +96,7 @@ impl GridColor {
         style.join_style(JoinStyle::Bevel);
         style.cap_style(CapStyle::Butt);
 
-        renderer.draw_markers(&path, &xy, &Tensor::from(None), &colors, &style)
+        ui.draw_markers(&path, &xy, &Tensor::from(None), &colors, &style)
     }
 
     fn draw_gouraud_shading(

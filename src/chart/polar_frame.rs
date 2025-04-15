@@ -243,7 +243,7 @@ impl Drawable for PolarFrame {
         self.y_axis.draw(renderer, &self.path_style)?;
         self.x_axis.draw(renderer, &self.path_style)?;
 
-        renderer.draw_with_closure(self.data.pos(), Box::new(|ui| {
+        renderer.draw_with_clip(self.data.pos(), Box::new(|ui| {
             // self.draw_axis(ui)?;
             self.data.draw(ui, &draw_to_canvas, &self.path_style)
         }))?;

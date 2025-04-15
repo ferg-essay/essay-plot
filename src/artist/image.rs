@@ -1,6 +1,5 @@
 use essay_graphics::api::{
-    renderer::{Renderer, Result},
-    Bounds, Point, PathOpt
+    renderer::{Canvas, Renderer, Result}, Bounds, PathOpt, Point
 };
 use essay_tensor::tensor::Tensor;
 
@@ -81,7 +80,7 @@ impl ArtistDraw<Data> for Image {
     ) -> Result<()> {
         //let to_canvas = to_canvas.translate(0., self.).scale(1., -1.);
         let extent = self.bounds();
-        let bounds = Bounds::new(
+        let bounds = Bounds::<Canvas>::new(
             to_canvas.transform_point(extent.p0()),
             to_canvas.transform_point(extent.p1()),
         );
@@ -102,7 +101,8 @@ impl ArtistDraw<Data> for Image {
         // todo [width, height, 4]
         let colors = Tensor::from(colors).reshape([self.data.rows(), self.data.cols(), 4]);
     
-        renderer.draw_image(bounds, &colors)
+        // renderer.draw_image(bounds, &colors)
+        todo!()
     }
 }
 

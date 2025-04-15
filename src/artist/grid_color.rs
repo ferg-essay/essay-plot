@@ -1,10 +1,16 @@
 use essay_graphics::api::{
-    renderer::{Canvas, Renderer, Result}, Affine2d, Bounds, CapStyle, Color, JoinStyle, Path, PathOpt, Point
+    renderer::{Renderer, Result}, 
+    Bounds, Mesh2dColor, PathOpt, Point
 };
-use essay_tensor::{tensor::Tensor, ten};
+use essay_tensor::tensor::Tensor;
 
 use crate::{
-    artist::{Norm, Norms}, chart::{Data, LegendHandler}, config::{ConfigArc, PathStyle}, data_artist_option_struct, palette::{ColorMap, EssayColors}, transform::ToCanvas
+    artist::{Norm, Norms}, 
+    chart::{Data, LegendHandler}, 
+    config::ConfigArc, 
+    data_artist_option_struct, 
+    palette::{ColorMap, EssayColors}, 
+    transform::ToCanvas
 };
 
 use super::{Artist, ArtistDraw, ArtistView};
@@ -65,43 +71,57 @@ impl GridColor {
         to_canvas: &ToCanvas<Data>,
         _style: &dyn PathOpt,
     ) -> Result<()> {
-        let path = Path::<Data>::closed_poly(ten![
-            [0.0, 0.0], [1.0, 0.0], [1.0, 1.0],
-            [0.0, 1.0]
-        ]);
-
-        let sx = ui.pos().width() / to_canvas.bounds().width().max(f32::EPSILON);
-        let sy = ui.pos().height() / to_canvas.bounds().height().max(f32::EPSILON);
-        //let scale_canvas = Affine2d::eye();
-            
-        // let to_canvas = to_canvas.affine2d();
-        // let scale_canvas = to_canvas.strip_translation();
-        let path: Path<Canvas> = path.scale(sx, sy); // to_canvas.transform_path(&path);
         let xy = to_canvas.transform_tensor(&self.xy);
-        // let norm = normalize_unit(&self.data);
 
-        let colormap = &self.color_map;
+        let norm = self.data.normalize_unit();
+        
+        let cmap = &self.color_map;
 
-        let colors = self.data.iter().map(|v| {
-            let v = self.norm.norm(*v);
+        let (rows, cols) = (norm.rows(), norm.cols());
 
-            colormap.map(v).to_rgba()
-        }).collect();
+        let j_stride = cols + 1;
 
-        let mut style = PathStyle::new();
-        style.edge_color(Color(0));
-        style.line_width(0.);
+        let mut mesh = Mesh2dColor::new();
 
-        // style.edge_color("k");
-        style.join_style(JoinStyle::Bevel);
-        style.cap_style(CapStyle::Butt);
+        for j in 0..rows {
+            for i in 0..cols {
+                let index = j * j_stride + i;
+                let x00 = xy[(index, 0)];
+                let y00 = xy[(index, 1)];
+                let c00 = cmap.map(norm[(j, i)]);
 
-        ui.draw_markers(&path, &xy, &Tensor::from(None), &colors, &style)
+                let index = j * j_stride + i + 1;
+                let x01 = xy[(index, 0)];
+                let y01 = xy[(index, 1)];
+
+                let index = (j + 1) * j_stride + i;
+                let x10 = xy[(index, 0)];
+                let y10 = xy[(index, 1)];
+
+                let index = (j + 1) * j_stride + i + 1;
+                let x11 = xy[(index, 0)];
+                let y11 = xy[(index, 1)];
+
+                mesh.triangle(
+                    ([x00, y00], c00),
+                    ([x01, y01], c00),
+                    ([x11, y11], c00),
+                );
+
+                mesh.triangle(
+                    ([x00, y00], c00),
+                    ([x10, y10], c00),
+                    ([x11, y11], c00),
+                );
+            }
+        }
+
+        ui.draw_mesh2d_color(&mesh)
     }
 
     fn draw_gouraud_shading(
         &mut self, 
-        renderer: &mut dyn Renderer,
+        ui: &mut dyn Renderer,
         to_canvas: &ToCanvas<Data>,
         _style: &dyn PathOpt,
     ) -> Result<()> {
@@ -111,43 +131,49 @@ impl GridColor {
         
         let cmap = &self.color_map;
 
-        let mut vertices = Vec::<[f32; 2]>::new();
-        let mut colors = Vec::<u32>::new();
-        let mut triangles = Vec::<[u32; 3]>::new();
-
         let (rows, cols) = (norm.rows(), norm.cols());
 
-        let j_stride = cols; //  + 1;
+        let j_stride = cols + 1;
 
-        for j in 0..rows {
-            for i in 0..cols {
-                let x0 = xy[(j * j_stride + i, 0)];
-                let y0 = xy[(j * j_stride + i, 1)];
+        let mut mesh = Mesh2dColor::new();
+
+        for j in 0..rows - 1 {
+            for i in 0..cols - 1 {
+                let index = j * j_stride + i;
+                let x00 = xy[(index, 0)];
+                let y00 = xy[(index, 1)];
+                let c00 = cmap.map(norm[(j, i)]);
                 
-                vertices.push([x0, y0]);
-                colors.push(cmap.map(norm[(j, i)]).to_rgba());
+                let index = j * j_stride + i + 1;
+                let x01 = xy[(index, 0)];
+                let y01 = xy[(index, 1)];
+                let c01 = cmap.map(norm[(j, i + 1)]);
 
-                if i + 1 < cols && j + 1 < rows {
-                    triangles.push([
-                        (j * j_stride + i) as u32, 
-                        (j * j_stride + i + 1) as u32, 
-                        ((j + 1) * j_stride + i + 1) as u32,
-                    ]);
+                let index = (j + 1) * j_stride + i;
+                let x10 = xy[(index, 0)];
+                let y10 = xy[(index, 1)];
+                let c10 = cmap.map(norm[(j + 1, i)]);
 
-                    triangles.push([
-                        ((j + 1) * j_stride + i + 1) as u32, 
-                        ((j + 1) * j_stride + i) as u32, 
-                        (j * j_stride + i) as u32,
-                    ]);
-                }
+                let index = (j + 1) * j_stride + i + 1;
+                let x11 = xy[(index, 0)];
+                let y11 = xy[(index, 1)];
+                let c11 = cmap.map(norm[(j + 1, i + 1)]);
+
+                mesh.triangle(
+                    ([x00, y00], c00),
+                    ([x01, y01], c01),
+                    ([x11, y11], c11),
+                );
+
+                mesh.triangle(
+                    ([x00, y00], c00),
+                    ([x10, y10], c10),
+                    ([x11, y11], c11),
+                );
             }
         }
 
-        let vertices = Tensor::from(vertices);
-        let colors = Tensor::from(colors);
-        let triangles = Tensor::from(triangles);
-
-        renderer.draw_triangles(&vertices, &colors, &triangles)
+        ui.draw_mesh2d_color(&mesh)
     }
 
     pub(crate) fn set_norm(&mut self, min: f32, max: f32) {
@@ -181,8 +207,8 @@ impl ArtistDraw<Data> for GridColor {
             let mut xy = Vec::<[f32; 2]>::new();
             let (rows, cols) = (self.data.rows(), self.data.cols());
 
-            for j in 0..rows {
-                for i in 0..cols {
+            for j in 0..rows + 1 {
+                for i in 0..cols + 1 {
                     xy.push([i as f32, j as f32]);
                 }
             }

@@ -252,7 +252,7 @@ impl Drawable for CartesianFrame {
         self.top.draw(ui, &frame_to_canvas, &self.path_style)?;
         self.right.draw(ui,  &frame_to_canvas, &self.path_style)?;
 
-        ui.draw_with_closure(self.data.pos(), Box::new(|ui| {
+        ui.draw_with_clip(self.data.pos(), Box::new(|ui| {
             self.data.draw(ui, &data_to_canvas, &self.path_style)?;
             Ok(())
         }))?;

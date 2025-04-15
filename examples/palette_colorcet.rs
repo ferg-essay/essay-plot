@@ -1,8 +1,5 @@
 use essay_plot::{
-    chart::{Chart, Scaling, SubFigure}, 
-    palette::{ColorMap, Colorcet}, 
-    plot::grid_color, 
-    prelude::*
+    artist::Shading, chart::{Chart, Scaling, SubFigure}, palette::{ColorMap, Colorcet}, plot::grid_color, prelude::*
 };
 use essay_tensor::init::linspace;
 
@@ -102,7 +99,7 @@ fn draw_grid(figure: &mut SubFigure, colormap: impl Into<ColorMap>) -> Chart {
     let z = z.reshape([1, 100]);
 
     grid_color(&mut chart, &z)
-        // .shading(Shading::Flat)
+        .shading(Shading::Flat)
         .color_map(colormap);
     // grid_color(&mut graph2, &z).shading(Shading::Gouraud);
 

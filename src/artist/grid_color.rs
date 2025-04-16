@@ -110,8 +110,8 @@ impl GridColor {
 
                 mesh.triangle(
                     ([x00, y00], c00),
-                    ([x10, y10], c00),
                     ([x11, y11], c00),
+                    ([x10, y10], c00),
                 );
             }
         }
@@ -167,8 +167,8 @@ impl GridColor {
 
                 mesh.triangle(
                     ([x00, y00], c00),
-                    ([x10, y10], c10),
                     ([x11, y11], c11),
+                    ([x10, y10], c10),
                 );
             }
         }

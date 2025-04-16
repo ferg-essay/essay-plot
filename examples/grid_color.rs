@@ -1,6 +1,6 @@
 use essay_plot::{
     artist::Shading, 
-    palette::EssayColors, 
+    palette::{Colorcet, Diverging, EssayColors}, 
     plot::grid_color, 
     prelude::*
 };
@@ -17,8 +17,8 @@ fn main() {
     let mut graph1 = figure.chart();
 
     grid_color(&mut graph1, &z)
-        .shading(Shading::Flat)
-        .color_map(EssayColors::BlueOrange);
+        .shading(Shading::Gouraud)
+        .color_map(Diverging::RedBlue);
     
     figure.show();
 }

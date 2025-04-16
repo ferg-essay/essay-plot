@@ -15,7 +15,7 @@ pub struct Level {
 }
 
 impl Level {
-    fn _new(paths: Vec<Path<Data>>) -> Self {
+    fn new(paths: Vec<Path<Data>>) -> Self {
         Self {
             paths,
         }
@@ -52,7 +52,7 @@ impl Contour {
         self.data = data;
     }
 
-    fn _resize(&mut self, _renderer: &mut dyn Renderer, _pos: &Bounds<Canvas>) {
+    fn resize(&mut self) {
         let mut xy = Vec::<[f32; 2]>::new();
         let (rows, cols) = (self.data.rows(), self.data.cols());
 
@@ -84,7 +84,7 @@ impl Contour {
                 .map(|p| Path::<Data>::lines(p))
                 .collect();
 
-            levels.push(Level::_new(paths));
+            levels.push(Level::new(paths));
         }
 
         self.levels = levels;
@@ -109,6 +109,8 @@ impl ArtistDraw<Data> for Contour {
         to_canvas: &ToCanvas<Data>,
         _style: &dyn PathOpt,
     ) -> Result<()> {
+        self.resize();
+
         //let path = Path::<Data>::closed_poly(tf32!([
         //    [0.0, 0.0], [1.0, 0.0], [1.0, 1.0],
         //    [0.0, 1.0]

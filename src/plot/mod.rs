@@ -43,7 +43,7 @@ pub use plot::{plot, plot_y};
 
 pub use quiver::quiver;
 
-pub use radar::radar;
+pub use radar::{radar, RadarOpt};
 
 pub use span::hline;
 

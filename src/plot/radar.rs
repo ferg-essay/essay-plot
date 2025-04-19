@@ -21,15 +21,29 @@ impl PolarChart {
         &mut self,
         y: impl Into<Tensor>,
     ) -> RadarOpt {
-        let mut vec_y: Vec<f32> = y.into().iter().map(|v| *v).collect();
-
-        vec_y.push(vec_y[0]);
+        let vec_y: Vec<f32> = y.into().iter().map(|v| *v).collect();
 
         let x = linspace(0., vec_y.len() as f32 - 1., vec_y.len());
 
-        let lines = Lines2d::from_xy(x, vec_y);
+        let lines = Lines2d::from_xy(&x, vec_y);
 
-        let radar = Radar::new(lines);
+        let radar = Radar::new(&x, lines);
+
+        self.artist(radar)
+    }
+
+    pub fn radar_xy(
+        &mut self,
+        x: impl Into<Tensor>,
+        y: impl Into<Tensor>,
+    ) -> RadarOpt {
+        let vec_y: Vec<f32> = y.into().iter().map(|v| *v).collect();
+
+        let x = x.into();
+
+        let lines = Lines2d::from_xy(&x, vec_y);
+
+        let radar = Radar::new(&x, lines);
 
         self.artist(radar)
     }
@@ -37,6 +51,7 @@ impl PolarChart {
 
 pub struct Radar {
     lines: Lines2d,
+    x: Tensor,
     fill: Path<Data>,
 
     style: PathStyle,
@@ -44,9 +59,10 @@ pub struct Radar {
 }
 
 impl Radar {
-    fn new(lines: Lines2d) -> Self {
+    fn new(x: &Tensor, lines: Lines2d) -> Self {
         let mut radar = Self {
             lines,
+            x: x.into(),
             fill: Path::move_to(0., 0.).to_path(),
             style: PathStyle::new(),
             fill_style: PathStyle::new(),
@@ -60,13 +76,13 @@ impl Radar {
     }
 
     fn set_y(&mut self, y: impl Into<Tensor>) {
-        let mut vec_y: Vec<f32> = y.into().iter().map(|v| *v).collect();
+        let vec_y: Vec<f32> = y.into().iter().map(|v| *v).collect();
 
-        vec_y.push(vec_y[0]);
+        //vec_y.push(vec_y[0]);
 
-        let x = linspace(0., vec_y.len() as f32 - 1., vec_y.len());
+        // let x = linspace(0., vec_y.len() as f32 - 1., vec_y.len());
 
-        self.lines.set_xy(x, vec_y);
+        self.lines.set_xy(&self.x, vec_y);
 
         self.fill();
     }

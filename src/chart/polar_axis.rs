@@ -336,6 +336,8 @@ fn text_angle_align(theta: f32) -> (HorizAlign, VertAlign) {
 
     let halign = if PI / 2. - center < theta && theta < PI / 2. + center {
         HorizAlign::Center
+    } else if 3. * PI / 2. - center < theta && theta < 3. * PI / 2. + center {
+        HorizAlign::Center
     } else if PI / 2. < theta && theta < 3. * PI / 2. {
         HorizAlign::Right
     } else {
@@ -375,10 +377,10 @@ impl PolarAxisOpt {
         self
     }
 
-    pub fn tick_labels(&mut self, ticks: &[(f32, &str)]) -> &mut Self {
+    pub fn tick_labels(&mut self, ticks: &[(f32, String)]) -> &mut Self {
         self.write(|axis| { 
             axis.ticks = Some(ticks.iter().map(|t| t.0).collect());
-            axis.labels = Some(ticks.iter().map(|t| String::from(t.1)).collect());
+            axis.labels = Some(ticks.iter().map(|t| t.1.clone()).collect());
         });
         self
     }

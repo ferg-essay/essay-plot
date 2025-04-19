@@ -71,6 +71,7 @@ impl GridColor {
         to_canvas: &ToCanvas<Data>,
         _style: &dyn PathOpt,
     ) -> Result<()> {
+        let pos = ui.pos();
         let xy = to_canvas.transform_tensor(&self.xy);
 
         let norm = self.data.normalize_unit();
@@ -80,6 +81,7 @@ impl GridColor {
         let (rows, cols) = (norm.rows(), norm.cols());
 
         let j_stride = cols + 1;
+        let ymax = pos.ymax();
 
         let mut mesh = Mesh2dColor::new();
 
@@ -88,7 +90,8 @@ impl GridColor {
                 let index = j * j_stride + i;
                 let x00 = xy[(index, 0)];
                 let y00 = xy[(index, 1)];
-                let c00 = cmap.map(norm[(j, i)]);
+                // reverse y 
+                let c00 = cmap.map(norm[((rows - 1 - j), i)]);
 
                 let index = j * j_stride + i + 1;
                 let x01 = xy[(index, 0)];

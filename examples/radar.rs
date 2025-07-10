@@ -27,10 +27,10 @@ fn main() {
             chart.angle_coord(AngleCoord::Degrees);
             // chart.x().ticks(&[0., 1., 2., 2.4, 2.6]);
             chart.x().tick_labels(&[
-                (0., "A"), 
-                (1., "B"), 
-                (2., "C"), 
-                (3., "D"), 
+                (0., "A".to_string()), 
+                (1., "B".to_string()), 
+                (2., "C".to_string()), 
+                (3., "D".to_string()), 
             ]);
             chart.y().ticks(&[1., 2., 3., 4., 5., 7.5, 10.]);
             chart.y().visible(false);
@@ -40,11 +40,11 @@ fn main() {
 
             chart.angle_coord(AngleCoord::Degrees);
             chart.x().tick_labels(&[
-                (0., "A"), 
-                (1., "B"), 
-                (2., "C"), 
-                (2.5, "D1"), 
-                (3.5, "D2"), 
+                (0., "A".to_string()), 
+                (1., "B".to_string()), 
+                (2., "C".to_string()), 
+                (2.5, "D1".to_string()), 
+                (3.5, "D2".to_string()), 
             ]);
             chart.y().ticks(&[1., 2., 3., 4., 5., 7.5, 10.]);
             chart.y().visible(false);

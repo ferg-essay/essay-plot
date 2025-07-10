@@ -36,20 +36,20 @@ fn main() {
             chart.angle_coord(AngleCoord::Degrees);
             // chart.x().ticks(&[0., 1., 2., 2.4, 2.6]);
             chart.x().tick_labels(&[
-                (0., "A"), 
-                (1., "B"), 
-                (2., "C"), 
-                (2.4, "D"), 
-                (2.6, "E")]
+                (0., "A".to_string()), 
+                (1., "B".to_string()), 
+                (2., "C".to_string()), 
+                (2.4, "D".to_string()), 
+                (2.6, "E".to_string())]
             );
             chart.y().tick_labels(&[
-                (1., ""), 
-                (2., ""), 
-                (3., ""), 
-                (4., ""), 
-                (5., "J"), 
-                (7.5, "K"), 
-                (10., "L"), 
+                (1., "".to_string()), 
+                (2., "".to_string()), 
+                (3., "".to_string()), 
+                (4., "".to_string()), 
+                (5., "J".to_string()), 
+                (7.5, "K".to_string()), 
+                (10., "L".to_string()), 
             ]);
             chart.plot(&x, &y);
             

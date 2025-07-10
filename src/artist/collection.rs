@@ -41,6 +41,10 @@ impl PathCollection {
             affine,
         }
     }
+
+    pub fn style_mut(&mut self) -> &mut PathStyle {
+        &mut self.style
+    }
 }
 
 impl ArtistDraw<Data> for PathCollection {
@@ -50,12 +54,10 @@ impl ArtistDraw<Data> for PathCollection {
 
     fn draw(
         &mut self, 
-        renderer: &mut dyn Renderer, 
-        to_canvas: &ToCanvas<Data>,
+        ui: &mut dyn Renderer, 
+        _to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
-        let xy = to_canvas.transform_tensor(&self.xy);
-
         let style = self.style.push(style);
 
         let markers: Vec<MeshStyle> = self.affine.iter().map(|affine| {
@@ -65,7 +67,7 @@ impl ArtistDraw<Data> for PathCollection {
             }
         }).collect();
 
-        renderer.draw_markers(&self.path, &style, markers.as_slice())
+        ui.draw_markers(&self.path, &style, markers.as_slice())
     }
 }
 

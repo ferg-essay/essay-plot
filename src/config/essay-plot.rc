@@ -17,6 +17,10 @@ span.line_style: ":"
 
 patch.line_width: 1.0
 
+box_plot.line_width: 1.5
+box_plot.edge_color: black
+box_plot.face_color: white
+
 font.family: sans-serif
 font.style: normal
 font.variant: normal

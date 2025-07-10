@@ -1,12 +1,13 @@
 use essay_graphics::api::{Path, PathCode, Point};
-use essay_tensor::tensor::Tensor;
+use essay_tensor::tensor::{IntoTensorList, Tensor};
 
 use crate::{
     artist::{patch::PathPatch, ContainerOpt, HorizontalLineOpt, ImageOpt, Lines2d, LinesOpt, TextOpt}, 
-    chart::{Chart, PlotOpt, PolarChart}
+    chart::{Chart, PlotOpt, PolarChart}, plot::box_plot::BoxPlotOpt
 };
 
 mod bar;
+mod box_plot;
 mod contour;
 mod fill_between;
 mod grid_color;
@@ -26,6 +27,8 @@ mod triplot;
 mod tricontour;
 
 pub use bar::bar;
+
+pub use box_plot::box_plot;
 
 pub use grid_color::grid_color;
 
@@ -126,6 +129,13 @@ impl Chart {
         text: impl AsRef<str>,
     ) -> TextOpt {
         text::text(self, pos, text)
+    }
+
+    pub fn box_plot(
+        &mut self,
+        data: impl IntoTensorList<f32>,
+    ) -> BoxPlotOpt {
+        box_plot::box_plot(self, data)
     }
 }
 

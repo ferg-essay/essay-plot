@@ -60,14 +60,26 @@ impl ArtistDraw<Data> for PathCollection {
     ) -> Result<()> {
         let style = self.style.push(style);
 
-        let markers: Vec<MeshStyle> = self.affine.iter().map(|affine| {
-            MeshStyle {
-                color: style.get_face_color().unwrap_or(Color::black()),
-                affine: affine.clone(),
-            }
-        }).collect();
+        // TODO: rework with markers
+        if style.get_face_color().is_some() && ! style.get_face_color().unwrap().is_none() {
+            let markers: Vec<MeshStyle> = self.affine.iter().map(|affine| {
+                MeshStyle {
+                    color: style.get_face_color().unwrap_or(Color::black()),
+                    affine: affine.clone(),
+                }
+            }).collect();
 
-        ui.draw_markers(&self.path, &style, markers.as_slice())
+            ui.draw_markers(&self.path, &style, markers.as_slice())
+        } else {
+            let markers: Vec<MeshStyle> = self.affine.iter().map(|affine| {
+                MeshStyle {
+                    color: style.get_edge_color().unwrap_or(Color::black()),
+                    affine: affine.clone(),
+                }
+            }).collect();
+
+            ui.draw_markers(&self.path, &style, markers.as_slice())
+        }
     }
 }
 

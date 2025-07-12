@@ -94,7 +94,7 @@ impl Chart {
         self
     }
 
-    pub fn xlim(&mut self, x_min: f32, x_max: f32) -> &mut Self {
+    pub fn xlim(&mut self, x_min: Option<f32>, x_max: Option<f32>) -> &mut Self {
         self.view.write(|f| { 
             f.data_mut().xlim(x_min, x_max); 
         });
@@ -102,7 +102,7 @@ impl Chart {
         self
     }
 
-    pub fn ylim(&mut self, y_min: f32, y_max: f32) -> &mut Self {
+    pub fn ylim(&mut self, y_min: Option<f32>, y_max: Option<f32>) -> &mut Self {
         self.view.write(|f| { 
             f.data_mut().ylim(y_min, y_max); 
         });

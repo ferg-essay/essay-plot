@@ -18,8 +18,10 @@ pub(crate) struct DataFrame {
     view_bounds: Bounds<Data>,
     pan_zoom_bounds: Option<Bounds<Data>>,
 
-    x_lim: Option<(f32, f32)>,
-    y_lim: Option<(f32, f32)>,
+    x_min: Option<f32>,
+    x_max: Option<f32>,
+    y_min: Option<f32>,
+    y_max: Option<f32>,
 
     x_margin: Option<f32>,
     y_margin: Option<f32>,
@@ -47,8 +49,10 @@ impl DataFrame {
             view_bounds: Bounds::<Data>::unit(),
             pan_zoom_bounds: None,
 
-            x_lim: None,
-            y_lim: None,
+            x_min: None,
+            x_max: None,
+            y_min: None,
+            y_max: None,
             x_margin: cfg.get_as_type(prefix, "x_margin"),
             y_margin: cfg.get_as_type(prefix, "y_margin"),
             scaling: Scaling::Auto,
@@ -92,18 +96,28 @@ impl DataFrame {
         self
     }
 
-    pub fn xlim(&mut self, x_min: f32, x_max: f32) -> &mut Self {
-        assert!(x_min < x_max);
+    pub fn xlim(&mut self, x_min: Option<f32>, x_max: Option<f32>) -> &mut Self {
+        if let Some(x_min) = x_min {
+            if let Some(x_max) = x_max {
+                assert!(x_min < x_max);
+            }
+        }
 
-        self.x_lim = Some((x_min, x_max));
+        self.x_min = x_min;
+        self.x_max = x_max;
 
         self
     }
 
-    pub fn ylim(&mut self, y_min: f32, y_max: f32) -> &mut Self {
-        assert!(y_min < y_max);
+    pub fn ylim(&mut self, y_min: Option<f32>, y_max: Option<f32>) -> &mut Self {
+        if let Some(y_min) = y_min {
+            if let Some(y_max) = y_max {
+                assert!(y_min < y_max);
+            }
+        }
 
-        self.y_lim = Some((y_min, y_max));
+        self.y_min = y_min;
+        self.y_max = y_max;
 
         self
     }
@@ -182,15 +196,11 @@ impl DataFrame {
             ymax = ymax + 1.;
         }
 
-        if let Some(xlim) = self.x_lim {
-            xmin = xlim.0;
-            xmax = xlim.1;
-        }
+        xmin = self.x_min.unwrap_or(xmin);
+        xmax = self.x_max.unwrap_or(xmax);
 
-        if let Some(ylim) = self.y_lim {
-            ymin = ylim.0;
-            ymax = ylim.1;
-        }
+        ymin = self.y_min.unwrap_or(ymin);
+        ymax = self.y_max.unwrap_or(ymax);
 
         self.view_bounds = Bounds::new(Point(xmin, ymin), Point(xmax, ymax));
         // pos.clone()

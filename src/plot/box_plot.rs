@@ -103,12 +103,14 @@ impl BoxPlot {
                         .to_path();
 
                     let outliers = if data.outliers.len() > 0 {
-                        let marker = Markers::Circle.get_scaled_path(10.);
+                        let marker = Markers::Circle.get_scaled_path(8.);
 
                         let xy = to_canvas.transform_tensor(&data.outliers);
 
                         let mut scatter = PathCollection::new(marker, xy);
-                        scatter.style_mut().face_color(Color::black());
+                        scatter.style_mut().face_color(Color::none());
+                        scatter.style_mut().edge_color(Color::black());
+                        scatter.style_mut().line_width(1.);
 
                         Some(scatter)
                     } else {

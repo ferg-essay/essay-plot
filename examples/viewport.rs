@@ -27,8 +27,8 @@ fn main() {
     chart.artist(patch).color("amber").edge_color("black");
 
     chart.aspect(1.);
-    chart.xlim(0., 10.);
-    chart.ylim(0., 10.);
+    chart.xlim(Some(0.), Some(10.));
+    chart.ylim(Some(0.), Some(10.));
     //graph.aspect_mode(AspectMode::View);
 
     figure.show();

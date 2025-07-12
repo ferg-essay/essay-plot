@@ -20,8 +20,8 @@ fn main() {
     //graph.artist(patch).color("black");
 
     chart.aspect(1.);
-    chart.xlim(0., 20.);
-    chart.ylim(0., 20.);
+    chart.xlim(Some(0.), Some(20.));
+    chart.ylim(Some(0.), Some(20.));
     //graph.aspect_mode(AspectMode::View);
 
     figure.show();

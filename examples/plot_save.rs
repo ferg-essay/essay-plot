@@ -75,14 +75,14 @@ fn main_plot2() {
     ];
 
     graph1.title("Signal");
-    graph1.ylim(0., 2.0);
+    graph1.ylim(Some(0.), Some(2.0));
     graph1.plot(&x, &odor).label("odor");
     graph1.plot(&x, &failure).label("LTD").draw_style(DrawStyle::StepsMid);
     graph1.x().visible(false);
     graph1.y().visible(false);
 
     graph2.title("Timeout");
-    graph2.ylim(0., 2.0);
+    graph2.ylim(Some(0.), Some(2.0));
     graph2.plot(&x, &odor).label("odor");
     let x2 = ten![0., 0.1, 0.8, 1.0];
     let failure2 = ten![
@@ -106,7 +106,7 @@ fn main_plot2() {
         0., 0.8, 0., 0.,
     ];
     graph3.plot(&x3, &reward).label("reward").draw_style(DrawStyle::StepsMid);
-    graph3.ylim(0., 2.0);
+    graph3.ylim(Some(0.), Some(2.0));
     graph3.x().visible(false);
     graph3.y().visible(false);
 
@@ -123,7 +123,7 @@ fn main_plot2() {
         0., 0.8, 0., 0.,
     ];
     graph4.plot(&x3, &reward).label("reward").draw_style(DrawStyle::StepsMid);
-    graph4.ylim(0., 2.0);
+    graph4.ylim(Some(0.), Some(2.0));
     graph4.x().visible(false);
     graph4.y().visible(false);
     //graph3.title("Reward");

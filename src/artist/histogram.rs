@@ -1,10 +1,8 @@
 use essay_graphics::api::{renderer::{Canvas, Renderer, Result}, Bounds, Path, PathOpt};
-use essay_tensor::tensor::Tensor;
+use essay_tensor::{stats::HistArgs, tensor::Tensor};
 
 use crate::{
-    chart::{Data, LegendHandler}, 
-    config::{ConfigArc, PathStyle},
-    data_artist_option_struct, path_style_options, transform::ToCanvas
+    artist::Stale, chart::{Data, LegendHandler}, config::{ConfigArc, PathStyle}, data_artist_option_struct, path_style_options, transform::ToCanvas
 };
 
 use super::{paths, Artist, ArtistDraw, ArtistView};
@@ -13,12 +11,13 @@ pub struct Histogram {
     data: Tensor,
     style: PathStyle,
 
+    n_bins: Option<usize>,
     bins: Tensor,
     count: Tensor,
     extent: Bounds<Data>,
     paths: Vec<Path<Data>>,
 
-    is_stale: bool,
+    stale: Stale,
 }
 
 impl Histogram {
@@ -30,11 +29,12 @@ impl Histogram {
         let mut histogram = Self {
             data,
             style: PathStyle::new(),
+            n_bins: None,
             bins: Tensor::zeros([1]),
             count: Tensor::zeros([1]),
             extent: Bounds::<Data>::none(),
             paths: Vec::new(),
-            is_stale: true,
+            stale: Stale::stale(),
         };
 
         histogram.update_bounds();
@@ -46,15 +46,20 @@ impl Histogram {
         assert!(data.rank() == 1, "histogram requires 1D value {:?}", data.shape());
 
         self.data = data;
-        self.update_bounds();
-        self.is_stale = true;
+        self.stale = Stale::stale();
     }
 
     fn update_bounds(&mut self) {
-        if self.is_stale {
-            self.is_stale = false;
+        if self.stale.is_stale() {
+            self.stale = Stale::new_for_update();
 
-            let (count, bins) = essay_tensor::stats::histogram(&self.data, ());
+            let hist_args: HistArgs = if let Some(n_bins) = self.n_bins {
+                n_bins.into()
+            } else {
+                ().into()
+            };
+
+            let (count, bins) = essay_tensor::stats::histogram(&self.data, hist_args);
 
             self.count = count;
             self.bins = bins;
@@ -81,6 +86,8 @@ impl Histogram {
 
 impl ArtistDraw<Data> for Histogram {
     fn bounds(&mut self) -> Bounds<Data> {
+        self.update_bounds();
+
         self.extent.clone()
     }
 
@@ -90,6 +97,8 @@ impl ArtistDraw<Data> for Histogram {
         to_canvas: &ToCanvas<Data>,
         style: &dyn PathOpt,
     ) -> Result<()> {
+        self.update_bounds();
+
         let style = self.style.push(style);
 
         for path in &self.paths {
@@ -121,6 +130,17 @@ data_artist_option_struct!(HistogramOpt, Histogram);
 
 impl HistogramOpt {
     path_style_options!(style);
+
+    pub fn n_bins(&mut self, n_bins: usize) -> &mut Self {
+        assert!(n_bins > 0);
+
+        self.write(|artist| {
+            artist.n_bins = Some(n_bins);
+            artist.stale = Stale::stale();
+        });
+
+        self
+    }
 
     pub fn data(&mut self, data: impl Into<Tensor>) -> &mut Self {
         let data = data.into();
